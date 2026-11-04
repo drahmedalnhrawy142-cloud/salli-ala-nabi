@@ -1,7 +1,28 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+
+type NusukCodeResult = {
+  code: string;
+};
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error
+  ) {
+    return String(error.message);
+  }
+
+  return 'Unknown error';
+}
 
 export function CodeActions() {
   const [message, setMessage] = useState('');
@@ -11,14 +32,19 @@ export function CodeActions() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let id = localStorage.getItem('nusuk_visitor_id');
+    try {
+      let id = localStorage.getItem('nusuk_visitor_id');
 
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem('nusuk_visitor_id', id);
+      if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem('nusuk_visitor_id', id);
+      }
+
+      setVisitorId(id);
+    } catch (error) {
+      console.error('Visitor ID error:', error);
+      setMessage('تعذر تهيئة هوية الزائر. تحقق من إعدادات المتصفح.');
     }
-
-    setVisitorId(id);
   }, []);
 
   async function requestCode() {
@@ -31,22 +57,39 @@ export function CodeActions() {
     try {
       const { data, error } = await supabase.rpc(
         'get_next_nusuk_code',
-        { p_visitor_id: visitorId }
+        {
+          p_visitor_id: visitorId,
+        }
       );
 
-      if (error) throw error;
-
-      const result = Array.isArray(data) ? data[0] : data;
-
-      if (!result?.code) {
-        setMessage('لا توجد أكواد متاحة حاليًا. حاول مرة أخرى لاحقًا.');
-      } else {
-        setReceivedCode(result.code);
-        setMessage('تم الحصول على الكود بنجاح. احتفظ به في مكان آمن.');
+      if (error) {
+        console.error('Supabase get_next_nusuk_code error:', error);
+        throw error;
       }
+
+      const result = Array.isArray(data)
+        ? data[0]
+        : data;
+
+      const codeResult = result as NusukCodeResult | null;
+
+      if (!codeResult?.code) {
+        setMessage(
+          'لا توجد أكواد جديدة متاحة لهذا الزائر حالياً.'
+        );
+        return;
+      }
+
+      setReceivedCode(codeResult.code);
+      setMessage('تم الحصول على الكود بنجاح. احتفظ به في مكان آمن.');
+
     } catch (error) {
-      console.error(error);
-      setMessage('حدث خطأ أثناء الحصول على الكود. حاول مرة أخرى.');
+      const details = getErrorMessage(error);
+
+      console.error('Request code failed:', error);
+
+      setMessage(`تعذر الحصول على الكود: ${details}`);
+
     } finally {
       setLoading(false);
     }
@@ -68,22 +111,34 @@ export function CodeActions() {
     try {
       const { data, error } = await supabase.rpc(
         'submit_nusuk_code',
-        { p_code: code.trim() }
+        {
+          p_code: code.trim(),
+        }
       );
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase submit_nusuk_code error:', error);
+        throw error;
+      }
 
       if (data?.success) {
-        setMessage('تمت إضافة الكود بنجاح. شكرًا لمشاركتك.');
+        setMessage('تمت إضافة الكود بنجاح. شكراً لمشاركتك!');
         setCode('');
       } else if (data?.message === 'Code already exists') {
         setMessage('هذا الكود موجود بالفعل في قاعدة البيانات.');
       } else {
-        setMessage('لم تتم إضافة الكود. تأكد من صحته وحاول مجددًا.');
+        setMessage(
+          `لم تتم إضافة الكود: ${data?.message || 'استجابة غير متوقعة من قاعدة البيانات.'}`
+        );
       }
+
     } catch (error) {
-      console.error(error);
-      setMessage('حدث خطأ أثناء إضافة الكود. حاول مرة أخرى.');
+      const details = getErrorMessage(error);
+
+      console.error('Submit code failed:', error);
+
+      setMessage(`تعذر إضافة الكود: ${details}`);
+
     } finally {
       setLoading(false);
     }
@@ -100,32 +155,56 @@ export function CodeActions() {
         {
           p_visitor_id: visitorId,
           p_code: receivedCode,
-          p_reason: 'Reported by visitor'
+          p_reason: 'Reported by visitor',
         }
       );
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase report_nusuk_code error:', error);
+        throw error;
+      }
 
       if (data?.success) {
-        setMessage('تم تسجيل بلاغك للمراجعة. شكرًا لتنبيهنا.');
+        setMessage('تم تسجيل بلاغك للمراجعة. شكراً لتنبيهنا!');
       } else {
-        setMessage('تعذر تسجيل البلاغ. حاول مرة أخرى.');
+        setMessage(
+          `تعذر تسجيل البلاغ: ${data?.message || 'استجابة غير متوقعة.'}`
+        );
       }
+
     } catch (error) {
-      console.error(error);
-      setMessage('حدث خطأ أثناء إرسال البلاغ.');
+      const details = getErrorMessage(error);
+
+      console.error('Report code failed:', error);
+
+      setMessage(`حدث خطأ أثناء إرسال البلاغ: ${details}`);
+
     } finally {
       setLoading(false);
     }
   }
 
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(receivedCode);
+      setMessage('تم نسخ الكود.');
+    } catch (error) {
+      console.error('Copy failed:', error);
+      setMessage('تعذر نسخ الكود. يمكنك تحديده ونسخه يدويًا.');
+    }
+  }
+
   return (
     <div className="cards-grid">
+
       <article className="panel action-card">
+
         <div className="card-top">
           <div className="icon-box" aria-hidden="true">↗</div>
+
           <div>
             <h2 className="card-heading">الحصول على كود</h2>
+
             <p className="card-description">
               احصل على كود متاح من الأكواد التي شاركها الزوار.
             </p>
@@ -138,12 +217,16 @@ export function CodeActions() {
           onClick={requestCode}
           disabled={loading || !visitorId}
         >
-          {loading ? 'جارٍ التنفيذ...' : 'اطلب كودًا'}
+          {loading ? 'جارٍ التنفيذ...' : 'اطلب كوداً'}
         </button>
 
         {receivedCode && (
           <div style={{ marginTop: 16 }}>
-            <p className="card-description">الكود الخاص بك:</p>
+
+            <p className="card-description">
+              الكود الخاص بك:
+            </p>
+
             <div
               className="code-field"
               dir="ltr"
@@ -151,7 +234,7 @@ export function CodeActions() {
                 display: 'flex',
                 alignItems: 'center',
                 overflowX: 'auto',
-                marginTop: 8
+                marginTop: 8,
               }}
             >
               {receivedCode}
@@ -160,10 +243,7 @@ export function CodeActions() {
             <button
               className="button button-outline card-action"
               type="button"
-              onClick={() => {
-                navigator.clipboard.writeText(receivedCode);
-                setMessage('تم نسخ الكود.');
-              }}
+              onClick={copyCode}
             >
               نسخ الكود
             </button>
@@ -176,25 +256,39 @@ export function CodeActions() {
             >
               الإبلاغ عن كود غير صالح
             </button>
+
           </div>
         )}
 
-        <p className="status-message" aria-live="polite">{message}</p>
+        <p className="status-message" aria-live="polite">
+          {message}
+        </p>
+
       </article>
 
       <article className="panel action-card">
+
         <div className="card-top">
           <div className="icon-box gold-icon" aria-hidden="true">+</div>
+
           <div>
             <h2 className="card-heading">إضافة كود</h2>
+
             <p className="card-description">
-              شارك كودًا متاحًا لديك ليستفيد منه الآخرون.
+              شارك كوداً متاحاً لديك ليستفيد منه الآخرون.
             </p>
           </div>
         </div>
 
-        <form className="card-form" onSubmit={submitCode}>
-          <label className="sr-only" htmlFor="code-input">
+        <form
+          className="card-form"
+          onSubmit={submitCode}
+        >
+
+          <label
+            className="sr-only"
+            htmlFor="code-input"
+          >
             الكود المراد إضافته
           </label>
 
@@ -216,9 +310,15 @@ export function CodeActions() {
           >
             {loading ? 'جارٍ الإضافة...' : 'إضافة الكود'}
           </button>
+
         </form>
+
+        <p className="status-message" aria-live="polite">
+          {message}
+        </p>
+
       </article>
+
     </div>
   );
-}
-
+    }
