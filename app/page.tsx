@@ -1,4 +1,5 @@
 import { CodeActions } from '@/components/CodeActions';
+import { ContactSection } from '@/components/ContactSection';
 import { ShareButton } from '@/components/ShareButton';
 
 function Sparkle() {
@@ -14,7 +15,7 @@ export default function HomePage() {
             <span className="brand-mark" aria-hidden="true">ﷺ</span>
             <span>صلي على النبي ﷺ</span>
           </a>
-          <div className="top-note"><span>بلا حسابات</span> · مشاركة بين الزوار</div>
+          <a className="top-note" href="#contact"><span>تواصل معنا</span></a>
         </header>
 
         <section className="hero" id="home" aria-labelledby="hero-title">
@@ -54,6 +55,7 @@ export default function HomePage() {
           </div>
         </section>
 
+        <ContactSection />
         <div className="share-row"><ShareButton /></div>
       </div>
 
