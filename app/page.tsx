@@ -1,11 +1,9 @@
+
 import { CodeActions } from '@/components/CodeActions';
 import { ContactSection } from '@/components/ContactSection';
 import { ShareButton } from '@/components/ShareButton';
 import { StatsSection } from '@/components/StatsSection';
-
-function Sparkle() {
-  return <span className="eyebrow-dot" aria-hidden="true" />;
-}
+import { PrayerExperience } from '@/components/PrayerExperience';
 
 export default function HomePage() {
   return (
@@ -14,39 +12,25 @@ export default function HomePage() {
         <header className="topbar">
           <a className="brand" href="#home" aria-label="الصفحة الرئيسية">
             <span className="brand-mark" aria-hidden="true">ﷺ</span>
-            <span>صلي على النبي</span>
+            <span>صلِّ على النبي</span>
           </a>
-          <a className="top-note" href="#contact">
-            <span>تواصل معنا</span>
-          </a>
+
+          <nav className="top-links" aria-label="القائمة الرئيسية">
+            <a href="#home">الرئيسية</a>
+            <a href="#prayer">الصلاة على النبي</a>
+            <a href="#get-started">تبادل الأكواد</a>
+            <a href="#contact">تواصل معنا</a>
+          </nav>
         </header>
 
-        <section className="hero" id="home" aria-labelledby="hero-title">
-          <div className="eyebrow">
-            <Sparkle /> مساحة التبادل والبرمجة
-          </div>
-
-          <h1 id="hero-title">
-            <span className="gold">صلي</span> على النبي <span aria-hidden="true">ﷺ</span>
-          </h1>
-
-          <p className="hero-copy">
-            مثال بسيط لتبادل نسخ برمجية. هذه مساحة خفيفة لتبادل الأكواد وملاحظات سريعة حول أدوات.
-            <br />
-            منصة تجريبية للعرض فقط.
-          </p>
-
-          <div className="hero-actions">
-            <a className="button button-primary" href="#get-started">
-              ابدأ الآن <span aria-hidden="true">←</span>
-            </a>
-            <a className="button button-outline" href="#how-it-works">
-              كيف تعمل الأدوات
-            </a>
-          </div>
+        <section id="home">
+          <PrayerExperience />
         </section>
 
-        <section id="get-started" aria-label="مبادئ نسك">
+        <section
+          id="get-started"
+          aria-label="مساحة تبادل الأكواد"
+        >
           <CodeActions />
         </section>
 
@@ -59,32 +43,39 @@ export default function HomePage() {
         >
           <div className="panel how-panel">
             <h2 id="how-heading">كيف تعمل الأدوات؟</h2>
+
             <p className="how-intro">
-              فكرة بسيطة: مشاركة سريعة بين الزوار دون إنشاء حسابات.
+              فكرة بسيطة: مشاركة برمجية بين الزوار دون إنشاء حسابات.
             </p>
 
             <ol className="steps">
               <li className="step">
                 <span className="step-number">1</span>
-                <strong>احصل على مفتاح</strong> من منصة تبادل أو منح أدوات صغيرة.
+                <strong>احصل على مفتاح من منصة تبادل أو من أحد المساهمين.</strong>
               </li>
+
               <li className="step">
                 <span className="step-number">2</span>
-                <strong>شارك أو استبدل</strong> مع شخص آخر ضمن قواعد واضحة.
+                <strong>شارك أو استبدل مع شخص آخر ضمن ضوابط المنصة.</strong>
               </li>
+
               <li className="step">
                 <span className="step-number">3</span>
-                <strong>استخدم المفتاح</strong> في أدواتك المعتمدة.
+                <strong>استخدم المفتاح وفقًا لشروط المنصة المصدرة.</strong>
               </li>
             </ol>
 
             <div className="privacy-note">
-              <span aria-hidden="true">✦</span> المفاتيح لا تظهر في اللوحة، ولا يمكن استرجاعها بعد إغلاق الصفحة.
+              <span aria-hidden="true">✦</span>
+              الأكواد لا تظهر في ملفك الشخصي، ويمكنك استخدام الموقع دون تسجيل حساب.
             </div>
           </div>
         </section>
 
-        <ContactSection />
+        <section id="contact">
+          <ContactSection />
+        </section>
+
         <div className="share-row">
           <ShareButton />
         </div>
@@ -93,10 +84,11 @@ export default function HomePage() {
       <footer className="footer">
         <div className="container footer-inner">
           <div className="footer-prayer">
-            اللهم صل وسلم على نبينا محمد ﷺ
+            اللهم صلِّ وسلم على نبينا محمد ﷺ
           </div>
+
           <div className="footer-note">
-            مساحة مشاركة بسيطة، دون حسابات أو بيانات محفوظة.
+            مساحة للمشاركة والذكر والصلاة والسلام.
           </div>
         </div>
       </footer>
