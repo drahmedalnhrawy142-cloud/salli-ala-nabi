@@ -1,0 +1,260 @@
+.prayer-home {
+  --emerald: #064e3b;
+  --deep: #032d25;
+  --gold: #d8b66a;
+  --cream: #f6f0df;
+  min-height: 100vh;
+  padding: 24px 16px;
+  color: var(--cream);
+  direction: rtl;
+  font-family: Arial, sans-serif;
+  background:
+    radial-gradient(ellipse at top, #17634b 0%, transparent 55%),
+    linear-gradient(145deg, #021e19, #064e3b 55%, #03251f);
+}
+
+.prayer-header {
+  max-width: 1100px;
+  margin: 0 auto 55px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.prayer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gold);
+  font-size: 20px;
+}
+
+.prayer-brand span {
+  font-size: 30px;
+}
+
+.prayer-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.prayer-header a {
+  color: var(--cream);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.prayer-header a:hover {
+  color: var(--gold);
+}
+
+.prayer-hero {
+  max-width: 850px;
+  margin: auto;
+  text-align: center;
+  padding: 45px 20px;
+  border: 1px solid rgba(216, 182, 106, .3);
+  border-radius: 28px;
+  background: rgba(2, 30, 25, .65);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+}
+
+.prayer-eyebrow {
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+
+.prayer-hero h1 {
+  color: var(--gold);
+  font-size: clamp(32px, 6vw, 55px);
+  line-height: 1.7;
+  margin: 20px 0;
+}
+
+.prayer-subtitle {
+  color: #e5dfce;
+  line-height: 2;
+}
+
+.prayer-counters {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin: 35px 0;
+}
+
+.prayer-counter {
+  padding: 22px 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(216, 182, 106, .25);
+}
+
+.prayer-counter span {
+  display: block;
+  color: #d9d2c0;
+  font-size: 14px;
+}
+
+.prayer-counter strong {
+  display: block;
+  margin-top: 12px;
+  color: var(--gold);
+  font-size: 30px;
+}
+
+.prayer-main-button {
+  width: 100%;
+  max-width: 500px;
+  min-height: 65px;
+  border: 0;
+  border-radius: 16px;
+  padding: 15px;
+  background: linear-gradient(135deg, #e8cb83, #bd9140);
+  color: #173b2e;
+  font-size: 19px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform .2s;
+}
+
+.prayer-main-button:active {
+  transform: scale(.97);
+}
+
+.prayer-small-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.prayer-small-buttons button,
+.goal-options button {
+  padding: 11px 22px;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--cream);
+  cursor: pointer;
+}
+
+.prayer-small-buttons button:hover,
+.goal-options button:hover,
+.goal-options .goal-active {
+  background: var(--gold);
+  color: var(--deep);
+}
+
+.prayer-save-note {
+  color: #c9c3b3;
+  font-size: 12px;
+  margin-top: 22px;
+}
+
+.daily-section,
+.phrases-section,
+.share-section {
+  max-width: 850px;
+  margin: 35px auto;
+  padding: 28px 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(216, 182, 106, .25);
+  background: rgba(2, 30, 25, .72);
+  text-align: center;
+}
+
+.daily-section h2,
+.phrases-section h2,
+.share-section h2 {
+  color: var(--gold);
+  margin-top: 0;
+}
+
+.goal-options {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 25px 0;
+}
+
+.goal-progress {
+  height: 12px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #183e32;
+  margin: 20px 0;
+}
+
+.goal-progress div {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #b88a3d, #f0d58c);
+  transition: width .3s;
+}
+
+.phrase-card {
+  margin-top: 18px;
+  padding: 20px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .06);
+  line-height: 2;
+}
+
+.phrase-card button,
+.share-section button {
+  padding: 12px 22px;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--gold);
+  cursor: pointer;
+}
+
+.share-section p {
+  line-height: 2;
+}
+
+.prayer-footer {
+  padding: 35px 10px 15px;
+  text-align: center;
+  color: var(--gold);
+}
+
+@media (max-width: 600px) {
+  .prayer-header {
+    justify-content: center;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .prayer-header nav {
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .prayer-header nav a {
+    font-size: 12px;
+  }
+
+  .prayer-hero {
+    padding: 30px 14px;
+  }
+
+  .prayer-counters {
+    gap: 8px;
+  }
+
+  .prayer-counter strong {
+    font-size: 24px;
+  }
+
+  .prayer-main-button {
+    font-size: 16px;
+  }
+}
