@@ -1,6 +1,8 @@
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 type Celebration = {
   id: number;
@@ -14,7 +16,7 @@ const poems = [
   ],
   [
     'وَإِنَّ مِنْ جُودِكَ الدُّنْيَا وَضَرَّتَهَا',
-    'وَمِنْ عُلُومِكَ عِلْمَ اللَّوْحِ وَالْقَلَمِ',
+    'وَمِنْ عُلُومِكَ عِلْمِ اللَّوْحِ وَالْقَلَمِ',
   ],
   [
     'يَا أَكْرَمَ الْخَلْقِ مَا لِي مَنْ أَلُوذُ بِهِ',
@@ -32,10 +34,13 @@ const salawat =
 export function PrayerExperience() {
   const [count, setCount] = useState(0);
   const [todayCount, setTodayCount] = useState(0);
+  const [globalCount, setGlobalCount] = useState(0);
+  const [globalLoading, setGlobalLoading] = useState(true);
   const [poemIndex, setPoemIndex] = useState(0);
   const [celebrations, setCelebrations] = useState<Celebration[]>([]);
   const nextId = useRef(0);
 
+  // تحميل العدادات المحلية والإجمالي من قاعدة البيانات
   useEffect(() => {
     const savedCount = Number(
       localStorage.getItem('prayer_personal_count') || 0
@@ -55,13 +60,51 @@ export function PrayerExperience() {
       localStorage.setItem('prayer_today_count', '0');
       setTodayCount(0);
     }
+
+    loadGlobalCount();
   }, []);
+
+  // قراءة إجمالي الصلوات من Supabase
+  async function loadGlobalCount() {
+    try {
+      const { data, error } = await supabase
+        .from('prayer_stats')
+        .select('total_count')
+        .eq('id', 1)
+        .single();
+
+      if (error) throw error;
+
+      setGlobalCount(Number(data.total_count || 0));
+    } catch (error) {
+      console.error('تعذر تحميل إجمالي الصلوات:', error);
+    } finally {
+      setGlobalLoading(false);
+    }
+  }
+
+  // تسجيل ضغطة جديدة في قاعدة البيانات
+  async function incrementGlobalCount() {
+    try {
+      const { data, error } = await supabase.rpc(
+        'increment_prayer_count'
+      );
+
+      if (error) throw error;
+
+      setGlobalCount(Number(data));
+    } catch (error) {
+      console.error('تعذر تحديث إجمالي الصلوات:', error);
+    }
+  }
 
   function addPrayer() {
     const nextCount = count + 1;
     const today = new Date().toLocaleDateString('en-CA');
     const savedDate = localStorage.getItem('prayer_count_date');
-    const nextToday = savedDate === today ? todayCount + 1 : 1;
+
+    const nextToday =
+      savedDate === today ? todayCount + 1 : 1;
 
     setCount(nextCount);
     setTodayCount(nextToday);
@@ -76,7 +119,12 @@ export function PrayerExperience() {
       String(nextToday)
     );
 
+    // كل ضغطة تُسجَّل مرة واحدة في الإجمالي العام
+    incrementGlobalCount();
+
+    // حركة الكرة والاحتفال مع كل ضغطة
     const id = ++nextId.current;
+
     setCelebrations((old) => [
       ...old,
       {
@@ -103,8 +151,10 @@ export function PrayerExperience() {
           box-sizing: border-box;
         }
 
+        html,
         body {
           margin: 0;
+          padding: 0;
           background: #07172e;
         }
 
@@ -151,7 +201,7 @@ export function PrayerExperience() {
 
         .sky-scene::before,
         .sky-scene::after {
-          content: "";
+          content: '';
           position: absolute;
           inset: 0;
           pointer-events: none;
@@ -177,12 +227,8 @@ export function PrayerExperience() {
         }
 
         @keyframes stars-twinkle {
-          from {
-            opacity: 0.25;
-          }
-          to {
-            opacity: 1;
-          }
+          from { opacity: 0.25; }
+          to { opacity: 1; }
         }
 
         .sky-glow {
@@ -226,7 +272,7 @@ export function PrayerExperience() {
         }
 
         .scene-image::after {
-          content: "";
+          content: '';
           position: absolute;
           inset: 0;
           background: linear-gradient(
@@ -248,7 +294,7 @@ export function PrayerExperience() {
           color: #173453;
           background: linear-gradient(
             135deg,
-            #fff0bd 0%,
+            #fff7db 0%,
             #e7c779 48%,
             #cda44f 100%
           );
@@ -264,12 +310,6 @@ export function PrayerExperience() {
 
         .prayer-button:active {
           transform: scale(0.97);
-        }
-
-        .prayer-button:focus-visible,
-        .poem-change:focus-visible {
-          outline: 3px solid white;
-          outline-offset: 4px;
         }
 
         .celebration {
@@ -307,12 +347,8 @@ export function PrayerExperience() {
             transform: translate(-50%, 0) scale(0.65);
             opacity: 0;
           }
-          12% {
-            opacity: 1;
-          }
-          75% {
-            opacity: 1;
-          }
+          12% { opacity: 1; }
+          75% { opacity: 1; }
           100% {
             transform: translate(-50%, -65vh) scale(1.2);
             opacity: 0;
@@ -404,7 +440,7 @@ export function PrayerExperience() {
           );
           box-shadow:
             0 15px 45px rgba(0, 0, 0, 0.16),
-            inset 0 1px rgba(255, 255, 255, 0.04);
+            inset 0 1px 1px rgba(255, 255, 255, 0.04);
           backdrop-filter: blur(12px);
         }
 
@@ -435,17 +471,24 @@ export function PrayerExperience() {
           background: rgba(7, 23, 43, 0.42);
         }
 
+        .stat-card.global-stat {
+          grid-column: 1 / -1;
+          background: rgba(139, 105, 43, 0.16);
+          border-color: rgba(242, 213, 142, 0.45);
+        }
+
         .stat-number {
           display: block;
           color: #f2d58e;
           font-size: 29px;
           font-weight: 900;
+          direction: ltr;
         }
 
         .stat-label {
           display: block;
           margin-top: 7px;
-          color: #d4e0ed;
+          color: #e4dede;
           font-size: 13px;
         }
 
@@ -544,13 +587,14 @@ export function PrayerExperience() {
         <section className="content-card">
           <h2 className="section-title">حديث النبي ﷺ</h2>
           <p className="hadith-text">
-            «مَنْ صَلَّى عَلَيَّ صَلَاةً وَاحِدَةً؛ صَلَّى اللَّهُ
-            عَلَيْهِ بِهَا عَشْرًا»
+            «مَنْ صَلَّى عَلَيَّ صَلَاةً وَاحِدَةً؛
+            صَلَّى اللَّهُ عَلَيْهِ بِهَا عَشْرًا»
           </p>
         </section>
 
         <section className="content-card">
-          <h2 className="section-title">عدادات الصلاة</h2>
+          <h2 className="section-title">عدادات الصلوات</h2>
+
           <div className="stats-grid">
             <div className="stat-card">
               <span className="stat-number">
@@ -558,33 +602,49 @@ export function PrayerExperience() {
               </span>
               <span className="stat-label">إجمالي صلواتك</span>
             </div>
+
             <div className="stat-card">
               <span className="stat-number">
                 {todayCount.toLocaleString('ar-EG')}
               </span>
               <span className="stat-label">صلواتك اليوم</span>
             </div>
+
+            <div className="stat-card global-stat">
+              <span className="stat-number">
+                {globalLoading
+                  ? '...'
+                  : globalCount.toLocaleString('ar-EG')}
+              </span>
+              <span className="stat-label">
+                إجمالي صلوات جميع زوار الموقع
+              </span>
+            </div>
           </div>
         </section>
 
         <section className="content-card">
-          <h2 className="section-title">صيغة الصلاة والدعاء</h2>
+          <h2 className="section-title">صيغة الصلاة والسلام</h2>
           <p className="salawat-text">{salawat}</p>
         </section>
 
         <section className="content-card">
-          <h2 className="section-title">في مدح رسول الله ﷺ</h2>
-          {poems[poemIndex].map((line) => (
-            <p className="poem-line" key={line}>
+          <h2 className="section-title">
+            من مدح رسول الله ﷺ
+          </h2>
+
+          {poems[poemIndex].map((line, index) => (
+            <p className="poem-line" key={index}>
               {line}
             </p>
           ))}
+
           <button
             type="button"
             className="poem-change"
             onClick={changePoem}
           >
-            ↻ تغيير الأبيات
+            تغيير الأبيات
           </button>
         </section>
       </div>
@@ -593,3 +653,4 @@ export function PrayerExperience() {
 }
 
 export default PrayerExperience;
+      
