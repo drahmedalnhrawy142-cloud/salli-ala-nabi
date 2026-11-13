@@ -745,4 +745,48 @@ export function PrayerExperience() {
                   ? '...'
                   : globalCount.toLocaleString('ar-EG')}
               </span>
-              <span c
+                            <span className="stat-label">
+                إجمالي صلوات جميع زوار الموقع
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* نص الصلاة موجود بدون عنوان */}
+        <section className="content-card">
+          <p className="salawat-text">{salawat}</p>
+        </section>
+
+        <section className="content-card">
+          <h2 className="section-title">من مدح رسول الله ﷺ</h2>
+
+          {poems[poemIndex].map((line, index) => (
+            <p className="poem-line" key={index}>
+              {line}
+            </p>
+          ))}
+
+          <div className="poem-actions">
+            <button
+              type="button"
+              className="poem-copy"
+              onClick={copyPoem}
+            >
+              {copied ? '✓ تم النسخ' : '⧉ نسخ الأبيات'}
+            </button>
+
+            <button
+              type="button"
+              className="poem-change"
+              onClick={changePoem}
+            >
+              تغيير الأبيات
+            </button>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+export default PrayerExperience;
