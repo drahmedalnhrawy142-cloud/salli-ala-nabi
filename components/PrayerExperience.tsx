@@ -37,10 +37,10 @@ export function PrayerExperience() {
   const [globalCount, setGlobalCount] = useState(0);
   const [globalLoading, setGlobalLoading] = useState(true);
   const [poemIndex, setPoemIndex] = useState(0);
+  const [copied, setCopied] = useState(false);
   const [celebrations, setCelebrations] = useState<Celebration[]>([]);
   const nextId = useRef(0);
 
-  // تحميل العدادات المحلية والإجمالي من قاعدة البيانات
   useEffect(() => {
     const savedCount = Number(
       localStorage.getItem('prayer_personal_count') || 0
@@ -64,7 +64,6 @@ export function PrayerExperience() {
     loadGlobalCount();
   }, []);
 
-  // قراءة إجمالي الصلوات من Supabase
   async function loadGlobalCount() {
     try {
       const { data, error } = await supabase
@@ -74,7 +73,6 @@ export function PrayerExperience() {
         .single();
 
       if (error) throw error;
-
       setGlobalCount(Number(data.total_count || 0));
     } catch (error) {
       console.error('تعذر تحميل إجمالي الصلوات:', error);
@@ -83,7 +81,6 @@ export function PrayerExperience() {
     }
   }
 
-  // تسجيل ضغطة جديدة في قاعدة البيانات
   async function incrementGlobalCount() {
     try {
       const { data, error } = await supabase.rpc(
@@ -91,7 +88,6 @@ export function PrayerExperience() {
       );
 
       if (error) throw error;
-
       setGlobalCount(Number(data));
     } catch (error) {
       console.error('تعذر تحديث إجمالي الصلوات:', error);
@@ -102,27 +98,17 @@ export function PrayerExperience() {
     const nextCount = count + 1;
     const today = new Date().toLocaleDateString('en-CA');
     const savedDate = localStorage.getItem('prayer_count_date');
-
-    const nextToday =
-      savedDate === today ? todayCount + 1 : 1;
+    const nextToday = savedDate === today ? todayCount + 1 : 1;
 
     setCount(nextCount);
     setTodayCount(nextToday);
 
-    localStorage.setItem(
-      'prayer_personal_count',
-      String(nextCount)
-    );
+    localStorage.setItem('prayer_personal_count', String(nextCount));
     localStorage.setItem('prayer_count_date', today);
-    localStorage.setItem(
-      'prayer_today_count',
-      String(nextToday)
-    );
+    localStorage.setItem('prayer_today_count', String(nextToday));
 
-    // كل ضغطة تُسجَّل مرة واحدة في الإجمالي العام
     incrementGlobalCount();
 
-    // حركة الكرة والاحتفال مع كل ضغطة
     const id = ++nextId.current;
 
     setCelebrations((old) => [
@@ -137,11 +123,24 @@ export function PrayerExperience() {
       setCelebrations((old) =>
         old.filter((item) => item.id !== id)
       );
-    }, 2600);
+    }, 3300);
   }
 
   function changePoem() {
     setPoemIndex((old) => (old + 1) % poems.length);
+    setCopied(false);
+  }
+
+  async function copyPoem() {
+    try {
+      await navigator.clipboard.writeText(
+        poems[poemIndex].join('\n')
+      );
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch (error) {
+      console.error('تعذر نسخ الأبيات:', error);
+    }
   }
 
   return (
@@ -301,7 +300,7 @@ export function PrayerExperience() {
           box-shadow:
             0 8px 35px rgba(0, 0, 0, 0.35),
             0 0 35px rgba(245, 211, 137, 0.2),
-            inset 0 1px 1px rgba(255, 255, 255, 0.8);
+            inset 0 1px rgba(255, 255, 255, 0.8);
           font-size: clamp(18px, 4.5vw, 24px);
           font-weight: 800;
           cursor: pointer;
@@ -321,76 +320,123 @@ export function PrayerExperience() {
           height: 1px;
         }
 
+        /* الكرة الزجاجية وبداخلها ﷺ */
         .celebration-orb {
           position: absolute;
           left: 0;
           bottom: 0;
-          width: 30px;
-          height: 30px;
+          width: 42px;
+          height: 42px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           border-radius: 50%;
+          border: 1px solid rgba(255, 255, 255, 0.9);
           background: radial-gradient(
-            circle at 35% 30%,
-            #fff 0%,
-            rgba(225, 244, 255, 0.8) 38%,
-            rgba(175, 218, 255, 0.22) 72%,
-            transparent 100%
+            circle at 35% 25%,
+            rgba(255, 255, 255, 0.95),
+            rgba(225, 244, 255, 0.48) 35%,
+            rgba(132, 194, 255, 0.18) 72%,
+            rgba(255, 255, 255, 0.08) 100%
           );
-          border: 1px solid rgba(255, 255, 255, 0.8);
           box-shadow:
+            inset -5px -5px 12px rgba(130, 190, 255, 0.2),
             0 0 18px 7px rgba(210, 237, 255, 0.55),
             0 0 45px 15px rgba(115, 183, 255, 0.25);
-          animation: orb-flight 1.05s cubic-bezier(.2, .7, .25, 1) forwards;
+          animation: orb-flight 1s cubic-bezier(.2, .7, .25, 1) forwards;
+        }
+
+        .orb-text {
+          color: #b68a38;
+          font-size: 17px;
+          font-weight: 900;
+          text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
         }
 
         @keyframes orb-flight {
           0% {
-            transform: translate(-50%, 0) scale(0.65);
+            transform: translate(-50%, 0) scale(0.55);
             opacity: 0;
           }
-          12% { opacity: 1; }
-          75% { opacity: 1; }
+          12% {
+            opacity: 1;
+          }
+          75% {
+            opacity: 1;
+          }
           100% {
-            transform: translate(-50%, -65vh) scale(1.2);
+            transform: translate(-50%, -60vh) scale(1.25);
             opacity: 0;
           }
         }
 
+        /* الانفجار في نفس نقطة وصول الكرة */
         .celebration-burst {
           position: absolute;
           left: 0;
           bottom: 60vh;
-          width: 12px;
-          height: 12px;
+          width: 14px;
+          height: 14px;
           border-radius: 50%;
           background: #fff8d9;
           box-shadow:
-            0 0 14px 9px rgba(255, 230, 155, 0.8),
-            0 0 45px 25px rgba(255, 190, 75, 0.45);
+            0 0 14px 9px rgba(255, 230, 155, 0.9),
+            0 0 45px 25px rgba(255, 190, 75, 0.55);
           opacity: 0;
-          animation: golden-burst 1.1s 0.85s ease-out forwards;
+          animation: golden-burst 1.2s 0.95s ease-out forwards;
+        }
+
+        .celebration-burst::before,
+        .celebration-burst::after {
+          content: '';
+          position: absolute;
+          inset: -24px;
+          border: 2px solid rgba(255, 226, 153, 0.8);
+          border-radius: 50%;
+          animation: burst-ring 1s 1s ease-out forwards;
+        }
+
+        .celebration-burst::after {
+          inset: -42px;
+          animation-delay: 1.08s;
         }
 
         @keyframes golden-burst {
           0% {
-            transform: translate(-50%, 0) scale(0.1);
+            transform: translate(-50%, 50%) scale(0.1);
             opacity: 0;
           }
-          35% {
-            transform: translate(-50%, 0) scale(3.2);
+          25% {
+            transform: translate(-50%, 50%) scale(3.5);
             opacity: 1;
           }
           100% {
-            transform: translate(-50%, 0) scale(0.6);
+            transform: translate(-50%, 50%) scale(0.7);
             opacity: 0;
           }
         }
 
+        @keyframes burst-ring {
+          0% {
+            transform: scale(0.2);
+            opacity: 0;
+          }
+          25% {
+            opacity: 1;
+          }
+          100% {
+            transform: scale(2.8);
+            opacity: 0;
+          }
+        }
+
+        /* العبارة تخرج من مركز الانفجار */
         .celebration-message {
           position: absolute;
           left: 0;
-          bottom: calc(60vh - 58px);
+          bottom: calc(60vh + 7px);
           width: max-content;
-          transform: translateX(-50%);
+          max-width: 90vw;
           color: #ffe5a0;
           font-size: clamp(19px, 5vw, 28px);
           font-weight: 900;
@@ -398,25 +444,28 @@ export function PrayerExperience() {
             0 0 9px #f3c65f,
             0 0 25px rgba(255, 208, 105, 0.95);
           opacity: 0;
-          animation: message-appear 1.9s 1s ease-out forwards;
+          transform: translate(-50%, 50%) scale(0.15);
+          animation: message-appear 2s 1.05s ease-out forwards;
         }
 
         @keyframes message-appear {
           0% {
             opacity: 0;
-            transform: translate(-50%, 12px) scale(0.65);
+            transform: translate(-50%, 50%) scale(0.15);
+            filter: blur(5px);
           }
-          20% {
+          22% {
             opacity: 1;
-            transform: translate(-50%, 0) scale(1.08);
+            transform: translate(-50%, 50%) scale(1.12);
+            filter: blur(0);
           }
-          70% {
+          65% {
             opacity: 1;
-            transform: translate(-50%, -5px) scale(1);
+            transform: translate(-50%, 25%) scale(1);
           }
           100% {
             opacity: 0;
-            transform: translate(-50%, -28px) scale(0.95);
+            transform: translate(-50%, 0) scale(0.9);
           }
         }
 
@@ -440,7 +489,7 @@ export function PrayerExperience() {
           );
           box-shadow:
             0 15px 45px rgba(0, 0, 0, 0.16),
-            inset 0 1px 1px rgba(255, 255, 255, 0.04);
+            inset 0 1px rgba(255, 255, 255, 0.04);
           backdrop-filter: blur(12px);
         }
 
@@ -508,8 +557,17 @@ export function PrayerExperience() {
           line-height: 2;
         }
 
-        .poem-change {
+        .poem-actions {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 10px;
           margin-top: 17px;
+        }
+
+        .poem-change,
+        .poem-copy {
           padding: 12px 23px;
           border: 1px solid rgba(242, 213, 142, 0.45);
           border-radius: 15px;
@@ -518,6 +576,19 @@ export function PrayerExperience() {
           font-size: 14px;
           font-weight: 700;
           cursor: pointer;
+        }
+
+        .poem-copy {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          color: #fff4d8;
+          background: rgba(255, 255, 255, 0.07);
+        }
+
+        .poem-copy:active,
+        .poem-change:active {
+          transform: scale(0.97);
         }
 
         @media (min-width: 700px) {
@@ -550,6 +621,8 @@ export function PrayerExperience() {
           .sky-scene::after,
           .celebration-orb,
           .celebration-burst,
+          .celebration-burst::before,
+          .celebration-burst::after,
           .celebration-message {
             animation-duration: 0.01ms !important;
           }
@@ -566,8 +639,12 @@ export function PrayerExperience() {
             key={item.id}
             style={{ left: `${item.left}%` }}
           >
-            <div className="celebration-orb" />
+            <div className="celebration-orb">
+              <span className="orb-text">ﷺ</span>
+            </div>
+
             <div className="celebration-burst" />
+
             <div className="celebration-message">
               صلّى الله عليك عشرًا
             </div>
@@ -623,15 +700,13 @@ export function PrayerExperience() {
           </div>
         </section>
 
+        {/* نص الصلاة موجود بدون عنوان */}
         <section className="content-card">
-          <h2 className="section-title">صيغة الصلاة والسلام</h2>
           <p className="salawat-text">{salawat}</p>
         </section>
 
         <section className="content-card">
-          <h2 className="section-title">
-            من مدح رسول الله ﷺ
-          </h2>
+          <h2 className="section-title">من مدح رسول الله ﷺ</h2>
 
           {poems[poemIndex].map((line, index) => (
             <p className="poem-line" key={index}>
@@ -639,13 +714,23 @@ export function PrayerExperience() {
             </p>
           ))}
 
-          <button
-            type="button"
-            className="poem-change"
-            onClick={changePoem}
-          >
-            تغيير الأبيات
-          </button>
+          <div className="poem-actions">
+            <button
+              type="button"
+              className="poem-copy"
+              onClick={copyPoem}
+            >
+              {copied ? '✓ تم النسخ' : '⧉ نسخ الأبيات'}
+            </button>
+
+            <button
+              type="button"
+              className="poem-change"
+              onClick={changePoem}
+            >
+              تغيير الأبيات
+            </button>
+          </div>
         </section>
       </div>
     </main>
@@ -653,4 +738,3 @@ export function PrayerExperience() {
 }
 
 export default PrayerExperience;
-      
