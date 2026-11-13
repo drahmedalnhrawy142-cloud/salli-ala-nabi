@@ -45,9 +45,10 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
 
-      - name: Create and sync Android project
+      - name: Create Android project, app icons, and sync
         run: |
           if [ ! -d android ]; then npx cap add android; fi
+          npx capacitor-assets generate --android
           npx cap sync android
 
       - name: Build debug APK
