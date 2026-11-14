@@ -134,6 +134,7 @@ export function PrayerExperience() {
   const [floatPerm, setFloatPerm] = useState(false);
   const [floatOn, setFloatOn] = useState(false);
   const nextId = useRef(0);
+  const lastCelebrationAt = useRef(0);
 
   useEffect(() => {
     const savedCount = Number(
@@ -337,10 +338,15 @@ export function PrayerExperience() {
 
     incrementGlobalCount();
 
+    // لو الضغط سريع جدًا: العدّ يتحسب، بس الرسوم المتحركة نقللها علشان التطبيق ما يتقلش
+    const now = Date.now();
+    if (now - lastCelebrationAt.current < 250) return;
+    lastCelebrationAt.current = now;
+
     const id = ++nextId.current;
 
     setCelebrations((old) => [
-      ...old,
+      ...old.slice(-2),
       {
         id,
         left: 35 + Math.random() * 30,
@@ -569,8 +575,8 @@ export function PrayerExperience() {
           );
           box-shadow:
             inset -5px -5px 12px rgba(130, 190, 255, 0.2),
-            0 0 18px 7px rgba(210, 237, 255, 0.55),
-            0 0 45px 15px rgba(115, 183, 255, 0.25);
+            0 0 20px 8px rgba(190, 225, 255, 0.5);
+          will-change: transform, opacity;
           animation: orb-flight 1s cubic-bezier(.2, .7, .25, 1) forwards;
         }
 
@@ -607,10 +613,9 @@ export function PrayerExperience() {
           height: 14px;
           border-radius: 50%;
           background: #fff8d9;
-          box-shadow:
-            0 0 14px 9px rgba(255, 230, 155, 0.9),
-            0 0 45px 25px rgba(255, 190, 75, 0.55);
+          box-shadow: 0 0 22px 12px rgba(255, 215, 120, 0.8);
           opacity: 0;
+          will-change: transform, opacity;
           animation: golden-burst 1.2s 0.95s ease-out forwards;
         }
 
@@ -668,10 +673,9 @@ export function PrayerExperience() {
           color: #ffe5a0;
           font-size: clamp(19px, 5vw, 28px);
           font-weight: 900;
-          text-shadow:
-            0 0 9px #f3c65f,
-            0 0 25px rgba(255, 208, 105, 0.95);
+          text-shadow: 0 0 12px rgba(255, 208, 105, 0.95);
           opacity: 0;
+          will-change: transform, opacity;
           transform: translate(-50%, 50%) scale(0.15);
           animation: message-appear 2s 1.05s ease-out forwards;
         }
@@ -680,12 +684,10 @@ export function PrayerExperience() {
           0% {
             opacity: 0;
             transform: translate(-50%, 50%) scale(0.15);
-            filter: blur(5px);
           }
           22% {
             opacity: 1;
             transform: translate(-50%, 50%) scale(1.12);
-            filter: blur(0);
           }
           65% {
             opacity: 1;
