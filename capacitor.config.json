@@ -1,5 +1,15 @@
 {
   "appId": "com.sallialanabi.app",
   "appName": "صلّي على النبي",
-  "webDir": "out"
+  "webDir": "out",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "launchShowDuration": 2500,
+      "launchFadeOutDuration": 300,
+      "backgroundColor": "#000000",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_CROP"
+    }
+  }
 }
