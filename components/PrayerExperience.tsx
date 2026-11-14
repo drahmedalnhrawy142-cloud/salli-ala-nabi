@@ -144,6 +144,25 @@ export function PrayerExperience() {
     return () => window.cancelAnimationFrame(id);
   }, []);
 
+  // في تطبيق الأندرويد: نخفي الشاشة الافتتاحية بعد ما الصفحة تظهر كاملة
+  useEffect(() => {
+    if (!ready) return;
+    const timer = window.setTimeout(() => {
+      const w = window as unknown as {
+        Capacitor?: {
+          Plugins?: Record<
+            string,
+            { hide?: (o?: { fadeOutDuration: number }) => Promise<void> }
+          >;
+        };
+      };
+      w.Capacitor?.Plugins?.SplashScreen?.hide?.({ fadeOutDuration: 300 })?.catch?.(
+        () => {}
+      );
+    }, 150);
+    return () => window.clearTimeout(timer);
+  }, [ready]);
+
   useEffect(() => {
     const savedCount = Number(
       localStorage.getItem('prayer_personal_count') || 0
