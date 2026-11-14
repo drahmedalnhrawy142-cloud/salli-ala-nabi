@@ -80,6 +80,14 @@ const poems = [
   ],
 ];
 
+const goalOptions = [10, 33, 100, 300, 1000];
+
+function dayKey(offset = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toLocaleDateString('en-CA');
+}
+
 const salawat =
   'عَدَدَ مَا صَلَّى عَلَيْكَ اللهُ جَلَّ جَلَالُهُ، وَمَلَائِكَتُهُ، وَجَمِيعُ خَلْقِهِ، وَكَمَا يَلِيقُ بِصَلَاتِهِ، سَلَّمَ وَصَلَّى عَلَيْكَ اللهُ يَا خَيْرَ الوَرَى إِلَى يَوْمِ الدِّينِ، عَنِّي وَعَنْ وَالِدَيَّ وَالمُسْلِمِينَ';
 
@@ -91,6 +99,10 @@ export function PrayerExperience() {
   const [poemIndex, setPoemIndex] = useState(0);
   const [copied, setCopied] = useState(false);
   const [celebrations, setCelebrations] = useState<Celebration[]>([]);
+  const [goal, setGoal] = useState(100);
+  const [streak, setStreak] = useState(0);
+  const [haptic, setHaptic] = useState(true);
+  const [goalDone, setGoalDone] = useState(false);
   const nextId = useRef(0);
 
   useEffect(() => {
@@ -113,8 +125,33 @@ export function PrayerExperience() {
       setTodayCount(0);
     }
 
+    const savedGoal = Number(localStorage.getItem('prayer_goal') || 100);
+    if (savedGoal > 0) setGoal(savedGoal);
+    setHaptic(localStorage.getItem('prayer_haptic') !== 'off');
+
+    const streakDate = localStorage.getItem('prayer_streak_date');
+    const savedStreak = Number(
+      localStorage.getItem('prayer_streak') || 0
+    );
+    if (streakDate === today || streakDate === dayKey(-1)) {
+      setStreak(savedStreak);
+    }
+
     loadGlobalCount();
   }, []);
+
+  function chooseGoal(value: number) {
+    setGoal(value);
+    setGoalDone(false);
+    localStorage.setItem('prayer_goal', String(value));
+  }
+
+  function toggleHaptic() {
+    const next = !haptic;
+    setHaptic(next);
+    localStorage.setItem('prayer_haptic', next ? 'on' : 'off');
+    if (next && navigator.vibrate) navigator.vibrate(25);
+  }
 
   async function loadGlobalCount() {
     try {
@@ -158,6 +195,22 @@ export function PrayerExperience() {
     localStorage.setItem('prayer_personal_count', String(nextCount));
     localStorage.setItem('prayer_count_date', today);
     localStorage.setItem('prayer_today_count', String(nextToday));
+
+    const streakDate = localStorage.getItem('prayer_streak_date');
+    let nextStreak = Number(localStorage.getItem('prayer_streak') || 0);
+    if (streakDate !== today) {
+      nextStreak = streakDate === dayKey(-1) ? nextStreak + 1 : 1;
+      localStorage.setItem('prayer_streak', String(nextStreak));
+      localStorage.setItem('prayer_streak_date', today);
+    }
+    setStreak(nextStreak);
+
+    if (nextToday === goal) {
+      setGoalDone(true);
+      if (haptic && navigator.vibrate) navigator.vibrate([40, 60, 40, 60, 90]);
+    } else if (haptic && navigator.vibrate) {
+      navigator.vibrate(20);
+    }
 
     incrementGlobalCount();
 
@@ -679,6 +732,86 @@ export function PrayerExperience() {
             animation-duration: 0.01ms !important;
           }
         }
+
+        .goal-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-bottom: 12px;
+        }
+
+        .goal-progress-text {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #f4d98a;
+        }
+
+        .streak-badge {
+          padding: 4px 12px;
+          border-radius: 999px;
+          font-size: 0.95rem;
+          color: #ffe7a8;
+          background: rgba(255, 190, 80, 0.14);
+          border: 1px solid rgba(255, 214, 120, 0.35);
+        }
+
+        .goal-bar {
+          height: 12px;
+          border-radius: 999px;
+          overflow: hidden;
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .goal-bar-fill {
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #d9a441, #ffe39a);
+          transition: width 0.5s ease;
+        }
+
+        .goal-done {
+          margin: 14px 0 0;
+          text-align: center;
+          color: #ffe39a;
+          font-weight: 700;
+        }
+
+        .goal-options {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 16px;
+        }
+
+        .goal-chip,
+        .haptic-toggle {
+          font: inherit;
+          cursor: pointer;
+          color: #f4e7c0;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 214, 120, 0.3);
+          border-radius: 999px;
+          padding: 8px 16px;
+        }
+
+        .goal-chip-on {
+          color: #1c2540;
+          font-weight: 700;
+          background: #ffe39a;
+          border-color: #ffe39a;
+        }
+
+        .haptic-toggle {
+          margin-top: 14px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .goal-bar-fill {
+            transition: none;
+          }
+        }
       `}</style>
 
       <section className="sky-scene" aria-label="سماء الصلاة على النبي">
@@ -750,6 +883,65 @@ export function PrayerExperience() {
               </span>
             </div>
           </div>
+        </section>
+
+        <section className="content-card">
+          <h2 className="section-title">هدفك اليومي</h2>
+
+          <div className="goal-top">
+            <span className="goal-progress-text">
+              {Math.min(todayCount, goal).toLocaleString('ar-EG')} من{' '}
+              {goal.toLocaleString('ar-EG')}
+            </span>
+            <span className="streak-badge">
+              🔥 {streak.toLocaleString('ar-EG')}{' '}
+              {streak === 1 ? 'يوم متتالي' : 'أيام متتالية'}
+            </span>
+          </div>
+
+          <div
+            className="goal-bar"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={goal}
+            aria-valuenow={Math.min(todayCount, goal)}
+          >
+            <div
+              className="goal-bar-fill"
+              style={{
+                width: `${Math.min(100, (todayCount / goal) * 100)}%`,
+              }}
+            />
+          </div>
+
+          {(goalDone || todayCount >= goal) && (
+            <p className="goal-done">
+              ما شاء الله، أتممت هدفك اليوم. تقبّل الله منك ﷺ
+            </p>
+          )}
+
+          <div className="goal-options">
+            {goalOptions.map((value) => (
+              <button
+                type="button"
+                key={value}
+                className={
+                  value === goal ? 'goal-chip goal-chip-on' : 'goal-chip'
+                }
+                onClick={() => chooseGoal(value)}
+              >
+                {value.toLocaleString('ar-EG')}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="haptic-toggle"
+            onClick={toggleHaptic}
+          >
+            {haptic ? '📳 الاهتزاز: مفعّل' : '📴 الاهتزاز: متوقف'}
+          </button>
         </section>
 
         {/* نص الصلاة موجود بدون عنوان */}
