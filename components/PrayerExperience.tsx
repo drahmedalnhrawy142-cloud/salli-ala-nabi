@@ -135,6 +135,13 @@ export function PrayerExperience() {
   const [floatOn, setFloatOn] = useState(false);
   const nextId = useRef(0);
   const lastCelebrationAt = useRef(0);
+  // نخبّي الصفحة لحد ما التنسيقات تتحمّل، علشان ما تظهرش مفككة لثواني عند فتح التطبيق
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => setReady(true));
+    return () => window.cancelAnimationFrame(id);
+  }, []);
 
   useEffect(() => {
     const savedCount = Number(
@@ -378,7 +385,11 @@ export function PrayerExperience() {
   }
 
   return (
-    <main className="prayer-experience" dir="rtl">
+    <main
+      className="prayer-experience"
+      dir="rtl"
+      style={{ visibility: ready ? 'visible' : 'hidden' }}
+    >
       <style jsx global>{`
         * {
           box-sizing: border-box;
