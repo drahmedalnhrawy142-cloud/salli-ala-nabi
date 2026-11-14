@@ -1482,6 +1482,44 @@ export function PrayerExperience() {
           color: rgba(255, 255, 255, 0.92);
           font-weight: 500;
         }
+
+        /* ===== الخطوط: كوفي للعناوين والأزرار، رقعة للنصوص ===== */
+        .prayer-experience {
+          font-family: var(--font-ruqaa), Tahoma, Arial, sans-serif;
+        }
+
+        .section-title,
+        .prayer-button,
+        .stat-number,
+        .stat-label,
+        .streak-badge,
+        .goal-progress-text,
+        .goal-chip,
+        .haptic-toggle,
+        .poem-copy,
+        .poem-change,
+        .rem-field,
+        .rem-field select,
+        .celebration-message {
+          font-family: var(--font-kufi), Tahoma, Arial, sans-serif;
+        }
+
+        .hadith-text,
+        .salawat-text {
+          font-size: 22px;
+          line-height: 2.2;
+        }
+
+        .poem-line {
+          font-size: 22px;
+          line-height: 2.1;
+          font-weight: 400;
+        }
+
+        .float-note,
+        .goal-done {
+          font-size: 17px;
+        }
       `}</style>
 
       <section className="sky-scene" aria-label="سماء الصلاة على النبي">
