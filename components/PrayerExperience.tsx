@@ -80,6 +80,33 @@ const poems = [
   ],
 ];
 
+type FloatingPlugin = {
+  status(): Promise<{ permission: boolean; running: boolean }>;
+  requestPermission(): Promise<void>;
+  start(options: {
+    url: string;
+    key: string;
+    goal: number;
+    today: number;
+    haptic: boolean;
+  }): Promise<void>;
+  stop(): Promise<void>;
+  setProgress(options: { goal: number; today: number }): Promise<void>;
+  getPending(): Promise<{ count: number }>;
+};
+
+// الزرار العايم موجود في تطبيق الأندرويد فقط، مش في الموقع
+function getFloating(): FloatingPlugin | null {
+  const w = window as unknown as {
+    Capacitor?: {
+      isNativePlatform?: () => boolean;
+      Plugins?: Record<string, unknown>;
+    };
+  };
+  if (!w.Capacitor?.isNativePlatform?.()) return null;
+  return (w.Capacitor.Plugins?.FloatingButton as FloatingPlugin) ?? null;
+}
+
 const goalOptions = [10, 33, 100, 300, 1000];
 
 function dayKey(offset = 0) {
@@ -103,6 +130,9 @@ export function PrayerExperience() {
   const [streak, setStreak] = useState(0);
   const [haptic, setHaptic] = useState(true);
   const [goalDone, setGoalDone] = useState(false);
+  const [floatSupported, setFloatSupported] = useState(false);
+  const [floatPerm, setFloatPerm] = useState(false);
+  const [floatOn, setFloatOn] = useState(false);
   const nextId = useRef(0);
 
   useEffect(() => {
@@ -139,6 +169,99 @@ export function PrayerExperience() {
 
     loadGlobalCount();
   }, []);
+
+  // صلوات اتعملت من الزرار العايم: نضيفها للعدادات هنا
+  function applyExternalPrayers(n: number) {
+    const today = dayKey();
+    const total = Number(localStorage.getItem('prayer_personal_count') || 0) + n;
+    const base =
+      localStorage.getItem('prayer_count_date') === today
+        ? Number(localStorage.getItem('prayer_today_count') || 0)
+        : 0;
+    const nextToday = base + n;
+
+    localStorage.setItem('prayer_personal_count', String(total));
+    localStorage.setItem('prayer_count_date', today);
+    localStorage.setItem('prayer_today_count', String(nextToday));
+    setCount(total);
+    setTodayCount(nextToday);
+
+    if (localStorage.getItem('prayer_streak_date') !== today) {
+      const yesterday = localStorage.getItem('prayer_streak_date') === dayKey(-1);
+      const nextStreak = yesterday
+        ? Number(localStorage.getItem('prayer_streak') || 0) + 1
+        : 1;
+      localStorage.setItem('prayer_streak', String(nextStreak));
+      localStorage.setItem('prayer_streak_date', today);
+      setStreak(nextStreak);
+    }
+
+    loadGlobalCount();
+  }
+
+  // متابعة الزرار العايم: الحالة + الصلوات الجديدة
+  useEffect(() => {
+    const fp = getFloating();
+    if (!fp) return;
+    setFloatSupported(true);
+
+    let stopped = false;
+    async function sync() {
+      if (!fp || stopped) return;
+      try {
+        const st = await fp.status();
+        setFloatPerm(st.permission);
+        setFloatOn(st.running);
+        const pending = await fp.getPending();
+        if (pending.count > 0) applyExternalPrayers(pending.count);
+      } catch (error) {
+        console.error('تعذر قراءة حالة الزرار العايم:', error);
+      }
+    }
+
+    sync();
+    const timer = window.setInterval(sync, 2000);
+    document.addEventListener('visibilitychange', sync);
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', sync);
+    };
+  }, []);
+
+  // الحلقة الذهبية على الزرار العايم تتحدّث مع هدفك وعدّاد اليوم
+  useEffect(() => {
+    const fp = getFloating();
+    if (fp && floatOn) {
+      fp.setProgress({ goal, today: todayCount }).catch(() => {});
+    }
+  }, [goal, todayCount, floatOn]);
+
+  async function toggleFloating() {
+    const fp = getFloating();
+    if (!fp) return;
+    try {
+      if (!floatPerm) {
+        await fp.requestPermission();
+        return;
+      }
+      if (floatOn) {
+        await fp.stop();
+        setFloatOn(false);
+      } else {
+        await fp.start({
+          url: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+          key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+          goal,
+          today: todayCount,
+          haptic,
+        });
+        setFloatOn(true);
+      }
+    } catch (error) {
+      console.error('تعذر تشغيل الزرار العايم:', error);
+    }
+  }
 
   function chooseGoal(value: number) {
     setGoal(value);
@@ -807,6 +930,12 @@ export function PrayerExperience() {
           margin-top: 14px;
         }
 
+        .float-note {
+          margin: 0 0 4px;
+          line-height: 1.9;
+          color: #dfe8f5;
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .goal-bar-fill {
             transition: none;
@@ -943,6 +1072,33 @@ export function PrayerExperience() {
             {haptic ? '📳 الاهتزاز: مفعّل' : '📴 الاهتزاز: متوقف'}
           </button>
         </section>
+
+        {floatSupported && (
+          <section className="content-card">
+            <h2 className="section-title">الأيقونة العايمة</h2>
+            <p className="float-note">
+              زرار صغير بصورة اللوحة الذهبية يظهر فوق كل التطبيقات. دوس عليه
+              للصلاة على النبي ﷺ وإنت بتتصفح، والحلقة الذهبية بتوريك تقدمك في
+              هدفك اليوم. اسحبه لأي مكان، واسحبه على ✕ لإغلاقه.
+            </p>
+            <button
+              type="button"
+              className="haptic-toggle"
+              onClick={toggleFloating}
+            >
+              {!floatPerm
+                ? 'السماح بالظهور فوق التطبيقات'
+                : floatOn
+                  ? 'إيقاف الأيقونة العايمة'
+                  : 'تشغيل الأيقونة العايمة'}
+            </button>
+            {!floatPerm && (
+              <p className="float-note">
+                هيفتح لك الإعدادات: فعّل الخيار، وارجع للتطبيق.
+              </p>
+            )}
+          </section>
+        )}
 
         {/* نص الصلاة موجود بدون عنوان */}
         <section className="content-card">
