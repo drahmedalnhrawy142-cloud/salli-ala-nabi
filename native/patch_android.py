@@ -65,3 +65,35 @@ if "FloatingService" not in text:
 
 manifest_path.write_text(text, encoding="utf-8")
 print("manifest patched")
+
+# 4) شاشة البداية بتاعة أندرويد 12+: خلفية سودا + بدون أيقونة صغيرة
+#    (اللوجو الكبير بيظهر من جوه التطبيق نفسه بعدها على طول)
+import re
+
+res = MAIN / "res"
+(res / "drawable").mkdir(parents=True, exist_ok=True)
+(res / "drawable" / "splash_empty.xml").write_text(
+    '<?xml version="1.0" encoding="utf-8"?>\n'
+    '<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
+    '    android:width="24dp" android:height="24dp"\n'
+    '    android:viewportWidth="24" android:viewportHeight="24">\n'
+    '    <path android:fillColor="#00000000" android:pathData="M0,0h1v1h-1z" />\n'
+    '</vector>\n',
+    encoding="utf-8",
+)
+styles_path = res / "values" / "styles.xml"
+st = styles_path.read_text(encoding="utf-8")
+extra = (
+    '        <item name="windowSplashScreenBackground">#000000</item>\n'
+    '        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_empty</item>\n'
+    '        <item name="android:windowSplashScreenBackground">#000000</item>\n'
+    '        <item name="android:windowSplashScreenIconBackgroundColor">#000000</item>\n'
+)
+pattern = re.compile(r'(<style name="AppTheme\.NoActionBarLaunch"[^>]*>)(.*?)(</style>)', re.S)
+m = pattern.search(st)
+if m and "windowSplashScreenBackground" not in m.group(2):
+    st = st[: m.end(1)] + "\n" + extra + st[m.end(1):]
+    styles_path.write_text(st, encoding="utf-8")
+    print("splash theme patched")
+else:
+    print("splash theme: not patched (style missing or already set)")
