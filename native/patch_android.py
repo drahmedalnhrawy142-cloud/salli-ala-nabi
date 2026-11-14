@@ -15,7 +15,8 @@ if not java_dir.exists():
     sys.exit(f"Missing folder: {java_dir} (is the package name still {PKG}?)")
 
 # 1) ملفات الجافا
-for name in ("FloatingService.java", "FloatingPlugin.java", "MainActivity.java"):
+for name in ("FloatingService.java", "FloatingPlugin.java", "MainActivity.java",
+             "ReminderReceiver.java", "BootReceiver.java"):
     shutil.copyfile(NATIVE / name, java_dir / name)
     print("copied", name)
 
@@ -38,6 +39,7 @@ permissions = [
     "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
     "android.permission.POST_NOTIFICATIONS",
     "android.permission.VIBRATE",
+    "android.permission.RECEIVE_BOOT_COMPLETED",
 ]
 lines = ""
 for p in permissions:
@@ -62,6 +64,25 @@ if "FloatingService" not in text:
     if "</application>" not in text:
         sys.exit("AndroidManifest.xml has no </application> tag")
     text = text.replace("</application>", service + "    </application>", 1)
+
+# صوت وأيقونة التذكيرات
+raw = MAIN / "res" / "raw"
+raw.mkdir(parents=True, exist_ok=True)
+shutil.copyfile(NATIVE / "salli_nasheed.mp3", raw / "salli_nasheed.mp3")
+(MAIN / "res" / "drawable").mkdir(parents=True, exist_ok=True)
+shutil.copyfile(NATIVE / "ic_stat_salli.xml", MAIN / "res" / "drawable" / "ic_stat_salli.xml")
+print("copied reminder sound + icon")
+
+if "ReminderReceiver" not in text:
+    receivers = (
+        '        <receiver android:name=".ReminderReceiver" android:exported="false" />\n'
+        '        <receiver android:name=".BootReceiver" android:exported="true">\n'
+        '            <intent-filter>\n'
+        '                <action android:name="android.intent.action.BOOT_COMPLETED" />\n'
+        '            </intent-filter>\n'
+        '        </receiver>\n'
+    )
+    text = text.replace("</application>", receivers + "    </application>", 1)
 
 manifest_path.write_text(text, encoding="utf-8")
 print("manifest patched")
