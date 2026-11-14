@@ -3,6 +3,7 @@
 
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { ProphetQuiz } from '@/components/ProphetQuiz';
 
 type Celebration = {
   id: number;
@@ -1491,14 +1492,12 @@ export function PrayerExperience() {
         .section-title,
         .prayer-button,
         .stat-number,
-        .stat-label,
         .streak-badge,
         .goal-progress-text,
         .goal-chip,
         .haptic-toggle,
         .poem-copy,
         .poem-change,
-        .rem-field,
         .rem-field select,
         .celebration-message {
           font-family: var(--font-kufi), Tahoma, Arial, sans-serif;
@@ -1517,7 +1516,10 @@ export function PrayerExperience() {
         }
 
         .float-note,
-        .goal-done {
+        .goal-done,
+        .stat-label,
+        .rem-field {
+          font-family: var(--font-ruqaa), Tahoma, Arial, sans-serif;
           font-size: 17px;
         }
       `}</style>
@@ -1663,6 +1665,8 @@ export function PrayerExperience() {
             {haptic ? '📳 الاهتزاز: مفعّل' : '📴 الاهتزاز: متوقف'}
           </button>
         </section>
+
+        <ProphetQuiz />
 
         {floatSupported && (
           <section className="content-card">
