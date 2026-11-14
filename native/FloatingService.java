@@ -522,7 +522,8 @@ public class FloatingService extends Service {
     // -------------------------------------------------------------- bubble view
 
     private static class BubbleView extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint paint = new Paint(
+                Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
         private final Bitmap icon;
         private final RectF oval = new RectF();
         private final Path clip = new Path();

@@ -22,8 +22,11 @@ for name in ("FloatingService.java", "FloatingPlugin.java", "MainActivity.java")
 # 2) صورة الزرار
 drawable = MAIN / "res" / "drawable-nodpi"
 drawable.mkdir(parents=True, exist_ok=True)
-shutil.copyfile(NATIVE / "floating_icon.png", drawable / "floating_icon.png")
-print("copied floating_icon.png")
+logo = NATIVE / "floating_logo.png"
+if not logo.exists():
+    logo = NATIVE / "floating_icon.png"
+shutil.copyfile(logo, drawable / "floating_icon.png")
+print("copied", logo.name, "as floating_icon.png")
 
 # 3) AndroidManifest.xml
 manifest_path = MAIN / "AndroidManifest.xml"
