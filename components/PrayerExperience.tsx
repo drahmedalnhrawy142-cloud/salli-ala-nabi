@@ -419,7 +419,7 @@ export function PrayerExperience() {
         body {
           margin: 0;
           padding: 0;
-          background: #050304;
+          background: #000000;
         }
 
         .prayer-experience {
@@ -429,14 +429,14 @@ export function PrayerExperience() {
           background:
             radial-gradient(
               ellipse at 50% 8%,
-              rgba(176, 118, 38, 0.2),
+              rgba(212, 160, 40, 0.12),
               transparent 48%
             ),
             linear-gradient(
               180deg,
-              #050304 0%,
-              #140a06 48%,
-              #070304 100%
+              #000000 0%,
+              #060504 48%,
+              #000000 100%
             );
           font-family: Tahoma, Arial, sans-serif;
           text-align: center;
@@ -450,16 +450,12 @@ export function PrayerExperience() {
           overflow: hidden;
           isolation: isolate;
           background:
-            radial-gradient(
-              circle at 50% 58%,
-              rgba(214, 150, 52, 0.16),
-              transparent 38%
-            ),
+            url('/images/sky-night.jpg') center top / cover no-repeat,
             linear-gradient(
               180deg,
-              #040203 0%,
-              #120805 52%,
-              #22110a 100%
+              #000000 0%,
+              #050403 52%,
+              #0b0805 100%
             );
         }
 
@@ -484,6 +480,7 @@ export function PrayerExperience() {
         }
 
         .sky-scene::after {
+          display: none;
           opacity: 0.5;
           transform: translateY(40px);
           animation-delay: 1.5s;
@@ -495,6 +492,49 @@ export function PrayerExperience() {
           to { opacity: 1; }
         }
 
+        .shooting-star {
+          position: absolute;
+          z-index: 1;
+          top: 10%;
+          left: 72%;
+          width: 90px;
+          height: 2px;
+          border-radius: 2px;
+          background: linear-gradient(
+            90deg,
+            #ffffff 0%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          filter: drop-shadow(0 0 4px #ffffff);
+          opacity: 0;
+          pointer-events: none;
+          will-change: transform, opacity;
+          animation: shoot 9s linear infinite;
+        }
+
+        .shooting-star.second {
+          top: 26%;
+          left: 38%;
+          width: 70px;
+          animation-duration: 14s;
+          animation-delay: 5s;
+        }
+
+        @keyframes shoot {
+          0%,
+          86% {
+            opacity: 0;
+            transform: translate(0, 0) rotate(-35deg);
+          }
+          88% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+            transform: translate(-230px, 160px) rotate(-35deg);
+          }
+        }
+
         .sky-glow {
           position: absolute;
           width: 75vw;
@@ -502,7 +542,7 @@ export function PrayerExperience() {
           max-width: 600px;
           max-height: 600px;
           border-radius: 50%;
-          background: rgba(226, 160, 60, 0.1);
+          background: rgba(212, 160, 40, 0.07);
           filter: blur(65px);
           top: 8%;
           left: 50%;
@@ -520,8 +560,8 @@ export function PrayerExperience() {
           background-image:
             linear-gradient(
               180deg,
-              #120805 0%,
-              rgba(24, 12, 6, 0.35) 28%,
+              #000000 0%,
+              rgba(0, 0, 0, 0.38) 28%,
               rgba(0, 0, 0, 0.18) 100%
             ),
             url('/images/c5a8d5c4609027ede5212a874381354e.jpg');
@@ -542,7 +582,7 @@ export function PrayerExperience() {
           background: linear-gradient(
             180deg,
             transparent 35%,
-            rgba(4, 2, 1, 0.55) 100%
+            rgba(0, 0, 0, 0.6) 100%
           );
         }
 
@@ -741,12 +781,12 @@ export function PrayerExperience() {
         .content-card {
           margin-bottom: 18px;
           padding: 25px 20px;
-          border: 1px solid rgba(232, 180, 80, 0.3);
+          border: 1px solid rgba(212, 160, 40, 0.5);
           border-radius: 25px;
           background: linear-gradient(
             145deg,
-            rgba(34, 18, 10, 0.88),
-            rgba(10, 5, 4, 0.94)
+            rgba(14, 12, 9, 0.92),
+            rgba(0, 0, 0, 0.96)
           );
           box-shadow:
             0 15px 45px rgba(0, 0, 0, 0.16),
@@ -756,7 +796,7 @@ export function PrayerExperience() {
 
         .section-title {
           margin: 0 0 15px;
-          color: #f2d58e;
+          color: #e9bd5a;
           font-size: 19px;
           font-weight: 800;
         }
@@ -778,13 +818,13 @@ export function PrayerExperience() {
           padding: 20px 10px;
           border: 1px solid rgba(224, 201, 147, 0.28);
           border-radius: 19px;
-          background: rgba(0, 0, 0, 0.38);
+          background: rgba(0, 0, 0, 0.6);
         }
 
         .stat-card.global-stat {
           grid-column: 1 / -1;
-          background: rgba(139, 105, 43, 0.16);
-          border-color: rgba(242, 213, 142, 0.45);
+          background: rgba(212, 160, 40, 0.08);
+          border-color: rgba(232, 184, 74, 0.6);
         }
 
         .stat-number {
@@ -1042,6 +1082,7 @@ export function PrayerExperience() {
           .celebration-burst::before,
           .celebration-burst::after,
           .celebration-message,
+          .shooting-star,
           .light-head,
           .light-impact {
             animation-duration: 0.01ms !important;
@@ -1137,6 +1178,8 @@ export function PrayerExperience() {
 
       <section className="sky-scene" aria-label="سماء الصلاة على النبي">
         <div className="sky-glow" />
+        <span className="shooting-star" />
+        <span className="shooting-star second" />
         <div className="scene-image" />
         <div className="chamber-light" ref={chamberLightRef} />
 
