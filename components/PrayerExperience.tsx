@@ -139,6 +139,19 @@ export function PrayerExperience() {
   // نخبّي الصفحة لحد ما التنسيقات تتحمّل، علشان ما تظهرش مفككة لثواني عند فتح التطبيق
   const [ready, setReady] = useState(false);
 
+  // شاشة افتتاحية بلوجو كبير: تظهر فورًا ثم تتلاشى
+  const [bootPhase, setBootPhase] = useState<'show' | 'fade' | 'gone'>('show');
+
+  useEffect(() => {
+    if (!ready) return;
+    const t1 = window.setTimeout(() => setBootPhase('fade'), 1300);
+    const t2 = window.setTimeout(() => setBootPhase('gone'), 1900);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
+  }, [ready]);
+
   useEffect(() => {
     const id = window.requestAnimationFrame(() => setReady(true));
     return () => window.cancelAnimationFrame(id);
@@ -429,6 +442,12 @@ export function PrayerExperience() {
       dir="rtl"
       style={{ visibility: ready ? 'visible' : 'hidden' }}
     >
+      {bootPhase !== 'gone' && (
+        <div
+          className={`boot-splash${bootPhase === 'fade' ? ' boot-fade' : ''}`}
+          aria-hidden="true"
+        />
+      )}
       <style jsx global>{`
         * {
           box-sizing: border-box;
@@ -1192,6 +1211,146 @@ export function PrayerExperience() {
           .goal-bar-fill {
             transition: none;
           }
+        }
+
+        /* ===== تصميم عصري: زجاج داكن + ذهبي ناعم ===== */
+        .boot-splash {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          visibility: visible;
+          background: #000 url('/images/boot-logo.jpg') center / cover no-repeat;
+          transition: opacity 0.6s ease;
+        }
+
+        .boot-splash.boot-fade {
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .prayer-button {
+          min-height: 84px;
+          border: 1px solid transparent;
+          border-radius: 32px;
+          color: #f6e3b0;
+          background:
+            linear-gradient(rgba(10, 8, 5, 0.72), rgba(10, 8, 5, 0.72))
+              padding-box,
+            linear-gradient(135deg, #ffe9b0, #b98a2c 45%, #ffe9b0) border-box;
+          -webkit-backdrop-filter: blur(18px) saturate(140%);
+          backdrop-filter: blur(18px) saturate(140%);
+          box-shadow:
+            0 14px 40px rgba(0, 0, 0, 0.55),
+            0 0 40px rgba(233, 189, 90, 0.22),
+            inset 0 1px rgba(255, 255, 255, 0.12);
+          font-size: clamp(17px, 4.4vw, 22px);
+          font-weight: 700;
+          letter-spacing: 0.2px;
+          text-shadow: 0 0 18px rgba(233, 189, 90, 0.5);
+        }
+
+        .content-card {
+          padding: 26px 22px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 30px;
+          background:
+            linear-gradient(
+              160deg,
+              rgba(255, 255, 255, 0.07),
+              rgba(255, 255, 255, 0.015) 40%
+            ),
+            rgba(12, 10, 7, 0.78);
+          box-shadow:
+            0 20px 50px rgba(0, 0, 0, 0.45),
+            inset 0 1px rgba(255, 255, 255, 0.07);
+        }
+
+        .section-title {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin: 0 0 18px;
+          color: #f1d58a;
+          font-size: 18px;
+          font-weight: 700;
+          letter-spacing: 0.3px;
+        }
+
+        .section-title::before {
+          content: '';
+          width: 4px;
+          height: 20px;
+          border-radius: 4px;
+          background: linear-gradient(180deg, #ffe9b0, #b98a2c);
+        }
+
+        .stat-card {
+          padding: 22px 10px;
+          border: 1px solid rgba(255, 255, 255, 0.07);
+          border-radius: 22px;
+          background: rgba(255, 255, 255, 0.04);
+        }
+
+        .stat-card.global-stat {
+          background: linear-gradient(
+            135deg,
+            rgba(233, 189, 90, 0.16),
+            rgba(233, 189, 90, 0.04)
+          );
+          border-color: rgba(233, 189, 90, 0.35);
+        }
+
+        .stat-number {
+          font-size: 32px;
+          font-weight: 800;
+          background: linear-gradient(180deg, #fff1c9, #d9a441);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          color: transparent;
+        }
+
+        .stat-label {
+          color: rgba(255, 255, 255, 0.62);
+          letter-spacing: 0.2px;
+        }
+
+        .goal-bar {
+          height: 10px;
+          background: rgba(255, 255, 255, 0.08);
+        }
+
+        .goal-bar-fill {
+          background: linear-gradient(90deg, #b98a2c, #ffe9b0);
+          box-shadow: 0 0 14px rgba(233, 189, 90, 0.55);
+        }
+
+        .goal-chip,
+        .haptic-toggle,
+        .poem-change,
+        .poem-copy {
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 999px;
+          color: rgba(255, 255, 255, 0.85);
+          background: rgba(255, 255, 255, 0.05);
+        }
+
+        .goal-chip-on {
+          color: #1a1305;
+          background: linear-gradient(135deg, #ffe9b0, #d9a441);
+          border-color: transparent;
+        }
+
+        .streak-badge {
+          border-color: rgba(233, 189, 90, 0.4);
+          background: rgba(233, 189, 90, 0.12);
+        }
+
+        .hadith-text,
+        .salawat-text,
+        .poem-line {
+          color: rgba(255, 255, 255, 0.92);
+          font-weight: 500;
         }
       `}</style>
 
