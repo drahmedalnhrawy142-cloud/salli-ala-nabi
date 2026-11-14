@@ -93,7 +93,37 @@ type FloatingPlugin = {
   stop(): Promise<void>;
   setProgress(options: { goal: number; today: number }): Promise<void>;
   getPending(): Promise<{ count: number }>;
+  reminderStatus(): Promise<{
+    enabled: boolean;
+    startMin: number;
+    endMin: number;
+    intervalMin: number;
+    permission: boolean;
+  }>;
+  reminderRequestPermission(): Promise<void>;
+  reminderSet(options: {
+    enabled: boolean;
+    startMin: number;
+    endMin: number;
+    intervalMin: number;
+  }): Promise<void>;
+  reminderTest(): Promise<void>;
 };
+
+const reminderIntervals = [
+  { min: 30, label: 'نص ساعة' },
+  { min: 60, label: 'ساعة' },
+  { min: 120, label: 'ساعتين' },
+  { min: 180, label: '٣ ساعات' },
+  { min: 360, label: '٦ ساعات' },
+];
+
+function hourLabel(h: number) {
+  const hh = h % 24;
+  const suffix = hh < 12 ? 'ص' : 'م';
+  const n = hh % 12 === 0 ? 12 : hh % 12;
+  return `${n.toLocaleString('ar-EG')} ${suffix}`;
+}
 
 // الزرار العايم موجود في تطبيق الأندرويد فقط، مش في الموقع
 function getFloating(): FloatingPlugin | null {
@@ -133,6 +163,12 @@ export function PrayerExperience() {
   const [floatSupported, setFloatSupported] = useState(false);
   const [floatPerm, setFloatPerm] = useState(false);
   const [floatOn, setFloatOn] = useState(false);
+  const [remSupported, setRemSupported] = useState(false);
+  const [remOn, setRemOn] = useState(false);
+  const [remPerm, setRemPerm] = useState(true);
+  const [remStart, setRemStart] = useState(8);
+  const [remEnd, setRemEnd] = useState(22);
+  const [remInterval, setRemInterval] = useState(120);
   const nextId = useRef(0);
   const lastCelebrationAt = useRef(0);
   const chamberLightRef = useRef<HTMLDivElement | null>(null);
@@ -269,6 +305,63 @@ export function PrayerExperience() {
       document.removeEventListener('visibilitychange', sync);
     };
   }, []);
+
+  // التذكيرات: نقرأ الإعدادات المحفوظة من الأندرويد
+  useEffect(() => {
+    const fp = getFloating();
+    if (!fp || !fp.reminderStatus) return;
+    setRemSupported(true);
+    let stopped = false;
+    async function load() {
+      try {
+        const st = await fp!.reminderStatus();
+        if (stopped) return;
+        setRemOn(st.enabled);
+        setRemPerm(st.permission);
+        setRemStart(Math.floor(st.startMin / 60));
+        setRemEnd(Math.floor(st.endMin / 60));
+        setRemInterval(st.intervalMin);
+      } catch (error) {
+        console.error('تعذر قراءة التذكيرات:', error);
+      }
+    }
+    load();
+    const onVis = () => load();
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      stopped = true;
+      document.removeEventListener('visibilitychange', onVis);
+    };
+  }, []);
+
+  async function saveReminder(next: {
+    on?: boolean;
+    start?: number;
+    end?: number;
+    interval?: number;
+  }) {
+    const fp = getFloating();
+    if (!fp) return;
+    const on = next.on ?? remOn;
+    const start = next.start ?? remStart;
+    const end = next.end ?? remEnd;
+    const interval = next.interval ?? remInterval;
+    setRemOn(on);
+    setRemStart(start);
+    setRemEnd(end);
+    setRemInterval(interval);
+    try {
+      if (on && !remPerm) await fp.reminderRequestPermission();
+      await fp.reminderSet({
+        enabled: on,
+        startMin: start * 60,
+        endMin: end * 60,
+        intervalMin: interval,
+      });
+    } catch (error) {
+      console.error('تعذر حفظ التذكير:', error);
+    }
+  }
 
   // الحلقة الذهبية على الزرار العايم تتحدّث مع هدفك وعدّاد اليوم
   useEffect(() => {
@@ -1346,6 +1439,43 @@ export function PrayerExperience() {
           background: rgba(233, 189, 90, 0.12);
         }
 
+
+        .rem-row {
+          display: flex;
+          gap: 12px;
+          margin-top: 16px;
+        }
+
+        .rem-field {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          text-align: right;
+          color: rgba(255, 255, 255, 0.65);
+          font-size: 13px;
+        }
+
+        .rem-field select {
+          font: inherit;
+          font-size: 16px;
+          padding: 12px;
+          color: #f6e3b0;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          border-radius: 16px;
+        }
+
+        .rem-label {
+          margin-top: 18px;
+        }
+
+        .rem-main.rem-on {
+          color: #1a1305;
+          font-weight: 700;
+          background: linear-gradient(135deg, #ffe9b0, #d9a441);
+          border-color: transparent;
+        }
         .hadith-text,
         .salawat-text,
         .poem-line {
@@ -1520,6 +1650,91 @@ export function PrayerExperience() {
                 هيفتح لك الإعدادات: فعّل الخيار، وارجع للتطبيق.
               </p>
             )}
+          </section>
+        )}
+
+        {remSupported && (
+          <section className="content-card">
+            <h2 className="section-title">تذكير الصلاة على النبي ﷺ</h2>
+            <p className="float-note">
+              إشعار بصوت جميل يفكّرك بالصلاة على النبي ﷺ في الأوقات اللي
+              تختارها، وبدون إزعاج خارجها.
+            </p>
+
+            <button
+              type="button"
+              className={`haptic-toggle rem-main${remOn ? ' rem-on' : ''}`}
+              onClick={() => saveReminder({ on: !remOn })}
+            >
+              {remOn ? '🔔 التذكير شغّال (دوس للإيقاف)' : '🔕 تشغيل التذكير'}
+            </button>
+
+            {!remPerm && remOn && (
+              <p className="float-note">
+                فعّل إذن الإشعارات للتطبيق من إعدادات الموبايل علشان التذكير
+                يظهر.
+              </p>
+            )}
+
+            <div className="rem-row">
+              <label className="rem-field">
+                <span>من الساعة</span>
+                <select
+                  value={remStart}
+                  onChange={(e) =>
+                    saveReminder({ start: Number(e.target.value) })
+                  }
+                >
+                  {Array.from({ length: 24 }, (_, h) => (
+                    <option key={h} value={h}>
+                      {hourLabel(h)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="rem-field">
+                <span>إلى الساعة</span>
+                <select
+                  value={remEnd}
+                  onChange={(e) =>
+                    saveReminder({ end: Number(e.target.value) })
+                  }
+                >
+                  {Array.from({ length: 24 }, (_, h) => (
+                    <option key={h} value={h}>
+                      {hourLabel(h)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <p className="float-note rem-label">كل قد إيه؟</p>
+            <div className="goal-options">
+              {reminderIntervals.map((o) => (
+                <button
+                  key={o.min}
+                  type="button"
+                  className={`goal-chip${remInterval === o.min ? ' goal-chip-on' : ''}`}
+                  onClick={() => saveReminder({ interval: o.min })}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className="haptic-toggle"
+              onClick={() => {
+                const fp = getFloating();
+                if (!fp) return;
+                if (!remPerm) fp.reminderRequestPermission().catch(() => {});
+                fp.reminderTest().catch(() => {});
+              }}
+            >
+              🔊 جرّب الإشعار الآن
+            </button>
           </section>
         )}
 
