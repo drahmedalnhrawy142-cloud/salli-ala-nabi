@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - mobile-app
+      - floating-button
 
 permissions:
   contents: read
@@ -50,6 +51,9 @@ jobs:
           if [ ! -d android ]; then npx cap add android; fi
           npx capacitor-assets generate --android
           npx cap sync android
+
+      - name: Add floating button (native Android code)
+        run: python3 native/patch_android.py
 
       - name: Build debug APK
         working-directory: android
