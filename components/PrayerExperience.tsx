@@ -1070,76 +1070,61 @@ export function PrayerExperience() {
           mask-repeat: no-repeat;
         }
 
-        /* سهم النور النازل من الانفجار إلى الضريح */
+        /* شهاب لطيف ينزل من الانفجار ويغيب في عتمة السقف، فينوّر الضريح من جوّه */
         .light-descent {
           position: absolute;
           z-index: 3;
           width: 40px;
           margin-left: -20px;
-          bottom: 25%;
-          height: calc(110px + 60vh - 25%);
+          bottom: 37%;
+          height: calc(110px + 60vh - 37%);
           pointer-events: none;
         }
 
-        /* رأس سهم أبيض منوّر وراه ذيل قصير */
         .light-head {
           position: absolute;
           left: 50%;
           top: 0;
-          width: 18px;
-          height: 30px;
+          width: 9px;
+          height: 9px;
+          border-radius: 50%;
           opacity: 0;
           transform: translate(-50%, -50%);
-          filter:
-            drop-shadow(0 0 5px #ffffff)
-            drop-shadow(0 0 14px rgba(225, 238, 255, 0.85));
+          background: radial-gradient(circle, #ffffff 0%, #fff6dc 55%, rgba(255, 240, 200, 0) 100%);
+          box-shadow:
+            0 0 8px 3px rgba(255, 255, 255, 0.9),
+            0 0 22px 8px rgba(255, 236, 190, 0.45);
           animation:
-            head-move 0.55s 1s cubic-bezier(0.5, 0, 0.9, 0.55) both,
+            head-move 0.95s 1s cubic-bezier(0.35, 0, 0.75, 0.6) both,
             head-glow 0.95s 1s linear both;
         }
 
         .light-head::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: #ffffff;
-          clip-path: polygon(50% 100%, 0% 0%, 50% 32%, 100% 0%);
+          content: none;
         }
 
-        /* ذيل قصير وبسيط ورا رأس السهم فقط */
+        /* ذيل طويل رقيق يتلاشى */
         .light-head::after {
           content: '';
           position: absolute;
           left: 50%;
-          bottom: 62%;
+          bottom: 50%;
           width: 3px;
-          height: 80px;
+          height: 120px;
           margin-left: -1.5px;
           border-radius: 3px;
           background: linear-gradient(
             to top,
-            rgba(255, 255, 255, 0.95),
-            rgba(255, 255, 255, 0)
+            rgba(255, 250, 230, 0.9),
+            rgba(255, 240, 200, 0.25) 55%,
+            rgba(255, 240, 200, 0)
           );
+          filter: blur(0.6px);
         }
 
+        /* لا نقطة وصول ظاهرة على الأسوار؛ التنوير بييجي من نور الضريح الداخلي */
         .light-impact {
-          position: absolute;
-          left: 50%;
-          bottom: 0;
-          width: 110px;
-          height: 110px;
-          margin: 0 0 -55px -55px;
-          border-radius: 50%;
-          background: radial-gradient(
-            circle,
-            rgba(255, 255, 255, 0.95) 0%,
-            rgba(235, 244, 255, 0.5) 38%,
-            rgba(220, 234, 255, 0) 70%
-          );
-          opacity: 0;
-          transform: scale(0.2);
-          animation: light-impact 1s 1.5s ease-out both;
+          display: none;
         }
 
         @keyframes head-move {
@@ -1150,34 +1135,19 @@ export function PrayerExperience() {
         @keyframes head-glow {
           0% {
             opacity: 0;
-            transform: translate(-50%, -50%) scale(0.5);
+            transform: translate(-50%, -50%) scale(0.6);
           }
-          10% {
+          12% {
             opacity: 1;
             transform: translate(-50%, -50%) scale(1);
           }
-          58% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1.15);
+          60% {
+            opacity: 0.9;
+            transform: translate(-50%, -50%) scale(0.9);
           }
           100% {
             opacity: 0;
-            transform: translate(-50%, -50%) scale(2);
-          }
-        }
-
-        @keyframes light-impact {
-          0% {
-            opacity: 0;
-            transform: scale(0.2);
-          }
-          25% {
-            opacity: 1;
-            transform: scale(0.9);
-          }
-          100% {
-            opacity: 0;
-            transform: scale(1.6);
+            transform: translate(-50%, -50%) scale(0.35);
           }
         }
 
@@ -1198,8 +1168,8 @@ export function PrayerExperience() {
           }
 
           .light-descent {
-            bottom: 28%;
-            height: calc(110px + 60vh - 28%);
+            bottom: 42%;
+            height: calc(110px + 60vh - 42%);
           }
 
           .prayer-button {
