@@ -55,6 +55,11 @@ jobs:
       - name: Add floating button (native Android code)
         run: python3 native/patch_android.py
 
+      - name: Use fixed debug signing key (so updates keep your data)
+        run: |
+          mkdir -p ~/.android
+          cp native/debug.keystore ~/.android/debug.keystore
+
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug
