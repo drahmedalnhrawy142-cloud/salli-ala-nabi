@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { MORE_QUESTIONS } from '@/components/prophetQuestionsMore';
 
 type Q = {
   q: string;
@@ -201,7 +202,10 @@ const QUESTIONS: Q[] = [
   },
 ];
 
+const ALL: Q[] = [...QUESTIONS, ...MORE_QUESTIONS];
+
 const ROUND = 10;
+const SEEN_KEY = 'prophet_quiz_seen';
 
 function shuffle<T>(arr: T[]): T[] {
   const a = arr.slice();
@@ -212,8 +216,27 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+// نختار أسئلة لم تظهر من قبل، وإذا خلصت كلها نبدأ من جديد
 function newRound(): number[] {
-  return shuffle(QUESTIONS.map((_, i) => i)).slice(0, ROUND);
+  let seen: number[] = [];
+  try {
+    const raw = JSON.parse(localStorage.getItem(SEEN_KEY) || '[]');
+    if (Array.isArray(raw)) seen = raw.filter((n) => typeof n === 'number');
+  } catch {
+    /* التخزين غير متاح */
+  }
+  let pool = ALL.map((_, i) => i).filter((i) => !seen.includes(i));
+  if (pool.length < ROUND) {
+    seen = [];
+    pool = ALL.map((_, i) => i);
+  }
+  const picked = shuffle(pool).slice(0, ROUND);
+  try {
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...seen, ...picked]));
+  } catch {
+    /* التخزين غير متاح */
+  }
+  return picked;
 }
 
 const BEST_KEY = 'prophet_quiz_best';
@@ -234,7 +257,7 @@ export function ProphetQuiz() {
     }
   }, []);
 
-  const current = deck && pos < deck.length ? QUESTIONS[deck[pos]] : null;
+  const current = deck && pos < deck.length ? ALL[deck[pos]] : null;
 
   // نخلط الخيارات لكل سؤال، ونعرف مكان الإجابة الصحيحة بعد الخلط
   const shuffled = useMemo(() => {
