@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Fragment, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ProphetQuiz } from '@/components/ProphetQuiz';
 import { ProphetLineage } from '@/components/ProphetLineage';
@@ -147,6 +147,8 @@ function getFloating(): FloatingPlugin | null {
 }
 
 // 0 = بلا حد (∞)
+type Tab = 'home' | 'wird' | 'seera' | 'more';
+
 const goalOptions = [10, 33, 100, 300, 1000, 0];
 
 function dayKey(offset = 0) {
@@ -186,6 +188,7 @@ export function PrayerExperience() {
   const [ready, setReady] = useState(false);
 
   // شاشة افتتاحية بلوجو كبير: تظهر فورًا ثم تتلاشى
+  const [tab, setTab] = useState<Tab>('home');
   const [bootPhase, setBootPhase] = useState<'show' | 'fade' | 'gone'>('show');
 
   useEffect(() => {
@@ -525,6 +528,13 @@ export function PrayerExperience() {
       ],
       { duration: 3200, delay: 1500, easing: 'linear' }
     );
+  }
+
+  function goTab(next: Tab) {
+    setTab(next);
+    try {
+      window.scrollTo({ top: 0 });
+    } catch {}
   }
 
   function changePoem() {
@@ -1536,9 +1546,100 @@ export function PrayerExperience() {
           font-family: var(--font-ruqaa), Tahoma, Arial, sans-serif;
           font-size: 17px;
         }
+
+        /* ===== التنقل السفلي وتنظيم الصفحات (على طريقة التطبيقات الكبيرة) ===== */
+        .content-area {
+          position: relative;
+          z-index: 3;
+          width: min(100% - 32px, 720px);
+          margin: 0 auto;
+          padding: 20px 0 calc(104px + env(safe-area-inset-bottom, 0px));
+        }
+        .tab-pane[hidden] { display: none; }
+        .tab-head {
+          text-align: center;
+          padding: 18px 0 20px;
+        }
+        .tab-head h1 {
+          margin: 0;
+          font-family: var(--font-kufi), sans-serif;
+          font-size: 30px;
+          font-weight: 700;
+          color: #f1d77a;
+          text-shadow: 0 0 22px rgba(232, 194, 90, 0.35);
+        }
+        .tab-head p {
+          margin: 6px 0 0;
+          font-family: var(--font-ruqaa), serif;
+          font-size: 17px;
+          color: rgba(255, 241, 196, 0.7);
+        }
+        .about-text {
+          margin: 0;
+          font-family: var(--font-ruqaa), serif;
+          font-size: 18px;
+          line-height: 2;
+          color: #fff1c4;
+        }
+        .sky-scene {
+          min-height: 560px;
+          height: calc(100svh - 74px - env(safe-area-inset-bottom, 0px));
+        }
+        .app-nav {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 50;
+          display: flex;
+          justify-content: space-around;
+          padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+          background: rgba(8, 7, 5, 0.94);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+          border-top: 1px solid rgba(232, 194, 90, 0.28);
+        }
+        .nav-item {
+          position: relative;
+          flex: 1;
+          max-width: 140px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 3px;
+          padding: 6px 0 2px;
+          border: 0;
+          background: none;
+          color: rgba(255, 241, 196, 0.5);
+          font-family: var(--font-kufi), sans-serif;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          -webkit-tap-highlight-color: transparent;
+          transition: color 0.2s ease;
+        }
+        .nav-item svg { width: 25px; height: 25px; }
+        .nav-on { color: #f1d77a; }
+        .nav-on::before {
+          content: '';
+          position: absolute;
+          top: -9px;
+          width: 28px;
+          height: 3px;
+          border-radius: 0 0 4px 4px;
+          background: linear-gradient(90deg, #b8902f, #f1d77a);
+          box-shadow: 0 0 10px rgba(232, 194, 90, 0.7);
+        }
+        @media (min-width: 700px) {
+          .sky-scene { min-height: 700px; }
+        }
       `}</style>
 
-      <section className="sky-scene" aria-label="سماء الصلاة على النبي">
+      <section
+        className="sky-scene"
+        aria-label="سماء الصلاة على النبي"
+        style={tab === 'home' ? undefined : { display: 'none' }}
+      >
         <div className="sky-glow" />
         <span className="shooting-star" />
         <span className="shooting-star second" />
@@ -1595,20 +1696,8 @@ export function PrayerExperience() {
       </section>
 
       <div className="content-area">
-        <section className="content-card">
-          <h2 className="section-title">حديث النبي ﷺ</h2>
-          <p className="hadith-text">
-            «مَنْ صَلَّى عَلَيَّ صَلَاةً وَاحِدَةً؛
-            صَلَّى اللَّهُ عَلَيْهِ بِهَا عَشْرًا»
-          </p>
-        </section>
-
-        <ProphetLineage />
-
-        <ProphetDescription />
-
-        <ProphetTimeline />
-
+        {/* ===== الصلاة ===== */}
+        <div className="tab-pane" hidden={tab !== 'home'}>
         <section className="content-card">
           <h2 className="section-title">عدادات الصلوات</h2>
 
@@ -1712,6 +1801,54 @@ export function PrayerExperience() {
           </button>
         </section>
 
+        {/* نص الصلاة موجود بدون عنوان */}
+        <section className="content-card">
+          <p className="salawat-text">{salawat}</p>
+        </section>
+
+        <section className="content-card">
+          <h2 className="section-title">حديث النبي ﷺ</h2>
+          <p className="hadith-text">
+            «مَنْ صَلَّى عَلَيَّ صَلَاةً وَاحِدَةً؛
+            صَلَّى اللَّهُ عَلَيْهِ بِهَا عَشْرًا»
+          </p>
+        </section>
+
+        <section className="content-card">
+          <h2 className="section-title">من مدح رسول الله ﷺ</h2>
+
+          {poems[poemIndex].map((line, index) => (
+            <p className="poem-line" key={index}>
+              {line}
+            </p>
+          ))}
+
+          <div className="poem-actions">
+            <button
+              type="button"
+              className="poem-copy"
+              onClick={copyPoem}
+            >
+              {copied ? '✓ تم النسخ' : '⧉ نسخ الأبيات'}
+            </button>
+
+            <button
+              type="button"
+              className="poem-change"
+              onClick={changePoem}
+            >
+              تغيير الأبيات
+            </button>
+          </div>
+        </section>
+        </div>
+
+        {/* ===== وردي ===== */}
+        <div className="tab-pane" hidden={tab !== 'wird'}>
+          <header className="tab-head">
+            <h1>وردي</h1>
+            <p>ورد اليوم، وإنجازاتك، وبطاقة تشاركها</p>
+          </header>
         <DailyWird onPray={addPrayer} />
 
         <HadithFadl />
@@ -1720,10 +1857,32 @@ export function PrayerExperience() {
 
         <ShareCard count={count} />
 
+        </div>
+
+        {/* ===== السيرة ===== */}
+        <div className="tab-pane" hidden={tab !== 'seera'}>
+          <header className="tab-head">
+            <h1>السيرة</h1>
+            <p>نسبه وصفاته وأسماؤه ومراحل حياته ﷺ</p>
+          </header>
+        <ProphetLineage />
+
+        <ProphetDescription />
+
+        <ProphetTimeline />
+
         <ProphetNames />
 
         <ProphetQuiz />
 
+        </div>
+
+        {/* ===== المزيد ===== */}
+        <div className="tab-pane" hidden={tab !== 'more'}>
+          <header className="tab-head">
+            <h1>المزيد</h1>
+            <p>التذكير والأيقونة العايمة والإعدادات</p>
+          </header>
         {floatSupported && (
           <section className="content-card">
             <h2 className="section-title">الأيقونة العايمة</h2>
@@ -1836,39 +1995,39 @@ export function PrayerExperience() {
           </section>
         )}
 
-        {/* نص الصلاة موجود بدون عنوان */}
-        <section className="content-card">
-          <p className="salawat-text">{salawat}</p>
-        </section>
-
-        <section className="content-card">
-          <h2 className="section-title">من مدح رسول الله ﷺ</h2>
-
-          {poems[poemIndex].map((line, index) => (
-            <p className="poem-line" key={index}>
-              {line}
+          <section className="content-card">
+            <h2 className="section-title">عن التطبيق</h2>
+            <p className="about-text">
+              «صلّي على النبي ﷺ» تطبيق يذكّرك بالصلاة على النبي ﷺ ويعينك على
+              المداومة عليها، بمحتوى مأخوذ من الصحيحين وما صحّ عن أهل العلم.
             </p>
-          ))}
-
-          <div className="poem-actions">
-            <button
-              type="button"
-              className="poem-copy"
-              onClick={copyPoem}
-            >
-              {copied ? '✓ تم النسخ' : '⧉ نسخ الأبيات'}
-            </button>
-
-            <button
-              type="button"
-              className="poem-change"
-              onClick={changePoem}
-            >
-              تغيير الأبيات
-            </button>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
+
+      <nav className="app-nav" aria-label="التنقل الرئيسي">
+        {(
+          [
+            ['home', 'الصلاة', <path key="a" d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />],
+            ['wird', 'وردي', <g key="b"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5V19c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z" /><path d="M12 6v13.5" /></g>],
+            ['seera', 'السيرة', <g key="c"><circle cx="6" cy="6" r="2" /><circle cx="6" cy="18" r="2" /><path d="M6 8v8M11 6h9M11 12h9M11 18h9" /></g>],
+            ['more', 'المزيد', <g key="d" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></g>],
+          ] as [Tab, string, ReactNode][]
+        ).map(([id, label, icon]) => (
+          <button
+            key={id}
+            type="button"
+            className={tab === id ? 'nav-item nav-on' : 'nav-item'}
+            onClick={() => goTab(id)}
+            aria-current={tab === id ? 'page' : undefined}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              {icon}
+            </svg>
+            <span>{label}</span>
+          </button>
+        ))}
+      </nav>
     </main>
   );
 }
