@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ProphetQuiz } from '@/components/ProphetQuiz';
 import { ProphetLineage } from '@/components/ProphetLineage';
@@ -877,48 +877,78 @@ export function PrayerExperience() {
           }
         }
 
-        /* العبارة تخرج من مركز الانفجار */
+        /* العبارة بتتبني كلمة كلمة من مركز الانفجار */
         .celebration-message {
           position: absolute;
           left: 0;
           bottom: calc(60vh + 7px);
           width: max-content;
-          max-width: 90vw;
+          max-width: 92vw;
+          display: flex;
+          gap: 0.35em;
+          direction: rtl;
+          padding-bottom: 8px;
           color: #ffe5a0;
           font-size: clamp(19px, 5vw, 28px);
           font-weight: 900;
           text-shadow: 0 0 12px rgba(255, 208, 105, 0.95);
-          opacity: 0;
-          will-change: transform, opacity;
-          transform: translate(-50%, 50%) scale(0.15);
-          animation: message-appear 2s 1.05s ease-out forwards;
+          transform: translate(-50%, 50%);
+          animation: message-out 3.3s 1.05s linear both;
         }
 
-        @keyframes message-appear {
+        .celebration-message .cm-word {
+          display: inline-block;
+          opacity: 0;
+          will-change: transform, opacity, filter;
+          animation: word-build 0.7s calc(1.05s + var(--i) * 0.26s)
+            cubic-bezier(0.2, 0.8, 0.25, 1) both;
+        }
+
+        /* خط ذهبي يترسم تحت العبارة بعد ما تكتمل */
+        .celebration-message::after {
+          content: '';
+          position: absolute;
+          left: 8%;
+          right: 8%;
+          bottom: 0;
+          height: 2px;
+          border-radius: 2px;
+          background: linear-gradient(
+            90deg,
+            rgba(255, 224, 150, 0),
+            rgba(255, 236, 180, 0.95),
+            rgba(255, 224, 150, 0)
+          );
+          box-shadow: 0 0 10px rgba(255, 215, 120, 0.8);
+          transform: scaleX(0);
+          animation: msg-line 0.7s calc(1.05s + 1.1s) ease-out both;
+        }
+
+        @keyframes word-build {
           0% {
             opacity: 0;
-            transform: translate(-50%, 50%) scale(0.15);
+            transform: translate(var(--sx), 0) scale(0.1);
+            filter: blur(10px) brightness(2.2);
           }
-          22% {
+          55% {
             opacity: 1;
-            transform: translate(-50%, 50%) scale(1.12);
-          }
-          65% {
-            opacity: 1;
-            transform: translate(-50%, 25%) scale(1);
+            filter: blur(1px) brightness(1.7);
           }
           100% {
-            opacity: 0;
-            transform: translate(-50%, 0) scale(0.9);
+            opacity: 1;
+            transform: translate(0, 0) scale(1);
+            filter: blur(0) brightness(1);
           }
         }
 
-        .content-area {
-          position: relative;
-          z-index: 3;
-          width: min(100% - 32px, 720px);
-          margin: -1px auto 0;
-          padding: 30px 0 55px;
+        @keyframes msg-line {
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
+        }
+
+        @keyframes message-out {
+          0%, 78% { opacity: 1; transform: translate(-50%, 50%); }
+          100% { opacity: 0; transform: translate(-50%, 20%); }
         }
 
         .content-card {
@@ -1525,7 +1555,20 @@ export function PrayerExperience() {
               <div className="celebration-burst" />
 
               <div className="celebration-message">
-                صلّى الله عليك عشرًا
+                {['صلّى', 'الله', 'عليك', 'عشرًا'].map((w, i) => (
+                  <span
+                    key={w}
+                    className="cm-word"
+                    style={
+                      {
+                        '--i': i,
+                        '--sx': `${[-120, -40, 40, 120][i]}%`,
+                      } as CSSProperties
+                    }
+                  >
+                    {w}
+                  </span>
+                ))}
               </div>
             </div>
 
