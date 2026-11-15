@@ -2008,7 +2008,7 @@ export function PrayerExperience() {
                 className={`goal-chip${remSound === 'full' ? ' goal-chip-on' : ''}`}
                 onClick={() => saveReminder({ sound: 'full' })}
               >
-                الصوت كامل: محمد رسول الله ﷺ
+                الصوت كامل: محمد رسول الله صلى الله عليه وسلم
               </button>
               <button
                 type="button"
