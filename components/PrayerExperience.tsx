@@ -5,6 +5,7 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ProphetQuiz } from '@/components/ProphetQuiz';
 import { ProphetLineage } from '@/components/ProphetLineage';
+import { ProphetDescription } from '@/components/ProphetDescription';
 
 type Celebration = {
   id: number;
@@ -1578,6 +1579,8 @@ export function PrayerExperience() {
         </section>
 
         <ProphetLineage />
+
+        <ProphetDescription />
 
         <section className="content-card">
           <h2 className="section-title">عدادات الصلوات</h2>
