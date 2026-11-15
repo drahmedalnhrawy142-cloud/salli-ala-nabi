@@ -11,6 +11,8 @@ import { DailyWird } from '@/components/DailyWird';
 import { ShareCard } from '@/components/ShareCard';
 import { ProphetNames } from '@/components/ProphetNames';
 import { HadithFadl } from '@/components/HadithFadl';
+import { AdhkarCard } from '@/components/AdhkarCard';
+import { Tasbeeh } from '@/components/Tasbeeh';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 
 type Celebration = {
@@ -147,7 +149,7 @@ function getFloating(): FloatingPlugin | null {
 }
 
 // 0 = بلا حد (∞)
-type Tab = 'home' | 'wird' | 'seera' | 'more';
+type Tab = 'home' | 'tasbih' | 'wird' | 'seera' | 'more';
 
 const goalOptions = [10, 33, 100, 300, 1000, 0];
 
@@ -1843,12 +1845,23 @@ export function PrayerExperience() {
         </section>
         </div>
 
+        {/* ===== السبحة ===== */}
+        <div className="tab-pane" hidden={tab !== 'tasbih'}>
+          <header className="tab-head">
+            <h1>السبحة</h1>
+            <p>سبّح كما تشاء، وعدّادك محفوظ</p>
+          </header>
+          <Tasbeeh />
+        </div>
+
         {/* ===== وردي ===== */}
         <div className="tab-pane" hidden={tab !== 'wird'}>
           <header className="tab-head">
             <h1>وردي</h1>
-            <p>ورد اليوم، وإنجازاتك، وبطاقة تشاركها</p>
+            <p>أذكار اليوم، وورد اليوم، وإنجازاتك، وبطاقة تشاركها</p>
           </header>
+        <AdhkarCard />
+
         <DailyWird onPray={addPrayer} />
 
         <HadithFadl />
@@ -2009,6 +2022,7 @@ export function PrayerExperience() {
         {(
           [
             ['home', 'الصلاة', <path key="a" d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />],
+            ['tasbih', 'السبحة', <g key="t"><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="2.2" fill="currentColor" /><path d="M12 3.5V6" /></g>],
             ['wird', 'وردي', <g key="b"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5V19c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z" /><path d="M12 6v13.5" /></g>],
             ['seera', 'السيرة', <g key="c"><circle cx="6" cy="6" r="2" /><circle cx="6" cy="18" r="2" /><path d="M6 8v8M11 6h9M11 12h9M11 18h9" /></g>],
             ['more', 'المزيد', <g key="d" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></g>],
