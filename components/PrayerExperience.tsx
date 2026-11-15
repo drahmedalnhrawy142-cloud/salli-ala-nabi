@@ -8,6 +8,7 @@ import { ProphetLineage } from '@/components/ProphetLineage';
 import { ProphetDescription } from '@/components/ProphetDescription';
 import { ProphetTimeline } from '@/components/ProphetTimeline';
 import { DailyWird } from '@/components/DailyWird';
+import { ShareCard } from '@/components/ShareCard';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 
 type Celebration = {
@@ -1712,6 +1713,8 @@ export function PrayerExperience() {
         <DailyWird onPray={addPrayer} />
 
         <ProphetStats count={count} todayCount={todayCount} streak={streak} />
+
+        <ShareCard count={count} />
 
         <ProphetQuiz />
 
