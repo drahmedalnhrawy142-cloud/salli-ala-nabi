@@ -98,6 +98,7 @@ public class FloatingPlugin extends Plugin {
         r.put("startMin", p.getInt("start_min", 8 * 60));
         r.put("endMin", p.getInt("end_min", 22 * 60));
         r.put("intervalMin", p.getInt("interval_min", 120));
+        r.put("sound", p.getString("sound", "full"));
         r.put("permission", NotificationManagerCompat.from(getContext()).areNotificationsEnabled());
         call.resolve(r);
     }
@@ -118,6 +119,7 @@ public class FloatingPlugin extends Plugin {
                 .putInt("start_min", call.getInt("startMin", 8 * 60))
                 .putInt("end_min", call.getInt("endMin", 22 * 60))
                 .putInt("interval_min", call.getInt("intervalMin", 120))
+                .putString("sound", "short".equals(call.getString("sound", "full")) ? "short" : "full")
                 .apply();
         ReminderReceiver.schedule(getContext());
         call.resolve();

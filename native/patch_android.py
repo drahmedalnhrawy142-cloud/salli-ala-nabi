@@ -68,7 +68,8 @@ if "FloatingService" not in text:
 # صوت وأيقونة التذكيرات
 raw = MAIN / "res" / "raw"
 raw.mkdir(parents=True, exist_ok=True)
-shutil.copyfile(NATIVE / "salli_nasheed.mp3", raw / "salli_nasheed.mp3")
+shutil.copyfile(NATIVE / "salli_full.mp3", raw / "salli_full.mp3")
+shutil.copyfile(NATIVE / "salli_short.mp3", raw / "salli_short.mp3")
 (MAIN / "res" / "drawable").mkdir(parents=True, exist_ok=True)
 shutil.copyfile(NATIVE / "ic_stat_salli.xml", MAIN / "res" / "drawable" / "ic_stat_salli.xml")
 print("copied reminder sound + icon")

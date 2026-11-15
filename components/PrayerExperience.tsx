@@ -109,6 +109,7 @@ type FloatingPlugin = {
     startMin: number;
     endMin: number;
     intervalMin: number;
+    sound?: 'full' | 'short';
     permission: boolean;
   }>;
   reminderRequestPermission(): Promise<void>;
@@ -117,6 +118,7 @@ type FloatingPlugin = {
     startMin: number;
     endMin: number;
     intervalMin: number;
+    sound: 'full' | 'short';
   }): Promise<void>;
   reminderTest(): Promise<void>;
 };
@@ -180,6 +182,7 @@ export function PrayerExperience() {
   const [remSupported, setRemSupported] = useState(false);
   const [remOn, setRemOn] = useState(false);
   const [remPerm, setRemPerm] = useState(true);
+  const [remSound, setRemSound] = useState<'full' | 'short'>('full');
   const [remStart, setRemStart] = useState(8);
   const [remEnd, setRemEnd] = useState(22);
   const [remInterval, setRemInterval] = useState(120);
@@ -337,6 +340,7 @@ export function PrayerExperience() {
         setRemStart(Math.floor(st.startMin / 60));
         setRemEnd(Math.floor(st.endMin / 60));
         setRemInterval(st.intervalMin);
+        setRemSound(st.sound === 'short' ? 'short' : 'full');
       } catch (error) {
         console.error('تعذر قراءة التذكيرات:', error);
       }
@@ -355,6 +359,7 @@ export function PrayerExperience() {
     start?: number;
     end?: number;
     interval?: number;
+    sound?: 'full' | 'short';
   }) {
     const fp = getFloating();
     if (!fp) return;
@@ -362,10 +367,12 @@ export function PrayerExperience() {
     const start = next.start ?? remStart;
     const end = next.end ?? remEnd;
     const interval = next.interval ?? remInterval;
+    const sound = next.sound ?? remSound;
     setRemOn(on);
     setRemStart(start);
     setRemEnd(end);
     setRemInterval(interval);
+    setRemSound(sound);
     try {
       if (on && !remPerm) await fp.reminderRequestPermission();
       await fp.reminderSet({
@@ -373,6 +380,7 @@ export function PrayerExperience() {
         startMin: start * 60,
         endMin: end * 60,
         intervalMin: interval,
+        sound,
       });
     } catch (error) {
       console.error('تعذر حفظ التذكير:', error);
@@ -1991,6 +1999,24 @@ export function PrayerExperience() {
                   {o.label}
                 </button>
               ))}
+            </div>
+
+            <p className="float-note rem-label">صوت التذكير</p>
+            <div className="goal-options">
+              <button
+                type="button"
+                className={`goal-chip${remSound === 'full' ? ' goal-chip-on' : ''}`}
+                onClick={() => saveReminder({ sound: 'full' })}
+              >
+                الصوت كامل: محمد رسول الله ﷺ
+              </button>
+              <button
+                type="button"
+                className={`goal-chip${remSound === 'short' ? ' goal-chip-on' : ''}`}
+                onClick={() => saveReminder({ sound: 'short' })}
+              >
+                صلى الله عليه وسلم فقط
+              </button>
             </div>
 
             <button

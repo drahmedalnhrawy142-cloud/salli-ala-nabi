@@ -45,13 +45,19 @@ public class ReminderReceiver extends BroadcastReceiver {
         schedule(ctx);
     }
 
-    /** إشعار فوري للتجربة. */
+    /** إشعار فوري للتجربة. الصوت حسب اختيار المستخدم: كامل أو "صلى الله عليه وسلم" فقط. */
     public static void show(Context ctx, String text) {
+        SharedPreferences sp = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        boolean full = "full".equals(sp.getString("sound", "full"));
+        String res = full ? "salli_full" : "salli_short";
+        String channelId = full ? "salli_reminder_full_v1" : "salli_reminder_short_v1";
         NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-        Uri sound = Uri.parse("android.resource://" + ctx.getPackageName() + "/raw/salli_nasheed");
+        Uri sound = Uri.parse("android.resource://" + ctx.getPackageName() + "/raw/" + res);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm != null) {
             NotificationChannel ch = new NotificationChannel(
-                    CHANNEL_ID, "تذكير الصلاة على النبي ﷺ", NotificationManager.IMPORTANCE_HIGH);
+                    channelId,
+                    full ? "تذكير الصلاة على النبي ﷺ (الصوت الكامل)" : "تذكير الصلاة على النبي ﷺ (صلى الله عليه وسلم)",
+                    NotificationManager.IMPORTANCE_HIGH);
             ch.setSound(sound, new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -62,7 +68,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         Intent launch = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
         PendingIntent open = PendingIntent.getActivity(
                 ctx, 7, launch, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, CHANNEL_ID)
+        NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, channelId)
                 .setSmallIcon(R.drawable.ic_stat_salli)
                 .setContentTitle("صلّي على النبي ﷺ")
                 .setContentText(text)
