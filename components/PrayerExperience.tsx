@@ -7,6 +7,8 @@ import { ProphetQuiz } from '@/components/ProphetQuiz';
 import { ProphetLineage } from '@/components/ProphetLineage';
 import { ProphetDescription } from '@/components/ProphetDescription';
 import { ProphetTimeline } from '@/components/ProphetTimeline';
+import { DailyWird } from '@/components/DailyWird';
+import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 
 type Celebration = {
   id: number;
@@ -141,7 +143,8 @@ function getFloating(): FloatingPlugin | null {
   return (w.Capacitor.Plugins?.FloatingButton as FloatingPlugin) ?? null;
 }
 
-const goalOptions = [10, 33, 100, 300, 1000];
+// 0 = بلا حد (∞)
+const goalOptions = [10, 33, 100, 300, 1000, 0];
 
 function dayKey(offset = 0) {
   const d = new Date();
@@ -236,8 +239,8 @@ export function PrayerExperience() {
       setTodayCount(0);
     }
 
-    const savedGoal = Number(localStorage.getItem('prayer_goal') || 100);
-    if (savedGoal > 0) setGoal(savedGoal);
+    const rawGoal = localStorage.getItem('prayer_goal');
+    if (rawGoal !== null && Number(rawGoal) >= 0) setGoal(Number(rawGoal));
     setHaptic(localStorage.getItem('prayer_haptic') !== 'off');
 
     const streakDate = localStorage.getItem('prayer_streak_date');
@@ -266,6 +269,7 @@ export function PrayerExperience() {
     localStorage.setItem('prayer_today_count', String(nextToday));
     setCount(total);
     setTodayCount(nextToday);
+    bumpHistory(today, n);
 
     if (localStorage.getItem('prayer_streak_date') !== today) {
       const yesterday = localStorage.getItem('prayer_streak_date') === dayKey(-1);
@@ -371,7 +375,10 @@ export function PrayerExperience() {
   useEffect(() => {
     const fp = getFloating();
     if (fp && floatOn) {
-      fp.setProgress({ goal, today: todayCount }).catch(() => {});
+      fp.setProgress({
+        goal: goal > 0 ? goal : Math.max(100, Math.ceil((todayCount + 1) / 100) * 100),
+        today: todayCount,
+      }).catch(() => {});
     }
   }, [goal, todayCount, floatOn]);
 
@@ -452,6 +459,7 @@ export function PrayerExperience() {
 
     setCount(nextCount);
     setTodayCount(nextToday);
+    bumpHistory(today, 1);
 
     localStorage.setItem('prayer_personal_count', String(nextCount));
     localStorage.setItem('prayer_count_date', today);
@@ -466,7 +474,7 @@ export function PrayerExperience() {
     }
     setStreak(nextStreak);
 
-    if (nextToday === goal) {
+    if (goal > 0 && nextToday === goal) {
       setGoalDone(true);
       if (haptic && navigator.vibrate) navigator.vibrate([40, 60, 40, 60, 90]);
     } else if (haptic && navigator.vibrate) {
@@ -1621,8 +1629,16 @@ export function PrayerExperience() {
 
           <div className="goal-top">
             <span className="goal-progress-text">
-              {Math.min(todayCount, goal).toLocaleString('ar-EG')} من{' '}
-              {goal.toLocaleString('ar-EG')}
+              {goal > 0 ? (
+                <>
+                  {Math.min(todayCount, goal).toLocaleString('ar-EG')} من{' '}
+                  {goal.toLocaleString('ar-EG')}
+                </>
+              ) : (
+                <>
+                  {todayCount.toLocaleString('ar-EG')} من ∞
+                </>
+              )}
             </span>
             <span className="streak-badge">
               🔥 {streak.toLocaleString('ar-EG')}{' '}
@@ -1634,18 +1650,23 @@ export function PrayerExperience() {
             className="goal-bar"
             role="progressbar"
             aria-valuemin={0}
-            aria-valuemax={goal}
-            aria-valuenow={Math.min(todayCount, goal)}
+            aria-valuemax={goal > 0 ? goal : undefined}
+            aria-valuenow={goal > 0 ? Math.min(todayCount, goal) : todayCount}
           >
             <div
               className="goal-bar-fill"
               style={{
-                width: `${Math.min(100, (todayCount / goal) * 100)}%`,
+                width:
+                  goal > 0
+                    ? `${Math.min(100, (todayCount / goal) * 100)}%`
+                    : todayCount > 0
+                      ? '100%'
+                      : '0%',
               }}
             />
           </div>
 
-          {(goalDone || todayCount >= goal) && (
+          {goal > 0 && (goalDone || todayCount >= goal) && (
             <p className="goal-done">
               ما شاء الله، أتممت هدفك اليوم. تقبّل الله منك ﷺ
             </p>
@@ -1661,7 +1682,7 @@ export function PrayerExperience() {
                 }
                 onClick={() => chooseGoal(value)}
               >
-                {value.toLocaleString('ar-EG')}
+                {value > 0 ? value.toLocaleString('ar-EG') : '∞'}
               </button>
             ))}
           </div>
@@ -1674,6 +1695,10 @@ export function PrayerExperience() {
             {haptic ? '📳 الاهتزاز: مفعّل' : '📴 الاهتزاز: متوقف'}
           </button>
         </section>
+
+        <DailyWird onPray={addPrayer} />
+
+        <ProphetStats count={count} todayCount={todayCount} streak={streak} />
 
         <ProphetQuiz />
 
