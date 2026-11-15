@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { ProphetQuiz } from '@/components/ProphetQuiz';
 import { ProphetLineage } from '@/components/ProphetLineage';
 import { ProphetDescription } from '@/components/ProphetDescription';
+import { ProphetTimeline } from '@/components/ProphetTimeline';
 
 type Celebration = {
   id: number;
@@ -1581,6 +1582,8 @@ export function PrayerExperience() {
         <ProphetLineage />
 
         <ProphetDescription />
+
+        <ProphetTimeline />
 
         <section className="content-card">
           <h2 className="section-title">عدادات الصلوات</h2>
