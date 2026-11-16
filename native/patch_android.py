@@ -16,7 +16,8 @@ if not java_dir.exists():
 
 # 1) ملفات الجافا
 for name in ("FloatingService.java", "FloatingPlugin.java", "MainActivity.java",
-             "ReminderReceiver.java", "BootReceiver.java"):
+             "ReminderReceiver.java", "BootReceiver.java", "AdhkarReceiver.java",
+             "SalliWidgetProvider.java"):
     shutil.copyfile(NATIVE / name, java_dir / name)
     print("copied", name)
 
@@ -84,6 +85,28 @@ if "ReminderReceiver" not in text:
         '        </receiver>\n'
     )
     text = text.replace("</application>", receivers + "    </application>", 1)
+
+# ويدجت الشاشة الرئيسية + تذكير الأذكار
+(MAIN / "res" / "layout").mkdir(parents=True, exist_ok=True)
+(MAIN / "res" / "xml").mkdir(parents=True, exist_ok=True)
+shutil.copyfile(NATIVE / "salli_widget.xml", MAIN / "res" / "layout" / "salli_widget.xml")
+shutil.copyfile(NATIVE / "widget_bg.xml", MAIN / "res" / "drawable" / "widget_bg.xml")
+shutil.copyfile(NATIVE / "widget_btn.xml", MAIN / "res" / "drawable" / "widget_btn.xml")
+shutil.copyfile(NATIVE / "salli_widget_info.xml", MAIN / "res" / "xml" / "salli_widget_info.xml")
+print("copied widget resources")
+
+if "SalliWidgetProvider" not in text:
+    widget = (
+        '        <receiver android:name=".SalliWidgetProvider" android:exported="true">\n'
+        '            <intent-filter>\n'
+        '                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />\n'
+        '            </intent-filter>\n'
+        '            <meta-data android:name="android.appwidget.provider"\n'
+        '                android:resource="@xml/salli_widget_info" />\n'
+        '        </receiver>\n'
+        '        <receiver android:name=".AdhkarReceiver" android:exported="false" />\n'
+    )
+    text = text.replace("</application>", widget + "    </application>", 1)
 
 manifest_path.write_text(text, encoding="utf-8")
 print("manifest patched")

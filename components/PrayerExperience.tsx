@@ -102,7 +102,12 @@ type FloatingPlugin = {
     haptic: boolean;
   }): Promise<void>;
   stop(): Promise<void>;
-  setProgress(options: { goal: number; today: number }): Promise<void>;
+  setProgress(options: {
+    goal: number;
+    today: number;
+    url?: string;
+    key?: string;
+  }): Promise<void>;
   getPending(): Promise<{ count: number }>;
   reminderStatus(): Promise<{
     enabled: boolean;
@@ -121,6 +126,19 @@ type FloatingPlugin = {
     sound: 'full' | 'short';
   }): Promise<void>;
   reminderTest(): Promise<void>;
+  adhkarStatus?(): Promise<{
+    morningOn: boolean;
+    morningMin: number;
+    eveningOn: boolean;
+    eveningMin: number;
+  }>;
+  adhkarSet?(options: {
+    morningOn: boolean;
+    morningMin: number;
+    eveningOn: boolean;
+    eveningMin: number;
+  }): Promise<void>;
+  adhkarPending?(): Promise<{ pending: string }>;
 };
 
 const reminderIntervals = [
@@ -182,6 +200,12 @@ export function PrayerExperience() {
   const [remSupported, setRemSupported] = useState(false);
   const [remOn, setRemOn] = useState(false);
   const [remPerm, setRemPerm] = useState(true);
+  const [adhkar, setAdhkar] = useState({
+    morningOn: false,
+    morningMin: 6 * 60,
+    eveningOn: false,
+    eveningMin: 17 * 60,
+  });
   const [remSound, setRemSound] = useState<'full' | 'short'>('full');
   const [remStart, setRemStart] = useState(8);
   const [remEnd, setRemEnd] = useState(22);
@@ -341,6 +365,19 @@ export function PrayerExperience() {
         setRemEnd(Math.floor(st.endMin / 60));
         setRemInterval(st.intervalMin);
         setRemSound(st.sound === 'short' ? 'short' : 'full');
+        if (fp!.adhkarStatus) {
+          const ad = await fp!.adhkarStatus();
+          if (!stopped) setAdhkar(ad);
+        }
+        if (fp!.adhkarPending) {
+          const { pending } = await fp!.adhkarPending();
+          if (pending === 'm' || pending === 'e') {
+            window.dispatchEvent(
+              new CustomEvent('adhkar-period', { detail: pending })
+            );
+            goTab('wird');
+          }
+        }
       } catch (error) {
         console.error('تعذر قراءة التذكيرات:', error);
       }
@@ -353,6 +390,32 @@ export function PrayerExperience() {
       document.removeEventListener('visibilitychange', onVis);
     };
   }, []);
+
+  async function saveAdhkar(patch: Partial<typeof adhkar>) {
+    const next = { ...adhkar, ...patch };
+    setAdhkar(next);
+    const fp = getFloating();
+    if (!fp || !fp.adhkarSet) return;
+    try {
+      if ((next.morningOn || next.eveningOn) && !remPerm) {
+        await fp.reminderRequestPermission();
+      }
+      await fp.adhkarSet(next);
+    } catch (error) {
+      console.error('تعذر حفظ تذكير الأذكار:', error);
+    }
+  }
+
+  function minToTime(m: number) {
+    const h = Math.floor(m / 60);
+    const mm = m % 60;
+    return `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  }
+
+  function timeToMin(v: string) {
+    const [h, m] = v.split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  }
 
   async function saveReminder(next: {
     on?: boolean;
@@ -390,10 +453,12 @@ export function PrayerExperience() {
   // الحلقة الذهبية على الزرار العايم تتحدّث مع هدفك وعدّاد اليوم
   useEffect(() => {
     const fp = getFloating();
-    if (fp && floatOn) {
+    if (fp) {
       fp.setProgress({
         goal: goal > 0 ? goal : Math.max(100, Math.ceil((todayCount + 1) / 100) * 100),
         today: todayCount,
+        url: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+        key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
       }).catch(() => {});
     }
   }, [goal, todayCount, floatOn]);
@@ -1643,6 +1708,25 @@ export function PrayerExperience() {
         @media (min-width: 700px) {
           .sky-scene { min-height: 700px; }
         }
+
+        .ad-rem-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          margin: 12px 0;
+        }
+        .ad-rem-time {
+          padding: 8px 12px;
+          border-radius: 12px;
+          border: 1px solid rgba(232, 194, 90, 0.45);
+          background: rgba(255, 255, 255, 0.04);
+          color: #fff1c4;
+          font-family: var(--font-kufi), sans-serif;
+          font-weight: 700;
+          font-size: 1.05rem;
+          color-scheme: dark;
+        }
       `}</style>
 
       <section
@@ -1928,6 +2012,52 @@ export function PrayerExperience() {
                 هيفتح لك الإعدادات: فعّل الخيار، وارجع للتطبيق.
               </p>
             )}
+          </section>
+        )}
+
+        {remSupported && (
+          <section className="content-card">
+            <h2 className="section-title">تذكير الأذكار</h2>
+            <p className="float-note">
+              إشعار في وقت ثابت يفتح لك أذكار الصباح أو المساء.
+            </p>
+
+            {(
+              [
+                ['morning', 'أذكار الصباح'],
+                ['evening', 'أذكار المساء'],
+              ] as const
+            ).map(([k, label]) => {
+              const on = k === 'morning' ? adhkar.morningOn : adhkar.eveningOn;
+              const min = k === 'morning' ? adhkar.morningMin : adhkar.eveningMin;
+              return (
+                <div className="ad-rem-row" key={k}>
+                  <button
+                    type="button"
+                    className={`goal-chip${on ? ' goal-chip-on' : ''}`}
+                    onClick={() =>
+                      saveAdhkar(
+                        k === 'morning' ? { morningOn: !on } : { eveningOn: !on }
+                      )
+                    }
+                  >
+                    {on ? `🔔 ${label}` : `🔕 ${label}`}
+                  </button>
+                  <input
+                    type="time"
+                    className="ad-rem-time"
+                    value={minToTime(min)}
+                    onChange={(e) =>
+                      saveAdhkar(
+                        k === 'morning'
+                          ? { morningMin: timeToMin(e.target.value) }
+                          : { eveningMin: timeToMin(e.target.value) }
+                      )
+                    }
+                  />
+                </div>
+              );
+            })}
           </section>
         )}
 

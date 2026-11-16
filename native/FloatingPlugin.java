@@ -75,11 +75,17 @@ public class FloatingPlugin extends Plugin {
 
     @PluginMethod
     public void setProgress(PluginCall call) {
-        prefs().edit()
+        SharedPreferences.Editor ed = prefs().edit()
                 .putInt("goal", call.getInt("goal", 100))
                 .putInt("today", call.getInt("today", 0))
-                .putString("today_date", FloatingService.todayKey())
-                .apply();
+                .putString("today_date", FloatingService.todayKey());
+        String u = call.getString("url", "");
+        String k = call.getString("key", "");
+        if (u != null && !u.isEmpty() && k != null && !k.isEmpty()) {
+            ed.putString("url", u).putString("key", k);
+        }
+        ed.apply();
+        SalliWidgetProvider.refreshAll(getContext());
         FloatingService s = FloatingService.running;
         if (s != null) s.refreshFromPrefs();
         call.resolve();
@@ -123,6 +129,40 @@ public class FloatingPlugin extends Plugin {
                 .apply();
         ReminderReceiver.schedule(getContext());
         call.resolve();
+    }
+
+    @PluginMethod
+    public void adhkarStatus(PluginCall call) {
+        SharedPreferences p = remPrefs();
+        JSObject r = new JSObject();
+        r.put("morningOn", p.getBoolean("adhkar_m_on", false));
+        r.put("morningMin", p.getInt("adhkar_m_min", 6 * 60));
+        r.put("eveningOn", p.getBoolean("adhkar_e_on", false));
+        r.put("eveningMin", p.getInt("adhkar_e_min", 17 * 60));
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void adhkarSet(PluginCall call) {
+        remPrefs().edit()
+                .putBoolean("adhkar_m_on", call.getBoolean("morningOn", false))
+                .putInt("adhkar_m_min", call.getInt("morningMin", 6 * 60))
+                .putBoolean("adhkar_e_on", call.getBoolean("eveningOn", false))
+                .putInt("adhkar_e_min", call.getInt("eveningMin", 17 * 60))
+                .apply();
+        AdhkarReceiver.scheduleAll(getContext());
+        call.resolve();
+    }
+
+    /** لو المستخدم فتح التطبيق بعد إشعار أذكار: يرجّع "m" أو "e" ويصفّرها. */
+    @PluginMethod
+    public void adhkarPending(PluginCall call) {
+        SharedPreferences p = remPrefs();
+        String v = p.getString("adhkar_pending", "");
+        if (!v.isEmpty()) p.edit().putString("adhkar_pending", "").apply();
+        JSObject r = new JSObject();
+        r.put("pending", v);
+        call.resolve(r);
     }
 
     @PluginMethod

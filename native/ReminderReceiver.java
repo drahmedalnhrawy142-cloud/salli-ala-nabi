@@ -47,6 +47,10 @@ public class ReminderReceiver extends BroadcastReceiver {
 
     /** إشعار فوري للتجربة. الصوت حسب اختيار المستخدم: كامل أو "صلى الله عليه وسلم" فقط. */
     public static void show(Context ctx, String text) {
+        show(ctx, "صلّي على النبي ﷺ", text, 4101);
+    }
+
+    public static void show(Context ctx, String title, String text, int notifId) {
         SharedPreferences sp = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         boolean full = "full".equals(sp.getString("sound", "full"));
         String res = full ? "salli_full" : "salli_short";
@@ -70,7 +74,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                 ctx, 7, launch, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, channelId)
                 .setSmallIcon(R.drawable.ic_stat_salli)
-                .setContentTitle("صلّي على النبي ﷺ")
+                .setContentTitle(title)
                 .setContentText(text)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -79,7 +83,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                 .setContentIntent(open);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) b.setSound(sound);
         try {
-            NotificationManagerCompat.from(ctx).notify(4101, b.build());
+            NotificationManagerCompat.from(ctx).notify(notifId, b.build());
         } catch (SecurityException ignored) {
             // إذن الإشعارات مش ممنوح
         }

@@ -9,5 +9,7 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context ctx, Intent intent) {
         ReminderReceiver.schedule(ctx);
+        AdhkarReceiver.scheduleAll(ctx);
+        SalliWidgetProvider.refreshAll(ctx);
     }
 }

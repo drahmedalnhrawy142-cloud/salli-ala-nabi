@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="12dp"
+    android:background="@drawable/widget_bg">
+
+    <TextView
+        android:id="@+id/w_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="صلّي على النبي ﷺ"
+        android:textColor="#F1D77A"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/w_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textColor="#FFF1C4"
+        android:textSize="34sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/w_goal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="من 100 اليوم"
+        android:textColor="#C9A24A"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/w_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="صلّيت"
+        android:textColor="#1A1205"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:background="@drawable/widget_btn" />
+</LinearLayout>

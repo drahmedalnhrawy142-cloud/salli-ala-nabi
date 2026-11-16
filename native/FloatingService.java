@@ -375,6 +375,7 @@ public class FloatingService extends Service {
         }
 
         bubble.setProgress(today, goal);
+        SalliWidgetProvider.refreshAll(this);
         boolean reachedGoal = goal > 0 && today == goal;
         vibrate(reachedGoal);
         pulse(reachedGoal);

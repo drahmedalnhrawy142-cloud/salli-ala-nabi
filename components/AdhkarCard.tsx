@@ -49,6 +49,12 @@ export function AdhkarCard() {
 
   useEffect(() => {
     setPeriod(nowPeriod());
+    const onPeriod = (e: Event) => {
+      const v = (e as CustomEvent<string>).detail;
+      if (v === 'm' || v === 'e') setPeriod(v);
+    };
+    window.addEventListener('adhkar-period', onPeriod);
+    return () => window.removeEventListener('adhkar-period', onPeriod);
   }, []);
 
   useEffect(() => {
