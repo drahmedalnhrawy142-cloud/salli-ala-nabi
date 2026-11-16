@@ -204,6 +204,8 @@ const QUESTIONS: Q[] = [
 
 const ALL: Q[] = [...QUESTIONS, ...MORE_QUESTIONS];
 
+export const QUIZ_BANK = ALL;
+
 const ROUND = 10;
 const SEEN_KEY = 'prophet_quiz_seen';
 

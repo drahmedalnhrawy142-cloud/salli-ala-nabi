@@ -15,6 +15,13 @@ import { AdhkarCard } from '@/components/AdhkarCard';
 import { Tasbeeh } from '@/components/Tasbeeh';
 import { SectionChips } from '@/components/SectionChips';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
+import { FridayBanner } from '@/components/FridayBanner';
+import { GlobalKhatma } from '@/components/GlobalKhatma';
+import { DailyQuestion } from '@/components/DailyQuestion';
+import { AsmaAllah } from '@/components/AsmaAllah';
+import { ProphetMoments } from '@/components/ProphetMoments';
+import { Backup } from '@/components/Backup';
+import { FontSize } from '@/components/FontSize';
 
 type Celebration = {
   id: number;
@@ -1796,11 +1803,13 @@ export function PrayerExperience() {
           <SectionChips
             items={[
               { id: 's-counts', label: 'العدادات', icon: '🔢' },
+              { id: 's-khatma', label: 'الختمة', icon: '🌍' },
               { id: 's-goal', label: 'هدفك', icon: '🎯' },
               { id: 's-hadith', label: 'حديث', icon: '📖' },
               { id: 's-poems', label: 'أبيات', icon: '✨' },
             ]}
           />
+        <FridayBanner onGo={() => goTab('wird')} />
         <section className="content-card" id="s-counts">
           <h2 className="section-title">عدادات الصلوات</h2>
 
@@ -1831,6 +1840,8 @@ export function PrayerExperience() {
             </div>
           </div>
         </section>
+
+        <div id="s-khatma"><GlobalKhatma total={globalCount} loading={globalLoading} /></div>
 
         <section className="content-card" id="s-goal">
           <h2 className="section-title">هدفك اليومي</h2>
@@ -1975,6 +1986,7 @@ export function PrayerExperience() {
               { id: 's-adhkar', label: 'أذكار اليوم', icon: '🌅' },
               { id: 's-wird', label: 'وردك', icon: '📿' },
               { id: 's-fadl', label: 'فضل الصلاة', icon: '📖' },
+              { id: 's-dq', label: 'سؤال اليوم', icon: '💡' },
               { id: 's-stats', label: 'إحصائياتك', icon: '📊' },
               { id: 's-share', label: 'بطاقتك', icon: '🎴' },
             ]}
@@ -1984,6 +1996,8 @@ export function PrayerExperience() {
         <div id="s-wird"><DailyWird onPray={addPrayer} /></div>
 
         <div id="s-fadl"><HadithFadl /></div>
+
+        <DailyQuestion />
 
         <div id="s-stats"><ProphetStats count={count} todayCount={todayCount} streak={streak} /></div>
 
@@ -2002,7 +2016,9 @@ export function PrayerExperience() {
               { id: 's-lineage', label: 'النسب', icon: '🌿' },
               { id: 's-desc', label: 'الصفات', icon: '✨' },
               { id: 's-timeline', label: 'السيرة', icon: '⏳' },
+              { id: 's-moments', label: 'مواقف', icon: '🕌' },
               { id: 's-names', label: 'الأسماء', icon: '🏷️' },
+              { id: 's-asma', label: 'أسماء الله', icon: '🌙' },
               { id: 's-quiz', label: 'اختبر نفسك', icon: '❓' },
             ]}
           />
@@ -2012,7 +2028,11 @@ export function PrayerExperience() {
 
         <div id="s-timeline"><ProphetTimeline /></div>
 
+        <ProphetMoments />
+
         <div id="s-names"><ProphetNames /></div>
+
+        <AsmaAllah />
 
         <div id="s-quiz"><ProphetQuiz /></div>
 
@@ -2033,6 +2053,8 @@ export function PrayerExperience() {
                     { id: 's-rem', label: 'تذكير الصلاة', icon: '⏰' },
                   ]
                 : []),
+              { id: 's-font', label: 'حجم الخط', icon: '🔠' },
+              { id: 's-backup', label: 'نسخة احتياطية', icon: '💾' },
               { id: 's-about', label: 'عن التطبيق', icon: 'ℹ️' },
             ]}
           />
@@ -2212,6 +2234,8 @@ export function PrayerExperience() {
           </section>
         )}
 
+          <FontSize />
+          <Backup />
           <section className="content-card" id="s-about">
             <h2 className="section-title">عن التطبيق</h2>
             <p className="about-text">

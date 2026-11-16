@@ -32,7 +32,33 @@ const EVENING: Item[] = [
   ...COMMON,
 ];
 
-type Period = 'm' | 'e';
+const BAQARA_END =
+  'آمَنَ الرَّسُولُ بِمَا أُنزِلَ إِلَيْهِ مِن رَّبِّهِ وَالْمُؤْمِنُونَ كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِ وَقَالُوا سَمِعْنَا وَأَطَعْنَا غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ الْمَصِيرُ * لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا اكْتَسَبَتْ رَبَّنَا لَا تُؤَاخِذْنَا إِن نَّسِينَا أَوْ أَخْطَأْنَا رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا أَنتَ مَوْلَانَا فَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ';
+
+const AFTER_PRAYER: Item[] = [
+  { id: 'istighfar', text: 'أستغفر الله', count: 3, source: 'ثلاثًا بعد السلام — رواه مسلم' },
+  { id: 'salam', text: 'اللهم أنت السلام ومنك السلام، تباركت يا ذا الجلال والإكرام', count: 1, source: 'رواه مسلم' },
+  { id: 'la', text: 'لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، اللهم لا مانع لما أعطيت، ولا معطي لما منعت، ولا ينفع ذا الجَدِّ منك الجَدُّ', count: 1, source: 'رواه البخاري ومسلم' },
+  { id: 'sub33', text: 'سبحان الله', count: 33, source: 'رواه مسلم' },
+  { id: 'ham33', text: 'الحمد لله', count: 33, source: 'رواه مسلم' },
+  { id: 'akb33', text: 'الله أكبر', count: 33, source: 'رواه مسلم' },
+  { id: 'tamam', text: 'لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير', count: 1, source: 'تمام المائة — رواه مسلم' },
+  { id: 'kursi', text: KURSI, count: 1, source: 'آية الكرسي دبر كل صلاة — رواه النسائي في الكبرى وصححه الألباني' },
+  { id: 'suras', text: SURAS, count: 1, source: 'المعوذات دبر كل صلاة — رواه أبو داود والترمذي وصححه الألباني' },
+];
+
+const SLEEP: Item[] = [
+  { id: 'kursi', text: KURSI, count: 1, source: 'آية الكرسي عند النوم — رواه البخاري' },
+  { id: 'baqara', text: BAQARA_END, count: 1, source: 'آخر آيتين من سورة البقرة — رواه البخاري ومسلم' },
+  { id: 'suras', text: SURAS, count: 3, source: 'يقرؤها وينفث في كفيه ويمسح بهما جسده، ثلاث مرات — رواه البخاري' },
+  { id: 'bismika', text: 'باسمك ربي وضعتُ جنبي وبك أرفعه، فإن أمسكتَ نفسي فارحمها، وإن أرسلتَها فاحفظها بما تحفظ به عبادك الصالحين', count: 1, source: 'رواه البخاري ومسلم' },
+  { id: 'amut', text: 'باسمك اللهم أموت وأحيا', count: 1, source: 'رواه البخاري' },
+  { id: 'sub33', text: 'سبحان الله', count: 33, source: 'التسبيح عند النوم — رواه البخاري ومسلم' },
+  { id: 'ham33', text: 'الحمد لله', count: 33, source: 'رواه البخاري ومسلم' },
+  { id: 'akb34', text: 'الله أكبر', count: 34, source: 'رواه البخاري ومسلم' },
+];
+
+type Period = 'm' | 'e' | 'p' | 's';
 
 function dayStr() {
   return new Date().toLocaleDateString('en-CA');
@@ -44,7 +70,8 @@ function nowPeriod(): Period {
 export function AdhkarCard() {
   const [period, setPeriod] = useState<Period>('m');
   const [done, setDone] = useState<Record<string, number>>({});
-  const items = period === 'm' ? MORNING : EVENING;
+  const items =
+    period === 'm' ? MORNING : period === 'e' ? EVENING : period === 'p' ? AFTER_PRAYER : SLEEP;
   const key = `adhkar_${dayStr()}_${period}`;
 
   useEffect(() => {
@@ -84,12 +111,23 @@ export function AdhkarCard() {
       <h2 className="section-title">أذكار اليوم</h2>
 
       <div className="ad-tabs">
-        <button type="button" className={period === 'm' ? 'ad-tab ad-on' : 'ad-tab'} onClick={() => setPeriod('m')}>
-          أذكار الصباح
-        </button>
-        <button type="button" className={period === 'e' ? 'ad-tab ad-on' : 'ad-tab'} onClick={() => setPeriod('e')}>
-          أذكار المساء
-        </button>
+        {(
+          [
+            ['m', 'الصباح'],
+            ['e', 'المساء'],
+            ['p', 'بعد الصلاة'],
+            ['s', 'النوم'],
+          ] as [Period, string][]
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            className={period === id ? 'ad-tab ad-on' : 'ad-tab'}
+            onClick={() => setPeriod(id)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       <p className="ad-progress">
@@ -117,8 +155,8 @@ export function AdhkarCard() {
       <p className="ad-note">اضغط على الذكر في كل مرة تقوله.</p>
 
       <style>{`
-        .ad-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
-        .ad-tab { font-family: var(--font-kufi), sans-serif; font-weight: 700; padding: 8px 18px; border-radius: 999px; border: 1px solid rgba(232,194,90,.4); background: transparent; color: #e8c25a; cursor: pointer; }
+        .ad-tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 10px; }
+        .ad-tab { font-family: var(--font-kufi), sans-serif; font-weight: 700; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(232,194,90,.4); background: transparent; color: #e8c25a; cursor: pointer; }
         .ad-on { background: rgba(232,194,90,.2); color: #f6e49c; }
         .ad-progress { font-family: var(--font-kufi), sans-serif; color: #e8c25a; margin: 6px 0 12px; }
         .ad-item { display: block; width: 100%; text-align: center; margin-bottom: 10px; padding: 16px 14px; border-radius: 16px; border: 1px solid rgba(232,194,90,.3); background: rgba(232,194,90,.05); color: #fff1c4; cursor: pointer; }
