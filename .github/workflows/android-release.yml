@@ -80,11 +80,18 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew bundleRelease
+        run: ./gradlew bundleRelease assembleRelease
 
-      - name: Upload AAB
+      - name: Upload AAB (Google Play)
         uses: actions/upload-artifact@v4
         with:
           name: salli-ala-nabi-release-aab
           path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      - name: Upload APK (Huawei AppGallery / Samsung Galaxy Store / direct install)
+        uses: actions/upload-artifact@v4
+        with:
+          name: salli-ala-nabi-release-apk
+          path: android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
