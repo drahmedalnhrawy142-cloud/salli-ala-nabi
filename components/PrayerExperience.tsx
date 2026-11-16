@@ -24,6 +24,8 @@ import { Backup } from '@/components/Backup';
 import { FontSize } from '@/components/FontSize';
 import { PrayerTimes } from '@/components/PrayerTimes';
 import { VolumeKeys } from '@/components/VolumeKeys';
+import { LangSwitch } from '@/components/LangSwitch';
+import { initI18n, useLang } from '@/components/i18n';
 
 type Celebration = {
   id: number;
@@ -542,6 +544,11 @@ export function PrayerExperience() {
     }
   }
 
+  const lang = useLang();
+  useEffect(() => {
+    initI18n();
+  }, []);
+
   const volRef = useRef<() => void>(() => {});
   useEffect(() => {
     function onKey() {
@@ -659,7 +666,7 @@ export function PrayerExperience() {
   return (
     <main
       className="prayer-experience"
-      dir="rtl"
+      dir={lang === 'en' ? 'ltr' : 'rtl'}
       style={{ visibility: ready ? 'visible' : 'hidden' }}
     >
       {bootPhase !== 'gone' && (
@@ -2076,6 +2083,7 @@ export function PrayerExperience() {
                   ]
                 : []),
               ...(remSupported ? [{ id: 's-volume', label: 'أزرار الصوت', icon: '🔊' }] : []),
+              { id: 's-lang', label: 'اللغة', icon: '🌐' },
               { id: 's-font', label: 'حجم الخط', icon: '🔠' },
               { id: 's-backup', label: 'نسخة احتياطية', icon: '💾' },
               { id: 's-about', label: 'عن التطبيق', icon: 'ℹ️' },
@@ -2257,6 +2265,7 @@ export function PrayerExperience() {
           </section>
         )}
 
+          <LangSwitch />
           <VolumeKeys />
           <FontSize />
           <Backup />
