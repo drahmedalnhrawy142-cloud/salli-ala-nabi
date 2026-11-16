@@ -165,6 +165,38 @@ public class FloatingPlugin extends Plugin {
         call.resolve(r);
     }
 
+    /** تذكير بعد كل صلاة: on + قائمة "epoch|اسم;..." من صفحة التطبيق. */
+    @PluginMethod
+    public void prayerAfterSet(PluginCall call) {
+        remPrefs().edit()
+                .putBoolean("pa_on", call.getBoolean("on", false))
+                .putString("pa_list", call.getString("list", ""))
+                .apply();
+        PrayerAfterReceiver.scheduleNext(getContext());
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void prayerAfterStatus(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("on", remPrefs().getBoolean("pa_on", false));
+        call.resolve(r);
+    }
+
+    /** العدّ بأزرار الصوت (والتطبيق مفتوح). */
+    @PluginMethod
+    public void volumeSet(PluginCall call) {
+        prefs().edit().putBoolean("vol_on", call.getBoolean("on", false)).apply();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void volumeStatus(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("on", prefs().getBoolean("vol_on", false));
+        call.resolve(r);
+    }
+
     @PluginMethod
     public void reminderTest(PluginCall call) {
         ReminderReceiver.show(getContext(), "اللهم صلِّ وسلِّم وبارك على سيدنا محمد ﷺ");

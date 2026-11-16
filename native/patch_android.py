@@ -16,7 +16,7 @@ if not java_dir.exists():
 
 # 1) ملفات الجافا
 for name in ("FloatingService.java", "FloatingPlugin.java", "MainActivity.java",
-             "ReminderReceiver.java", "BootReceiver.java", "AdhkarReceiver.java",
+             "ReminderReceiver.java", "BootReceiver.java", "AdhkarReceiver.java", "PrayerAfterReceiver.java",
              "SalliWidgetProvider.java", "SalliFileProvider.java"):
     shutil.copyfile(NATIVE / name, java_dir / name)
     print("copied", name)
@@ -106,6 +106,7 @@ if "SalliWidgetProvider" not in text:
         '                android:resource="@xml/salli_widget_info" />\n'
         '        </receiver>\n'
         '        <receiver android:name=".AdhkarReceiver" android:exported="false" />\n'
+        '        <receiver android:name=".PrayerAfterReceiver" android:exported="false" />\n'
     )
     text = text.replace("</application>", widget + "    </application>", 1)
 

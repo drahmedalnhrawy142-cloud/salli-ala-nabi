@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SectionChips } from '@/components/SectionChips';
 
 type Item = { label: string; text: string; source?: string };
@@ -112,6 +112,9 @@ export function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
     } catch {}
   }
 
+  const tapRef = useRef<() => void>(() => {});
+  tapRef.current = tap;
+
   function tap() {
     let next = c + 1;
     let nr = r;
@@ -126,6 +129,16 @@ export function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
     } catch {}
     save({ ...counts, [key]: next }, { ...rounds, [key]: nr });
   }
+
+  // زر الصوت: الواجهة الظاهرة بس هي اللي تعدّ
+  useEffect(() => {
+    function onVol(e: Event) {
+      const t = (e as CustomEvent<{ tab: string }>).detail?.tab;
+      if (t === (multi ? 'multi' : 'tasbih')) tapRef.current();
+    }
+    window.addEventListener('volume-tap', onVol);
+    return () => window.removeEventListener('volume-tap', onVol);
+  }, [multi]);
 
   function reset() {
     save({ ...counts, [key]: 0 }, { ...rounds, [key]: 0 });

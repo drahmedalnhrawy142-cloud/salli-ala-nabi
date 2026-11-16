@@ -22,6 +22,8 @@ import { AsmaAllah } from '@/components/AsmaAllah';
 import { ProphetMoments } from '@/components/ProphetMoments';
 import { Backup } from '@/components/Backup';
 import { FontSize } from '@/components/FontSize';
+import { PrayerTimes } from '@/components/PrayerTimes';
+import { VolumeKeys } from '@/components/VolumeKeys';
 
 type Celebration = {
   id: number;
@@ -540,6 +542,15 @@ export function PrayerExperience() {
     }
   }
 
+  const volRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    function onKey() {
+      volRef.current();
+    }
+    window.addEventListener('volume-key', onKey);
+    return () => window.removeEventListener('volume-key', onKey);
+  }, []);
+
   function addPrayer() {
     const nextCount = count + 1;
     const today = new Date().toLocaleDateString('en-CA');
@@ -612,6 +623,14 @@ export function PrayerExperience() {
       { duration: 3200, delay: 1500, easing: 'linear' }
     );
   }
+
+  volRef.current = () => {
+    if (tab === 'tasbih' || tab === 'multi') {
+      window.dispatchEvent(new CustomEvent('volume-tap', { detail: { tab } }));
+    } else if (tab === 'home') {
+      addPrayer();
+    }
+  };
 
   function goTab(next: Tab) {
     setTab(next);
@@ -1803,6 +1822,7 @@ export function PrayerExperience() {
           <SectionChips
             items={[
               { id: 's-counts', label: 'العدادات', icon: '🔢' },
+              { id: 's-times', label: 'المواقيت', icon: '🕋' },
               { id: 's-khatma', label: 'الختمة', icon: '🌍' },
               { id: 's-goal', label: 'هدفك', icon: '🎯' },
               { id: 's-hadith', label: 'حديث', icon: '📖' },
@@ -1840,6 +1860,8 @@ export function PrayerExperience() {
             </div>
           </div>
         </section>
+
+        <PrayerTimes />
 
         <div id="s-khatma"><GlobalKhatma total={globalCount} loading={globalLoading} /></div>
 
@@ -2053,6 +2075,7 @@ export function PrayerExperience() {
                     { id: 's-rem', label: 'تذكير الصلاة', icon: '⏰' },
                   ]
                 : []),
+              ...(remSupported ? [{ id: 's-volume', label: 'أزرار الصوت', icon: '🔊' }] : []),
               { id: 's-font', label: 'حجم الخط', icon: '🔠' },
               { id: 's-backup', label: 'نسخة احتياطية', icon: '💾' },
               { id: 's-about', label: 'عن التطبيق', icon: 'ℹ️' },
@@ -2234,6 +2257,7 @@ export function PrayerExperience() {
           </section>
         )}
 
+          <VolumeKeys />
           <FontSize />
           <Backup />
           <section className="content-card" id="s-about">

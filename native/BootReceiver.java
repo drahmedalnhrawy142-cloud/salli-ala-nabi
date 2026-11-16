@@ -10,6 +10,7 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context ctx, Intent intent) {
         ReminderReceiver.schedule(ctx);
         AdhkarReceiver.scheduleAll(ctx);
+        PrayerAfterReceiver.scheduleNext(ctx);
         SalliWidgetProvider.refreshAll(ctx);
     }
 }
