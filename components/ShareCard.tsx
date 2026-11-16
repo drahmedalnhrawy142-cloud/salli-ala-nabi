@@ -38,6 +38,26 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, maxW: number) {
   return lines;
 }
 
+type NativeShare = {
+  shareImage?(o: { data: string; text: string }): Promise<void>;
+  saveImage?(o: { data: string }): Promise<void>;
+};
+
+function nativeShare(): NativeShare | null {
+  try {
+    const w = window as unknown as {
+      Capacitor?: {
+        isNativePlatform?: () => boolean;
+        Plugins?: Record<string, unknown>;
+      };
+    };
+    if (!w.Capacitor?.isNativePlatform?.()) return null;
+    return (w.Capacitor.Plugins?.FloatingButton as NativeShare) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function ShareCard({ count }: { count: number }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [name, setName] = useState('');
@@ -187,10 +207,39 @@ export function ShareCard({ count }: { count: number }) {
     } catch {}
   }
 
+  async function saveToGallery() {
+    const c = canvasRef.current;
+    if (!c) return;
+    const native = nativeShare();
+    if (native?.saveImage) {
+      try {
+        await native.saveImage({ data: c.toDataURL('image/png').split(',')[1] });
+        setMsg('اتحفظت البطاقة في معرض الصور');
+        return;
+      } catch {
+        setMsg('تعذر الحفظ، جرّب المشاركة ثم حفظ الصورة');
+        return;
+      }
+    }
+    setFallbackImg(c.toDataURL('image/png'));
+  }
+
   async function share() {
     const c = canvasRef.current;
     if (!c) return;
     setMsg('');
+    const native = nativeShare();
+    if (native?.shareImage) {
+      try {
+        await native.shareImage({
+          data: c.toDataURL('image/png').split(',')[1],
+          text: 'اللهم صلِّ وسلِّم وبارك على سيدنا محمد ﷺ',
+        });
+        return;
+      } catch {
+        // نكمل بالطريقة الاحتياطية
+      }
+    }
     const blob: Blob | null = await new Promise((r) =>
       c.toBlob((b) => r(b), 'image/png')
     );
@@ -255,6 +304,9 @@ export function ShareCard({ count }: { count: number }) {
       <button type="button" className="sc-share" onClick={share}>
         مشاركة البطاقة
       </button>
+      <button type="button" className="sc-save" onClick={saveToGallery}>
+        حفظ في معرض الصور
+      </button>
       {msg && <p className="sc-msg">{msg}</p>}
 
       {fallbackImg && (
@@ -279,6 +331,7 @@ export function ShareCard({ count }: { count: number }) {
         .sc-on { background: rgba(232,194,90,.2); color: #f6e49c; }
         .sc-toggle { font-family: var(--font-kufi), sans-serif; font-weight: 700; padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(232,194,90,.3); background: transparent; color: #e8c25a; cursor: pointer; margin-bottom: 12px; }
         .sc-share { display: block; width: 100%; padding: 14px; border-radius: 14px; border: 1px solid rgba(232,194,90,.6); background: linear-gradient(135deg,#f1d77a,#b8902f); color: #1a1205; font-family: var(--font-kufi), sans-serif; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
+        .sc-save { display: block; width: 100%; margin-top: 10px; padding: 12px; border-radius: 14px; border: 1px solid rgba(232,194,90,.5); background: transparent; color: #f1d77a; font-family: var(--font-kufi), sans-serif; font-weight: 700; cursor: pointer; }
         .sc-msg { font-family: var(--font-ruqaa), serif; text-align: center; }
         .sc-modal { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.85); display: flex; align-items: center; justify-content: center; padding: 16px; }
         .sc-modal-in { max-width: 420px; width: 100%; text-align: center; }

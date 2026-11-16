@@ -13,6 +13,7 @@ import { ProphetNames } from '@/components/ProphetNames';
 import { HadithFadl } from '@/components/HadithFadl';
 import { AdhkarCard } from '@/components/AdhkarCard';
 import { Tasbeeh } from '@/components/Tasbeeh';
+import { SectionChips } from '@/components/SectionChips';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 
 type Celebration = {
@@ -169,7 +170,7 @@ function getFloating(): FloatingPlugin | null {
 }
 
 // 0 = بلا حد (∞)
-type Tab = 'home' | 'tasbih' | 'wird' | 'seera' | 'more';
+type Tab = 'home' | 'tasbih' | 'multi' | 'wird' | 'seera' | 'more';
 
 const goalOptions = [10, 33, 100, 300, 1000, 0];
 
@@ -1687,13 +1688,13 @@ export function PrayerExperience() {
           background: none;
           color: rgba(255, 241, 196, 0.5);
           font-family: var(--font-kufi), sans-serif;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 700;
           cursor: pointer;
           -webkit-tap-highlight-color: transparent;
           transition: color 0.2s ease;
         }
-        .nav-item svg { width: 25px; height: 25px; }
+        .nav-item svg { width: 24px; height: 24px; }
         .nav-on { color: #f1d77a; }
         .nav-on::before {
           content: '';
@@ -1792,7 +1793,15 @@ export function PrayerExperience() {
       <div className="content-area">
         {/* ===== الصلاة ===== */}
         <div className="tab-pane" hidden={tab !== 'home'}>
-        <section className="content-card">
+          <SectionChips
+            items={[
+              { id: 's-counts', label: 'العدادات', icon: '🔢' },
+              { id: 's-goal', label: 'هدفك', icon: '🎯' },
+              { id: 's-hadith', label: 'حديث', icon: '📖' },
+              { id: 's-poems', label: 'أبيات', icon: '✨' },
+            ]}
+          />
+        <section className="content-card" id="s-counts">
           <h2 className="section-title">عدادات الصلوات</h2>
 
           <div className="stats-grid">
@@ -1823,7 +1832,7 @@ export function PrayerExperience() {
           </div>
         </section>
 
-        <section className="content-card">
+        <section className="content-card" id="s-goal">
           <h2 className="section-title">هدفك اليومي</h2>
 
           <div className="goal-top">
@@ -1900,7 +1909,7 @@ export function PrayerExperience() {
           <p className="salawat-text">{salawat}</p>
         </section>
 
-        <section className="content-card">
+        <section className="content-card" id="s-hadith">
           <h2 className="section-title">حديث النبي ﷺ</h2>
           <p className="hadith-text">
             «مَنْ صَلَّى عَلَيَّ صَلَاةً وَاحِدَةً؛
@@ -1908,7 +1917,7 @@ export function PrayerExperience() {
           </p>
         </section>
 
-        <section className="content-card">
+        <section className="content-card" id="s-poems">
           <h2 className="section-title">من مدح رسول الله ﷺ</h2>
 
           {poems[poemIndex].map((line, index) => (
@@ -1946,21 +1955,39 @@ export function PrayerExperience() {
           <Tasbeeh />
         </div>
 
+        {/* ===== الذكر المضاعف ===== */}
+        <div className="tab-pane" hidden={tab !== 'multi'}>
+          <header className="tab-head">
+            <h1>المضاعف</h1>
+            <p>أذكار وردت في الصحيح، تعدّها بسبحتك</p>
+          </header>
+          <Tasbeeh mode="multi" />
+        </div>
+
         {/* ===== وردي ===== */}
         <div className="tab-pane" hidden={tab !== 'wird'}>
           <header className="tab-head">
             <h1>وردي</h1>
             <p>أذكار اليوم، وورد اليوم، وإنجازاتك، وبطاقة تشاركها</p>
           </header>
-        <AdhkarCard />
+          <SectionChips
+            items={[
+              { id: 's-adhkar', label: 'أذكار اليوم', icon: '🌅' },
+              { id: 's-wird', label: 'وردك', icon: '📿' },
+              { id: 's-fadl', label: 'فضل الصلاة', icon: '📖' },
+              { id: 's-stats', label: 'إحصائياتك', icon: '📊' },
+              { id: 's-share', label: 'بطاقتك', icon: '🎴' },
+            ]}
+          />
+        <div id="s-adhkar"><AdhkarCard /></div>
 
-        <DailyWird onPray={addPrayer} />
+        <div id="s-wird"><DailyWird onPray={addPrayer} /></div>
 
-        <HadithFadl />
+        <div id="s-fadl"><HadithFadl /></div>
 
-        <ProphetStats count={count} todayCount={todayCount} streak={streak} />
+        <div id="s-stats"><ProphetStats count={count} todayCount={todayCount} streak={streak} /></div>
 
-        <ShareCard count={count} />
+        <div id="s-share"><ShareCard count={count} /></div>
 
         </div>
 
@@ -1970,15 +1997,24 @@ export function PrayerExperience() {
             <h1>السيرة</h1>
             <p>نسبه وصفاته وأسماؤه ومراحل حياته ﷺ</p>
           </header>
-        <ProphetLineage />
+          <SectionChips
+            items={[
+              { id: 's-lineage', label: 'النسب', icon: '🌿' },
+              { id: 's-desc', label: 'الصفات', icon: '✨' },
+              { id: 's-timeline', label: 'السيرة', icon: '⏳' },
+              { id: 's-names', label: 'الأسماء', icon: '🏷️' },
+              { id: 's-quiz', label: 'اختبر نفسك', icon: '❓' },
+            ]}
+          />
+        <div id="s-lineage"><ProphetLineage /></div>
 
-        <ProphetDescription />
+        <div id="s-desc"><ProphetDescription /></div>
 
-        <ProphetTimeline />
+        <div id="s-timeline"><ProphetTimeline /></div>
 
-        <ProphetNames />
+        <div id="s-names"><ProphetNames /></div>
 
-        <ProphetQuiz />
+        <div id="s-quiz"><ProphetQuiz /></div>
 
         </div>
 
@@ -1988,8 +2024,20 @@ export function PrayerExperience() {
             <h1>المزيد</h1>
             <p>التذكير والأيقونة العايمة والإعدادات</p>
           </header>
+          <SectionChips
+            items={[
+              ...(floatSupported ? [{ id: 's-float', label: 'الأيقونة العايمة', icon: '🫧' }] : []),
+              ...(remSupported
+                ? [
+                    { id: 's-adhkar-rem', label: 'تذكير الأذكار', icon: '🔔' },
+                    { id: 's-rem', label: 'تذكير الصلاة', icon: '⏰' },
+                  ]
+                : []),
+              { id: 's-about', label: 'عن التطبيق', icon: 'ℹ️' },
+            ]}
+          />
         {floatSupported && (
-          <section className="content-card">
+          <section className="content-card" id="s-float">
             <h2 className="section-title">الأيقونة العايمة</h2>
             <p className="float-note">
               زرار صغير بصورة اللوحة الذهبية يظهر فوق كل التطبيقات. دوس عليه
@@ -2016,7 +2064,7 @@ export function PrayerExperience() {
         )}
 
         {remSupported && (
-          <section className="content-card">
+          <section className="content-card" id="s-adhkar-rem">
             <h2 className="section-title">تذكير الأذكار</h2>
             <p className="float-note">
               إشعار في وقت ثابت يفتح لك أذكار الصباح أو المساء.
@@ -2062,7 +2110,7 @@ export function PrayerExperience() {
         )}
 
         {remSupported && (
-          <section className="content-card">
+          <section className="content-card" id="s-rem">
             <h2 className="section-title">تذكير الصلاة على النبي ﷺ</h2>
             <p className="float-note">
               إشعار بصوت جميل يفكّرك بالصلاة على النبي ﷺ في الأوقات اللي
@@ -2164,7 +2212,7 @@ export function PrayerExperience() {
           </section>
         )}
 
-          <section className="content-card">
+          <section className="content-card" id="s-about">
             <h2 className="section-title">عن التطبيق</h2>
             <p className="about-text">
               «صلّي على النبي ﷺ» تطبيق يذكّرك بالصلاة على النبي ﷺ ويعينك على
@@ -2179,6 +2227,7 @@ export function PrayerExperience() {
           [
             ['home', 'الصلاة', <path key="a" d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />],
             ['tasbih', 'السبحة', <g key="t"><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="2.2" fill="currentColor" /><path d="M12 3.5V6" /></g>],
+            ['multi', 'المضاعف', <g key="m"><path d="M12 3l2.4 5.6L20 9.3l-4.3 3.8L17 19l-5-3-5 3 1.3-5.9L4 9.3l5.6-.7z" /></g>],
             ['wird', 'وردي', <g key="b"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5V19c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z" /><path d="M12 6v13.5" /></g>],
             ['seera', 'السيرة', <g key="c"><circle cx="6" cy="6" r="2" /><circle cx="6" cy="18" r="2" /><path d="M6 8v8M11 6h9M11 12h9M11 18h9" /></g>],
             ['more', 'المزيد', <g key="d" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></g>],

@@ -181,4 +181,70 @@ public class FloatingPlugin extends Plugin {
         r.put("count", count);
         call.resolve(r);
     }
+
+    // ===== مشاركة وحفظ بطاقة الصلاة =====
+    private byte[] decodePng(PluginCall call) {
+        String data = call.getString("data", "");
+        return android.util.Base64.decode(data, android.util.Base64.DEFAULT);
+    }
+
+    @PluginMethod
+    public void shareImage(PluginCall call) {
+        try {
+            byte[] bytes = decodePng(call);
+            String text = call.getString("text", "");
+            java.io.File dir = new java.io.File(getContext().getCacheDir(), "share");
+            if (!dir.exists()) dir.mkdirs();
+            java.io.File f = new java.io.File(dir, "salli-ala-nabi.png");
+            java.io.FileOutputStream out = new java.io.FileOutputStream(f);
+            out.write(bytes);
+            out.close();
+            android.net.Uri uri = androidx.core.content.FileProvider.getUriForFile(
+                    getContext(), getContext().getPackageName() + ".salliprovider", f);
+            Intent send = new Intent(Intent.ACTION_SEND);
+            send.setType("image/png");
+            send.putExtra(Intent.EXTRA_STREAM, uri);
+            if (text != null && !text.isEmpty()) send.putExtra(Intent.EXTRA_TEXT, text);
+            send.setClipData(android.content.ClipData.newRawUri("", uri));
+            send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent chooser = Intent.createChooser(send, "مشاركة البطاقة");
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(chooser);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("share failed: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void saveImage(PluginCall call) {
+        try {
+            if (Build.VERSION.SDK_INT < 29) {
+                call.reject("unsupported");
+                return;
+            }
+            byte[] bytes = decodePng(call);
+            android.content.ContentValues v = new android.content.ContentValues();
+            v.put(android.provider.MediaStore.Images.Media.DISPLAY_NAME,
+                    "salli-ala-nabi-" + System.currentTimeMillis() + ".png");
+            v.put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/png");
+            v.put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, "Pictures/SalliAlaNabi");
+            android.net.Uri u = getContext().getContentResolver().insert(
+                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v);
+            if (u == null) {
+                call.reject("insert failed");
+                return;
+            }
+            java.io.OutputStream o = getContext().getContentResolver().openOutputStream(u);
+            if (o == null) {
+                call.reject("stream failed");
+                return;
+            }
+            o.write(bytes);
+            o.close();
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("save failed: " + e.getMessage());
+        }
+    }
 }

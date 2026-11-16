@@ -17,7 +17,7 @@ if not java_dir.exists():
 # 1) ملفات الجافا
 for name in ("FloatingService.java", "FloatingPlugin.java", "MainActivity.java",
              "ReminderReceiver.java", "BootReceiver.java", "AdhkarReceiver.java",
-             "SalliWidgetProvider.java"):
+             "SalliWidgetProvider.java", "SalliFileProvider.java"):
     shutil.copyfile(NATIVE / name, java_dir / name)
     print("copied", name)
 
@@ -93,6 +93,7 @@ shutil.copyfile(NATIVE / "salli_widget.xml", MAIN / "res" / "layout" / "salli_wi
 shutil.copyfile(NATIVE / "widget_bg.xml", MAIN / "res" / "drawable" / "widget_bg.xml")
 shutil.copyfile(NATIVE / "widget_btn.xml", MAIN / "res" / "drawable" / "widget_btn.xml")
 shutil.copyfile(NATIVE / "salli_widget_info.xml", MAIN / "res" / "xml" / "salli_widget_info.xml")
+shutil.copyfile(NATIVE / "salli_file_paths.xml", MAIN / "res" / "xml" / "salli_file_paths.xml")
 print("copied widget resources")
 
 if "SalliWidgetProvider" not in text:
@@ -107,6 +108,20 @@ if "SalliWidgetProvider" not in text:
         '        <receiver android:name=".AdhkarReceiver" android:exported="false" />\n'
     )
     text = text.replace("</application>", widget + "    </application>", 1)
+
+if "SalliFileProvider" not in text:
+    provider = (
+        '        <provider\n'
+        '            android:name=".SalliFileProvider"\n'
+        '            android:authorities="${applicationId}.salliprovider"\n'
+        '            android:exported="false"\n'
+        '            android:grantUriPermissions="true">\n'
+        '            <meta-data\n'
+        '                android:name="android.support.FILE_PROVIDER_PATHS"\n'
+        '                android:resource="@xml/salli_file_paths" />\n'
+        '        </provider>\n'
+    )
+    text = text.replace("</application>", provider + "    </application>", 1)
 
 manifest_path.write_text(text, encoding="utf-8")
 print("manifest patched")
