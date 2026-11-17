@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useEffect, useState } from 'react';
 
 // [الاسم, خط العرض, خط الطول]
@@ -140,7 +141,7 @@ function fmt(d: Date) {
   return d.toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' });
 }
 
-export function PrayerTimes() {
+function PrayerTimes() {
   const [city, setCity] = useState(0);
   const [now, setNow] = useState<Date | null>(null);
   const [heading, setHeading] = useState<number | null>(null);
@@ -293,3 +294,6 @@ export function PrayerTimes() {
     </section>
   );
 }
+
+const PrayerTimesMemo = __memo(PrayerTimes);
+export { PrayerTimesMemo as PrayerTimes };

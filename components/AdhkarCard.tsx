@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useEffect, useState } from 'react';
 
 type Item = { id: string; text: string; count: number; source: string };
@@ -67,7 +68,7 @@ function nowPeriod(): Period {
   return new Date().getHours() < 14 ? 'm' : 'e';
 }
 
-export function AdhkarCard() {
+function AdhkarCard() {
   const [period, setPeriod] = useState<Period>('m');
   const [done, setDone] = useState<Record<string, number>>({});
   const items =
@@ -170,3 +171,6 @@ export function AdhkarCard() {
     </section>
   );
 }
+
+const AdhkarCardMemo = __memo(AdhkarCard);
+export { AdhkarCardMemo as AdhkarCard };

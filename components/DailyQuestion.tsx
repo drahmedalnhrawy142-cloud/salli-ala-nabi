@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { QUIZ_BANK } from '@/components/ProphetQuiz';
 
@@ -9,7 +10,7 @@ function dayNum() {
 }
 
 /** سؤال واحد كل يوم من أسئلة السيرة، مع سلسلة إجابات صحيحة. */
-export function DailyQuestion() {
+function DailyQuestion() {
   const day = dayNum();
   const q = QUIZ_BANK[day % QUIZ_BANK.length];
   const order = useMemo(() => {
@@ -82,3 +83,6 @@ export function DailyQuestion() {
     </section>
   );
 }
+
+const DailyQuestionMemo = __memo(DailyQuestion);
+export { DailyQuestionMemo as DailyQuestion };

@@ -1,8 +1,9 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { setLang, useLang } from '@/components/i18n';
 
-export function LangSwitch() {
+function LangSwitch() {
   const lang = useLang();
   return (
     <section className="content-card" id="s-lang">
@@ -42,3 +43,6 @@ export function LangSwitch() {
     </section>
   );
 }
+
+const LangSwitchMemo = __memo(LangSwitch);
+export { LangSwitchMemo as LangSwitch };

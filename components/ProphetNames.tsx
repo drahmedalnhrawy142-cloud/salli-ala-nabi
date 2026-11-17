@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useState } from 'react';
 
 type NameItem = { name: string; meaning: string; source: string };
@@ -51,7 +52,7 @@ const MORE: NameItem[] = [
   },
 ];
 
-export function ProphetNames() {
+function ProphetNames() {
   const [open, setOpen] = useState<string | null>(null);
 
   function card(it: NameItem) {
@@ -105,3 +106,6 @@ export function ProphetNames() {
     </section>
   );
 }
+
+const ProphetNamesMemo = __memo(ProphetNames);
+export { ProphetNamesMemo as ProphetNames };

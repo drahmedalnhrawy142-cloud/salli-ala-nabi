@@ -1,9 +1,8 @@
 
 'use client';
 
-import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { Fragment, Suspense, lazy, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
-import { ProphetQuiz } from '@/components/ProphetQuiz';
 import { ProphetLineage } from '@/components/ProphetLineage';
 import { ProphetDescription } from '@/components/ProphetDescription';
 import { ProphetTimeline } from '@/components/ProphetTimeline';
@@ -17,7 +16,6 @@ import { SectionChips } from '@/components/SectionChips';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 import { FridayBanner } from '@/components/FridayBanner';
 import { GlobalKhatma } from '@/components/GlobalKhatma';
-import { DailyQuestion } from '@/components/DailyQuestion';
 import { AsmaAllah } from '@/components/AsmaAllah';
 import { ProphetMoments } from '@/components/ProphetMoments';
 import { Backup } from '@/components/Backup';
@@ -26,6 +24,10 @@ import { PrayerTimes } from '@/components/PrayerTimes';
 import { VolumeKeys } from '@/components/VolumeKeys';
 import { LangSwitch } from '@/components/LangSwitch';
 import { initI18n, useLang } from '@/components/i18n';
+
+// بنك الأسئلة تقيل: بيتحمّل لما تفتح السيرة أو وردي
+const ProphetQuiz = lazy(() => import('@/components/ProphetQuiz').then((m) => ({ default: m.ProphetQuiz })));
+const DailyQuestion = lazy(() => import('@/components/DailyQuestion').then((m) => ({ default: m.DailyQuestion })));
 
 type Celebration = {
   id: number;
@@ -639,6 +641,12 @@ export function PrayerExperience() {
     }
   };
 
+  // الصفحات بتتحمّل أول ما تفتحها (أسرع في البدء وأخف في كل ضغطة)
+  const [seen, setSeen] = useState<Record<string, boolean>>({ home: true, wird: true });
+  useEffect(() => {
+    setSeen((s) => (s[tab] ? s : { ...s, [tab]: true }));
+  }, [tab]);
+
   function goTab(next: Tab) {
     setTab(next);
     try {
@@ -1086,7 +1094,6 @@ export function PrayerExperience() {
           box-shadow:
             0 15px 45px rgba(0, 0, 0, 0.16),
             inset 0 1px rgba(255, 255, 255, 0.04);
-          backdrop-filter: blur(12px);
         }
 
         .section-title {
@@ -1461,11 +1468,10 @@ export function PrayerExperience() {
           border-radius: 32px;
           color: #f6e3b0;
           background:
-            linear-gradient(rgba(10, 8, 5, 0.72), rgba(10, 8, 5, 0.72))
+            linear-gradient(rgba(10, 8, 5, 0.86), rgba(10, 8, 5, 0.86))
               padding-box,
             linear-gradient(135deg, #ffe9b0, #b98a2c 45%, #ffe9b0) border-box;
-          -webkit-backdrop-filter: blur(18px) saturate(140%);
-          backdrop-filter: blur(18px) saturate(140%);
+          touch-action: manipulation;
           box-shadow:
             0 14px 40px rgba(0, 0, 0, 0.55),
             0 0 40px rgba(233, 189, 90, 0.22),
@@ -1703,9 +1709,7 @@ export function PrayerExperience() {
           display: flex;
           justify-content: space-around;
           padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
-          background: rgba(8, 7, 5, 0.94);
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
+          background: rgba(8, 7, 5, 0.97);
           border-top: 1px solid rgba(232, 194, 90, 0.28);
         }
         .nav-item {
@@ -1988,20 +1992,28 @@ export function PrayerExperience() {
 
         {/* ===== السبحة ===== */}
         <div className="tab-pane" hidden={tab !== 'tasbih'}>
+        {seen.tasbih && (
+        <>
           <header className="tab-head">
             <h1>السبحة</h1>
             <p>سبّح كما تشاء، وعدّادك محفوظ</p>
           </header>
           <Tasbeeh />
+        </>
+        )}
         </div>
 
         {/* ===== الذكر المضاعف ===== */}
         <div className="tab-pane" hidden={tab !== 'multi'}>
+        {seen.multi && (
+        <>
           <header className="tab-head">
             <h1>المضاعف</h1>
             <p>أذكار وردت في الصحيح، تعدّها بسبحتك</p>
           </header>
           <Tasbeeh mode="multi" />
+        </>
+        )}
         </div>
 
         {/* ===== وردي ===== */}
@@ -2026,7 +2038,9 @@ export function PrayerExperience() {
 
         <div id="s-fadl"><HadithFadl /></div>
 
-        <DailyQuestion />
+        <Suspense fallback={null}>
+          <DailyQuestion />
+        </Suspense>
 
         <div id="s-stats"><ProphetStats count={count} todayCount={todayCount} streak={streak} /></div>
 
@@ -2036,6 +2050,8 @@ export function PrayerExperience() {
 
         {/* ===== السيرة ===== */}
         <div className="tab-pane" hidden={tab !== 'seera'}>
+        {seen.seera && (
+        <>
           <header className="tab-head">
             <h1>السيرة</h1>
             <p>نسبه وصفاته وأسماؤه ومراحل حياته ﷺ</p>
@@ -2063,12 +2079,20 @@ export function PrayerExperience() {
 
         <AsmaAllah />
 
-        <div id="s-quiz"><ProphetQuiz /></div>
+        <div id="s-quiz">
+          <Suspense fallback={null}>
+            <ProphetQuiz />
+          </Suspense>
+        </div>
 
+        </>
+        )}
         </div>
 
         {/* ===== المزيد ===== */}
         <div className="tab-pane" hidden={tab !== 'more'}>
+        {seen.more && (
+        <>
           <header className="tab-head">
             <h1>المزيد</h1>
             <p>التذكير والأيقونة العايمة والإعدادات</p>
@@ -2276,6 +2300,8 @@ export function PrayerExperience() {
               المداومة عليها، بمحتوى مأخوذ من الصحيحين وما صحّ عن أهل العلم.
             </p>
           </section>
+        </>
+        )}
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useEffect, useState } from 'react';
 
 type Fp = { volumeSet?: (o: { on: boolean }) => Promise<unknown>; volumeStatus?: () => Promise<{ on?: boolean }> };
@@ -10,7 +11,7 @@ function fp(): Fp | null {
   return p && p.volumeSet ? p : null;
 }
 
-export function VolumeKeys() {
+function VolumeKeys() {
   const [ok, setOk] = useState(false);
   const [on, setOn] = useState(false);
   useEffect(() => {
@@ -40,3 +41,6 @@ export function VolumeKeys() {
     </section>
   );
 }
+
+const VolumeKeysMemo = __memo(VolumeKeys);
+export { VolumeKeysMemo as VolumeKeys };

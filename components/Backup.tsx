@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useState } from 'react';
 
 const PREFIXES = ['prayer_', 'tasbeeh_', 'wird_', 'adhkar_', 'share_', 'prophet_quiz_', 'ui_', 'pt_'];
@@ -9,7 +10,7 @@ function allowed(k: string) {
 }
 
 /** نسخة احتياطية: نسخ بياناتك كنص، ولصقه على جهاز آخر. */
-export function Backup() {
+function Backup() {
   const [text, setText] = useState('');
   const [msg, setMsg] = useState('');
 
@@ -87,3 +88,6 @@ export function Backup() {
     </section>
   );
 }
+
+const BackupMemo = __memo(Backup);
+export { BackupMemo as Backup };

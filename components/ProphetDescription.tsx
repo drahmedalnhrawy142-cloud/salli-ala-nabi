@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -239,7 +240,7 @@ const TRAITS: Trait[] = [
   },
 ];
 
-export function ProphetDescription() {
+function ProphetDescription() {
   const [open, setOpen] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -508,3 +509,6 @@ export function ProphetDescription() {
 }
 
 export default ProphetDescription;
+
+const ProphetDescriptionMemo = __memo(ProphetDescription);
+export { ProphetDescriptionMemo as ProphetDescription };

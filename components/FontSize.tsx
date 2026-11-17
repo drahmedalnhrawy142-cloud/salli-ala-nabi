@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useEffect, useState } from 'react';
 
 const STEPS = [90, 100, 115, 130];
@@ -10,7 +11,7 @@ function apply(pct: number) {
 }
 
 /** حجم الخط: تكبير أو تصغير محتوى الصفحات. */
-export function FontSize() {
+function FontSize() {
   const [pct, setPct] = useState(100);
 
   useEffect(() => {
@@ -55,3 +56,6 @@ export function FontSize() {
     </section>
   );
 }
+
+const FontSizeMemo = __memo(FontSize);
+export { FontSizeMemo as FontSize };

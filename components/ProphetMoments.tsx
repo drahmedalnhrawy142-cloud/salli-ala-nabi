@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useState } from 'react';
 
 const MOMENTS: { title: string; text: string; source: string }[] = [
@@ -45,7 +46,7 @@ const MOMENTS: { title: string; text: string; source: string }[] = [
   },
 ];
 
-export function ProphetMoments() {
+function ProphetMoments() {
   const [i, setI] = useState(() => new Date().getDate() % MOMENTS.length);
   const m = MOMENTS[i];
 
@@ -76,3 +77,6 @@ export function ProphetMoments() {
     </section>
   );
 }
+
+const ProphetMomentsMemo = __memo(ProphetMoments);
+export { ProphetMomentsMemo as ProphetMoments };

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 // نسب النبي ﷺ من محمد إلى عدنان، من ولد إسماعيل بن إبراهيم
 const CHAIN: { name: string }[] = [
   { name: 'محمد ﷺ' },
@@ -26,7 +27,7 @@ const CHAIN: { name: string }[] = [
   { name: 'عدنان' },
 ];
 
-export function ProphetLineage() {
+function ProphetLineage() {
   return (
     <section className="content-card lineage">
       <h2 className="section-title">نسب النبي ﷺ</h2>
@@ -134,3 +135,6 @@ export function ProphetLineage() {
 }
 
 export default ProphetLineage;
+
+const ProphetLineageMemo = __memo(ProphetLineage);
+export { ProphetLineageMemo as ProphetLineage };

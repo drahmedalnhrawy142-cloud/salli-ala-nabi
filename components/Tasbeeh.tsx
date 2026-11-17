@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { SectionChips } from '@/components/SectionChips';
 
@@ -69,7 +70,7 @@ const GROUPS: Group[] = [
 const T_PLAIN = [33, 100, 0];
 const T_MULTI = [3, 10, 33, 100, 0];
 
-export function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
+function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
   const multi = mode === 'multi';
   const sfx = multi ? '_m' : '';
   const first = multi ? GROUPS[0].items[0] : null;
@@ -290,3 +291,6 @@ export function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
     </>
   );
 }
+
+const TasbeehMemo = __memo(Tasbeeh);
+export { TasbeehMemo as Tasbeeh };

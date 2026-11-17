@@ -2,8 +2,6 @@
 // الفكرة: النصوص العربية في الواجهة بتتبدّل وقت التشغيل من قاموس. النصوص المقدّسة (آيات، أحاديث، أذكار)
 // بتفضل عربي زي ما هي، والترجمة بتظهر تحتها (data-en).
 import { useSyncExternalStore } from 'react';
-import { UI_EN } from './en/ui';
-import { TR_EN } from './en/tr';
 
 export type Lang = 'ar' | 'en';
 const KEY = 'ui_lang';
@@ -50,14 +48,26 @@ const WORDS: Record<string, string> = {
 const exact = new Map<string, string>();
 const patterns: { re: RegExp; out: string }[] = [];
 const trExact = new Map<string, string>();
-for (const [k, v] of Object.entries(UI_EN)) {
-  const nk = norm(k);
-  if (/\{\d\}/.test(nk)) {
-    const esc = nk.replace(/[.*+?^$|\\()[\]]/g, '\\$&').replace(/\{\d\}/g, '(.+?)');
-    patterns.push({ re: new RegExp('^' + esc + '$'), out: v });
-  } else exact.set(nk, v);
+let loaded = false;
+let loading: Promise<void> | null = null;
+// القواميس ثقيلة (~٣٠٠ك): بنحمّلها بس لما اللغة تبقى إنجليزي
+function loadDict(): Promise<void> {
+  if (loaded) return Promise.resolve();
+  if (!loading) {
+    loading = Promise.all([import('./en/ui'), import('./en/tr')]).then(([u, t]) => {
+      for (const [k, v] of Object.entries(u.UI_EN)) {
+        const nk = norm(k);
+        if (/\{\d\}/.test(nk)) {
+          const esc = nk.replace(/[.*+?^$|\\()[\]]/g, '\\$&').replace(/\{\d\}/g, '(.+?)');
+          patterns.push({ re: new RegExp('^' + esc + '$'), out: v });
+        } else exact.set(nk, v);
+      }
+      for (const [k, v] of Object.entries(t.TR_EN)) trExact.set(norm(k), v);
+      loaded = true;
+    });
+  }
+  return loading;
 }
-for (const [k, v] of Object.entries(TR_EN)) trExact.set(norm(k), v);
 
 export const missing = new Set<string>();
 if (typeof window !== 'undefined') (window as unknown as { __i18nMissing: Set<string> }).__i18nMissing = missing;
@@ -197,8 +207,11 @@ function apply() {
   html.dir = lang === 'en' ? 'ltr' : 'rtl';
   if (lang === 'en') {
     document.title = 'Salli ala Nabi ﷺ — Send Blessings upon the Prophet';
-    startObs();
-    walk(document.body);
+    loadDict().then(() => {
+      if (lang !== 'en') return;
+      startObs();
+      walk(document.body);
+    });
   } else {
     document.title = 'صلي على النبي ﷺ';
     restore();

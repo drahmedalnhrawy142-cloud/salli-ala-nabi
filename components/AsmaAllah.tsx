@@ -1,9 +1,10 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useMemo, useState } from 'react';
 import { ASMA } from '@/components/asmaData';
 
-export function AsmaAllah() {
+function AsmaAllah() {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState<string | null>(null);
 
@@ -57,3 +58,6 @@ export function AsmaAllah() {
     </section>
   );
 }
+
+const AsmaAllahMemo = __memo(AsmaAllah);
+export { AsmaAllahMemo as AsmaAllah };

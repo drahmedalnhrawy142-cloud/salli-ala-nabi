@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useState } from 'react';
 
 type H = { text: string; note: string; source: string };
@@ -54,7 +55,7 @@ function dayIndex() {
   return Math.floor((d.getTime() - start.getTime()) / 86400000);
 }
 
-export function HadithFadl() {
+function HadithFadl() {
   const [i, setI] = useState(() => dayIndex() % LIST.length);
   const h = LIST[i];
 
@@ -85,3 +86,6 @@ export function HadithFadl() {
     </section>
   );
 }
+
+const HadithFadlMemo = __memo(HadithFadl);
+export { HadithFadlMemo as HadithFadl };

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { MORE_QUESTIONS } from '@/components/prophetQuestionsMore';
 
@@ -243,7 +244,7 @@ function newRound(): number[] {
 
 const BEST_KEY = 'prophet_quiz_best';
 
-export function ProphetQuiz() {
+function ProphetQuiz() {
   const [deck, setDeck] = useState<number[] | null>(null);
   const [pos, setPos] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -500,3 +501,6 @@ export function ProphetQuiz() {
 }
 
 export default ProphetQuiz;
+
+const ProphetQuizMemo = __memo(ProphetQuiz);
+export { ProphetQuizMemo as ProphetQuiz };

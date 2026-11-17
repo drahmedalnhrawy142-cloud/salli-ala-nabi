@@ -195,8 +195,12 @@ export function ShareCard({ count }: { count: number }) {
     ctx.fillText('salli-ala-nabi.vercel.app', W / 2, 1262);
   }, [name, formula, showCount, count]);
 
+  // نرسم البطاقة بعد ما العدّاد يهدى (مش مع كل ضغطة): ده بيخفّف الضغط على المعالج
   useEffect(() => {
-    draw();
+    const t = window.setTimeout(() => {
+      draw();
+    }, 600);
+    return () => window.clearTimeout(t);
   }, [draw]);
 
   function saveName(v: string) {

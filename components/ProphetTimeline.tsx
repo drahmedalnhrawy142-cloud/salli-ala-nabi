@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useState } from 'react';
 
 // خط زمني لسيرة النبي ﷺ: أحداث متفق عليها فقط
@@ -155,7 +156,7 @@ const ERAS: Era[] = [
   },
 ];
 
-export function ProphetTimeline() {
+function ProphetTimeline() {
   const [eraId, setEraId] = useState('before');
   const era = ERAS.find((e) => e.id === eraId) ?? ERAS[0];
 
@@ -300,3 +301,6 @@ export function ProphetTimeline() {
 }
 
 export default ProphetTimeline;
+
+const ProphetTimelineMemo = __memo(ProphetTimeline);
+export { ProphetTimelineMemo as ProphetTimeline };

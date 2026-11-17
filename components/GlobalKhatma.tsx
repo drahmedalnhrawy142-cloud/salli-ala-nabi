@@ -1,12 +1,13 @@
 'use client';
 
+import { memo as __memo } from 'react';
 const MILESTONES = [
   10_000, 100_000, 500_000, 1_000_000, 5_000_000, 10_000_000, 50_000_000,
   100_000_000, 500_000_000, 1_000_000_000,
 ];
 
 /** ختمة جماعية: تقدّم العدّاد العام نحو الهدف الجماعي القادم. */
-export function GlobalKhatma({ total, loading }: { total: number; loading: boolean }) {
+function GlobalKhatma({ total, loading }: { total: number; loading: boolean }) {
   const target = MILESTONES.find((m) => total < m) ?? total + 1_000_000_000;
   const prev = [...MILESTONES].reverse().find((m) => m <= total) ?? 0;
   const pct = loading ? 0 : Math.min(100, ((total - prev) / (target - prev)) * 100);
@@ -33,3 +34,6 @@ export function GlobalKhatma({ total, loading }: { total: number; loading: boole
     </section>
   );
 }
+
+const GlobalKhatmaMemo = __memo(GlobalKhatma);
+export { GlobalKhatmaMemo as GlobalKhatma };
