@@ -5,6 +5,8 @@ import { SectionGrid } from '@/components/SectionGrid';
 import { MushafReader } from './MushafReader';
 import { QuranIndex } from './QuranIndex';
 import { QuranSearch } from './QuranSearch';
+import { QuranWird } from './QuranWird';
+import { QuranTasmee } from './QuranTasmee';
 import { lsGet, lsSet, toAr, useQuran } from './data';
 
 export function QuranCorner() {
@@ -69,6 +71,8 @@ export function QuranCorner() {
                 <MushafReader data={d} page={page} setPage={setPage} focus={focus} marks={marks} toggleMark={toggleMark} />
               )),
           },
+          { id: 'wird', label: 'ورد القرآن', icon: '🗓️', hint: 'خطة الختمة', render: () => need((d) => <QuranWird data={d} currentPage={page} onOpenAt={openAt} />) },
+          { id: 'tasmee', label: 'التسميع', icon: '🎙️', hint: 'اختبر حفظك', render: () => need((d) => <QuranTasmee data={d} currentPage={page} />) },
           { id: 'index', label: 'الفهرس', icon: '🗂️', hint: 'السور والأجزاء', render: () => need((d) => <QuranIndex data={d} onGo={openAt} />) },
           { id: 'search', label: 'بحث', icon: '🔎', hint: 'في كل الآيات', render: () => need((d) => <QuranSearch data={d} onGo={openAt} />) },
           {
