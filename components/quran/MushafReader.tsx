@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent as RMouseEvent, type ReactNode, type TouchEvent as RTouchEvent } from 'react';
-import { BASMALA, lsGet, lsSet, pageAyas, toAr, type QData } from './data';
+import { BASMALA, loadQiraat, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
 import { VerseShare } from './VerseShare';
 
 type Theme = 'night' | 'paper';
@@ -26,9 +26,34 @@ export function MushafReader({
   const [sel, setSel] = useState<number | null>(null);
   const [toast, setToast] = useState('');
   const [shareIdx, setShareIdx] = useState<number | null>(null);
+  const [showQ, setShowQ] = useState<boolean>(() => lsGet('quran_showq', true));
+  const [qv, setQv] = useState<QV[]>([]);
+  const [qSel, setQSel] = useState<number | null>(null);
   const [jump, setJump] = useState('');
   const touch = useRef<{ x: number; y: number } | null>(null);
   const focusRef = useRef<HTMLSpanElement | null>(null);
+
+  useEffect(() => {
+    if (!showQ || qv.length) return;
+    let live = true;
+    loadQiraat()
+      .then((d) => live && setQv(d))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [showQ, qv.length]);
+
+  // آية -> مواضع الاختلاف
+  const qmap = useMemo(() => {
+    const m = new Map<number, number[]>();
+    qv.forEach((e, k) => {
+      const l = m.get(e.a);
+      if (l) l.push(k);
+      else m.set(e.a, [k]);
+    });
+    return m;
+  }, [qv]);
 
   const idxs = useMemo(() => pageAyas(data, page), [data, page]);
   const juz = idxs.length ? data.ayas[idxs[0]][3] : 1;
@@ -72,7 +97,9 @@ export function MushafReader({
       return;
     }
     const i = Number(el.dataset.i);
-    setSel((cur) => (cur === i ? null : i));
+    const qe = (e.target as HTMLElement).closest('[data-q]') as HTMLElement | null;
+    setQSel(qe ? Number(qe.dataset.q) : null);
+    setSel((cur) => (cur === i && !qe ? null : i));
   }
 
   function onTouchStart(e: RTouchEvent) {
@@ -123,6 +150,7 @@ export function MushafReader({
       }
     }
     const words = a[4].split(' ');
+    const qs = showQ ? qmap.get(i) : undefined;
     rows.push(
       <span
         key={i}
@@ -132,7 +160,16 @@ export function MushafReader({
       >
         {words.map((w, k) => (
           <Fragment key={k}>
-            <span className="qw">{w}</span>{' '}
+            {(() => {
+              const k2 = qs?.find((q) => k >= qv[q].f && k < qv[q].t);
+              return k2 != null ? (
+                <span className="qw qw-q" data-q={k2}>
+                  {w}
+                </span>
+              ) : (
+                <span className="qw">{w}</span>
+              );
+            })()}{' '}
           </Fragment>
         ))}
         <span className="qa-n">{toAr(a[1])}</span>{' '}
@@ -177,6 +214,18 @@ export function MushafReader({
         <button type="button" className="mr-btn mr-sm" onClick={() => changeFs(1)} aria-label="تكبير الخط">
           أ+
         </button>
+        <button
+          type="button"
+          className={`mr-btn mr-sm${showQ ? ' mr-on' : ''}`}
+          onClick={() => {
+            const n = !showQ;
+            setShowQ(n);
+            lsSet('quran_showq', n);
+          }}
+          aria-label="علامات اختلاف القراءات"
+        >
+          ق
+        </button>
         <button type="button" className="mr-btn mr-sm" onClick={changeTheme} aria-label="تغيير الخلفية">
           {theme === 'night' ? '☀' : '☾'}
         </button>
@@ -200,6 +249,20 @@ export function MushafReader({
           <div className="mr-sheet-ref">
             {data.suras[data.ayas[sel][0] - 1].name} • آية {toAr(data.ayas[sel][1])}
           </div>
+          {qSel != null && qv[qSel] && (
+            <div className="mr-q">
+              <div className="mr-q-t">اختلاف في قراءة هذه الكلمة</div>
+              <div className="mr-q-r">
+                <span>حفص عن عاصم</span>
+                <b className="mr-q-h">{data.ayas[qv[qSel].a][4].split(' ').slice(qv[qSel].f, qv[qSel].t).join(' ')}</b>
+              </div>
+              <div className="mr-q-r">
+                <span>شعبة عن عاصم</span>
+                <b className="mr-q-s">{qv[qSel].v}</b>
+              </div>
+              <div className="mr-q-n">من نصوص مجمع الملك فهد الرسمية للروايتين.</div>
+            </div>
+          )}
           <div className="mr-sheet-btns">
             <button type="button" onClick={() => copyAya(sel)}>
               نسخ
@@ -238,6 +301,14 @@ export function MushafReader({
           font-family: var(--font-kufi), sans-serif; font-size: 22px; cursor: pointer;
         }
         .mr-btn:disabled { opacity: .35; }
+        .mr-on { background: rgba(232,194,90,.32); border-color: #e8c25a; }
+        .qw-q { text-decoration: underline dotted #4fc3a1; text-decoration-thickness: 2px; text-underline-offset: 8px; cursor: pointer; }
+        .mr-q { margin: 0 0 10px; padding: 10px; border-radius: 14px; border: 1px solid rgba(79,195,161,.5); background: rgba(79,195,161,.08); }
+        .mr-q-t { text-align: center; color: #7fe0c0; font-family: var(--font-kufi), sans-serif; font-size: 13px; margin: 0 0 6px; }
+        .mr-q-r { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 4px 0; color: rgba(255,241,196,.75); font-family: var(--font-kufi), sans-serif; font-size: 12.5px; }
+        .mr-q-h { font-family: 'KFGQPC Hafs', serif; font-size: 24px; color: #fff1c4; font-weight: 400; direction: rtl; }
+        .mr-q-s { font-family: 'KFGQPC Shouba', serif; font-size: 24px; color: #fff1c4; font-weight: 400; direction: rtl; }
+        .mr-q-n { text-align: center; font-size: 11.5px; color: rgba(255,241,196,.5); font-family: var(--font-ruqaa), serif; margin-top: 4px; }
         .mr-sm { font-size: 15px; min-width: 36px; }
         .mr-gap { flex: 1; }
         .mr-jump { flex: 1.2; min-width: 0; }

@@ -37,6 +37,22 @@ export function loadSimple(): Promise<string[]> {
   return simpleCache;
 }
 
+/** اختلاف شعبة عن حفص (كلاهما عن عاصم): آية، من كلمة، إلى كلمة (غير شاملة)، نص شعبة */
+export type QV = { a: number; f: number; t: number; v: string };
+let qvCache: Promise<QV[]> | null = null;
+export function loadQiraat(): Promise<QV[]> {
+  if (!qvCache) {
+    qvCache = fetch('/quran/qiraat.json').then((r) => {
+      if (!r.ok) throw new Error('qiraat');
+      return r.json() as Promise<QV[]>;
+    });
+    qvCache.catch(() => {
+      qvCache = null;
+    });
+  }
+  return qvCache;
+}
+
 export function useQuran(): { data: QData | null; error: boolean } {
   const [data, setData] = useState<QData | null>(null);
   const [error, setError] = useState(false);

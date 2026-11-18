@@ -14,6 +14,7 @@ import { AdhkarCard } from '@/components/AdhkarCard';
 import { Tasbeeh } from '@/components/Tasbeeh';
 import { SectionGrid } from '@/components/SectionGrid';
 import { FloatTarget } from '@/components/FloatTarget';
+import { HadithQudsi } from '@/components/HadithQudsi';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 import { FridayBanner } from '@/components/FridayBanner';
 import { GlobalKhatma } from '@/components/GlobalKhatma';
@@ -2047,6 +2048,7 @@ export function PrayerExperience() {
             <SectionGrid
               secs={[
                 { id: 'asma', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
+                { id: 'qudsi', label: 'الأحاديث القدسية', icon: '📜', hint: 'من الصحيحين', render: () => <HadithQudsi /> },
               ]}
             />
           )}

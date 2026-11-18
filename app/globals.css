@@ -151,3 +151,10 @@ a { color: inherit; text-decoration: none; }
   src: url('/fonts/hafs.18.woff2') format('woff2');
   font-display: swap;
 }
+
+/* خط رواية شعبة عن عاصم (مجمع الملك فهد) — لعرض مواضع الاختلاف */
+@font-face {
+  font-family: 'KFGQPC Shouba';
+  src: url('/fonts/shouba.8.woff2') format('woff2');
+  font-display: swap;
+}
