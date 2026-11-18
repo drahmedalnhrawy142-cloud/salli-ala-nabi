@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent as RMouseEvent, type ReactNode, type TouchEvent as RTouchEvent } from 'react';
 import { BASMALA, lsGet, lsSet, pageAyas, toAr, type QData } from './data';
+import { VerseShare } from './VerseShare';
 
 type Theme = 'night' | 'paper';
 
@@ -24,6 +25,7 @@ export function MushafReader({
   const [theme, setTheme] = useState<Theme>(() => lsGet<Theme>('quran_theme', 'night'));
   const [sel, setSel] = useState<number | null>(null);
   const [toast, setToast] = useState('');
+  const [shareIdx, setShareIdx] = useState<number | null>(null);
   const [jump, setJump] = useState('');
   const touch = useRef<{ x: number; y: number } | null>(null);
   const focusRef = useRef<HTMLSpanElement | null>(null);
@@ -211,6 +213,9 @@ export function MushafReader({
             >
               {marks.includes(sel) ? 'إزالة العلامة' : 'علامة 🔖'}
             </button>
+            <button type="button" onClick={() => setShareIdx(sel)}>
+              مشاركة 🎴
+            </button>
             <button type="button" onClick={() => setSel(null)}>
               إغلاق
             </button>
@@ -218,6 +223,7 @@ export function MushafReader({
         </div>
       )}
       {toast && <div className="mr-toast">{toast}</div>}
+      {shareIdx != null && <VerseShare data={data} idx={shareIdx} onClose={() => setShareIdx(null)} />}
 
       <style>{`
         .mr { position: relative; }
