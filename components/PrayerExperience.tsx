@@ -12,7 +12,7 @@ import { ProphetNames } from '@/components/ProphetNames';
 import { HadithFadl } from '@/components/HadithFadl';
 import { AdhkarCard } from '@/components/AdhkarCard';
 import { Tasbeeh } from '@/components/Tasbeeh';
-import { SectionChips } from '@/components/SectionChips';
+import { SectionGrid } from '@/components/SectionGrid';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 import { FridayBanner } from '@/components/FridayBanner';
 import { GlobalKhatma } from '@/components/GlobalKhatma';
@@ -27,6 +27,7 @@ import { initI18n, useLang } from '@/components/i18n';
 
 // بنك الأسئلة تقيل: بيتحمّل لما تفتح السيرة أو وردي
 const ProphetQuiz = lazy(() => import('@/components/ProphetQuiz').then((m) => ({ default: m.ProphetQuiz })));
+const QuranCorner = lazy(() => import('@/components/quran/QuranCorner').then((m) => ({ default: m.QuranCorner })));
 const DailyQuestion = lazy(() => import('@/components/DailyQuestion').then((m) => ({ default: m.DailyQuestion })));
 
 type Celebration = {
@@ -183,7 +184,7 @@ function getFloating(): FloatingPlugin | null {
 }
 
 // 0 = بلا حد (∞)
-type Tab = 'home' | 'tasbih' | 'multi' | 'wird' | 'seera' | 'more';
+type Tab = 'home' | 'quran' | 'wird' | 'names' | 'seera' | 'more';
 
 const goalOptions = [10, 33, 100, 300, 1000, 0];
 
@@ -633,9 +634,12 @@ export function PrayerExperience() {
     );
   }
 
+  const [wirdSec, setWirdSec] = useState<string | null>(null);
+  const [cornerSec, setCornerSec] = useState<string | null>(null);
+
   volRef.current = () => {
-    if (tab === 'tasbih' || tab === 'multi') {
-      window.dispatchEvent(new CustomEvent('volume-tap', { detail: { tab } }));
+    if (tab === 'wird' && wirdSec === 'corner' && (cornerSec === 'tasbih' || cornerSec === 'multi')) {
+      window.dispatchEvent(new CustomEvent('volume-tap', { detail: { tab: cornerSec } }));
     } else if (tab === 'home') {
       addPrayer();
     }
@@ -1828,19 +1832,12 @@ export function PrayerExperience() {
       </section>
 
       <div className="content-area">
-        {/* ===== الصلاة ===== */}
+        {/* ===== الصلاة (مشهد الضريح فوق ممنوع المساس به) ===== */}
         <div className="tab-pane" hidden={tab !== 'home'}>
-          <SectionChips
-            items={[
-              { id: 's-counts', label: 'العدادات', icon: '🔢' },
-              { id: 's-times', label: 'المواقيت', icon: '🕋' },
-              { id: 's-khatma', label: 'الختمة', icon: '🌍' },
-              { id: 's-goal', label: 'هدفك', icon: '🎯' },
-              { id: 's-hadith', label: 'حديث', icon: '📖' },
-              { id: 's-poems', label: 'أبيات', icon: '✨' },
-            ]}
-          />
         <FridayBanner onGo={() => goTab('wird')} />
+        <SectionGrid
+          secs={[
+            { id: 'counts', label: 'العدادات', icon: '🔢', render: () => (
         <section className="content-card" id="s-counts">
           <h2 className="section-title">عدادات الصلوات</h2>
 
@@ -1871,11 +1868,10 @@ export function PrayerExperience() {
             </div>
           </div>
         </section>
-
-        <PrayerTimes />
-
-        <div id="s-khatma"><GlobalKhatma total={globalCount} loading={globalLoading} /></div>
-
+            ) },
+            { id: 'times', label: 'المواقيت', icon: '🕋', keepMounted: true, render: () => <PrayerTimes /> },
+            { id: 'khatma', label: 'الختمة', icon: '🌍', render: () => <GlobalKhatma total={globalCount} loading={globalLoading} /> },
+            { id: 'goal', label: 'هدفك', icon: '🎯', render: () => (
         <section className="content-card" id="s-goal">
           <h2 className="section-title">هدفك اليومي</h2>
 
@@ -1947,12 +1943,12 @@ export function PrayerExperience() {
             {haptic ? '📳 الاهتزاز: مفعّل' : '📴 الاهتزاز: متوقف'}
           </button>
         </section>
-
-        {/* نص الصلاة موجود بدون عنوان */}
+            ) },
+            { id: 'hadith', label: 'حديث', icon: '📖', render: () => (
+              <>
         <section className="content-card">
           <p className="salawat-text">{salawat}</p>
         </section>
-
         <section className="content-card" id="s-hadith">
           <h2 className="section-title">حديث النبي ﷺ</h2>
           <p className="hadith-text">
@@ -1960,7 +1956,9 @@ export function PrayerExperience() {
             صَلَّى اللَّهُ عَلَيْهِ بِهَا عَشْرًا»
           </p>
         </section>
-
+              </>
+            ) },
+            { id: 'poems', label: 'أبيات', icon: '✨', render: () => (
         <section className="content-card" id="s-poems">
           <h2 className="section-title">من مدح رسول الله ﷺ</h2>
 
@@ -1988,132 +1986,105 @@ export function PrayerExperience() {
             </button>
           </div>
         </section>
+            ) },
+          ]}
+        />
         </div>
 
-        {/* ===== السبحة ===== */}
-        <div className="tab-pane" hidden={tab !== 'tasbih'}>
-        {seen.tasbih && (
-        <>
+        {/* ===== القرآن ===== */}
+        <div className="tab-pane" hidden={tab !== 'quran'}>
           <header className="tab-head">
-            <h1>السبحة</h1>
-            <p>سبّح كما تشاء، وعدّادك محفوظ</p>
+            <h1>القرآن الكريم</h1>
+            <p>المصحف والورد والتسميع وأحكام التجويد</p>
           </header>
-          <Tasbeeh />
-        </>
-        )}
+          {seen.quran && (
+            <Suspense fallback={null}>
+              <QuranCorner />
+            </Suspense>
+          )}
         </div>
 
-        {/* ===== الذكر المضاعف ===== */}
-        <div className="tab-pane" hidden={tab !== 'multi'}>
-        {seen.multi && (
-        <>
-          <header className="tab-head">
-            <h1>المضاعف</h1>
-            <p>أذكار وردت في الصحيح، تعدّها بسبحتك</p>
-          </header>
-          <Tasbeeh mode="multi" />
-        </>
-        )}
-        </div>
-
-        {/* ===== وردي ===== */}
+        {/* ===== وردي (السبحة والأذكار داخله) ===== */}
         <div className="tab-pane" hidden={tab !== 'wird'}>
           <header className="tab-head">
             <h1>وردي</h1>
-            <p>أذكار اليوم، وورد اليوم، وإنجازاتك، وبطاقة تشاركها</p>
+            <p>السبحة والأذكار وورد اليوم وإنجازاتك</p>
           </header>
-          <SectionChips
-            items={[
-              { id: 's-adhkar', label: 'أذكار اليوم', icon: '🌅' },
-              { id: 's-wird', label: 'وردك', icon: '📿' },
-              { id: 's-fadl', label: 'فضل الصلاة', icon: '📖' },
-              { id: 's-dq', label: 'سؤال اليوم', icon: '💡' },
-              { id: 's-stats', label: 'إحصائياتك', icon: '📊' },
-              { id: 's-share', label: 'بطاقتك', icon: '🎴' },
+          <SectionGrid
+            onOpenChange={setWirdSec}
+            secs={[
+              { id: 'corner', label: 'السبحة والأذكار', icon: '📿', render: () => (
+                <SectionGrid
+                  onOpenChange={setCornerSec}
+                  secs={[
+                    { id: 'tasbih', label: 'السبحة', icon: '📿', render: () => <Tasbeeh /> },
+                    { id: 'multi', label: 'الذكر المضاعف', icon: '✨', render: () => <Tasbeeh mode="multi" /> },
+                    { id: 'adhkar', label: 'أذكار اليوم', icon: '🌅', render: () => <AdhkarCard /> },
+                  ]}
+                />
+              ) },
+              { id: 'wird', label: 'وردك', icon: '📜', render: () => <DailyWird onPray={addPrayer} /> },
+              { id: 'fadl', label: 'فضل الصلاة', icon: '📖', render: () => <HadithFadl /> },
+              { id: 'dq', label: 'سؤال اليوم', icon: '💡', render: () => (
+                <Suspense fallback={null}>
+                  <DailyQuestion />
+                </Suspense>
+              ) },
+              { id: 'stats', label: 'إحصائياتك', icon: '📊', render: () => <ProphetStats count={count} todayCount={todayCount} streak={streak} /> },
+              { id: 'share', label: 'بطاقتك', icon: '🎴', render: () => <ShareCard count={count} /> },
             ]}
           />
-        <div id="s-adhkar"><AdhkarCard /></div>
+        </div>
 
-        <div id="s-wird"><DailyWird onPray={addPrayer} /></div>
-
-        <div id="s-fadl"><HadithFadl /></div>
-
-        <Suspense fallback={null}>
-          <DailyQuestion />
-        </Suspense>
-
-        <div id="s-stats"><ProphetStats count={count} todayCount={todayCount} streak={streak} /></div>
-
-        <div id="s-share"><ShareCard count={count} /></div>
-
+        {/* ===== أسماء الله والأحاديث القدسية ===== */}
+        <div className="tab-pane" hidden={tab !== 'names'}>
+          <header className="tab-head">
+            <h1>أسماء الله</h1>
+            <p>أسماء الله الحسنى والأحاديث القدسية</p>
+          </header>
+          {seen.names && (
+            <SectionGrid
+              secs={[
+                { id: 'asma', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
+              ]}
+            />
+          )}
         </div>
 
         {/* ===== السيرة ===== */}
         <div className="tab-pane" hidden={tab !== 'seera'}>
-        {seen.seera && (
-        <>
           <header className="tab-head">
             <h1>السيرة</h1>
             <p>نسبه وصفاته وأسماؤه ومراحل حياته ﷺ</p>
           </header>
-          <SectionChips
-            items={[
-              { id: 's-lineage', label: 'النسب', icon: '🌿' },
-              { id: 's-desc', label: 'الصفات', icon: '✨' },
-              { id: 's-timeline', label: 'السيرة', icon: '⏳' },
-              { id: 's-moments', label: 'مواقف', icon: '🕌' },
-              { id: 's-names', label: 'الأسماء', icon: '🏷️' },
-              { id: 's-asma', label: 'أسماء الله', icon: '🌙' },
-              { id: 's-quiz', label: 'اختبر نفسك', icon: '❓' },
-            ]}
-          />
-        <div id="s-lineage"><ProphetLineage /></div>
-
-        <div id="s-desc"><ProphetDescription /></div>
-
-        <div id="s-timeline"><ProphetTimeline /></div>
-
-        <ProphetMoments />
-
-        <div id="s-names"><ProphetNames /></div>
-
-        <AsmaAllah />
-
-        <div id="s-quiz">
-          <Suspense fallback={null}>
-            <ProphetQuiz />
-          </Suspense>
-        </div>
-
-        </>
-        )}
+          {seen.seera && (
+            <SectionGrid
+              secs={[
+                { id: 'lineage', label: 'النسب', icon: '🌿', render: () => <ProphetLineage /> },
+                { id: 'desc', label: 'الصفات', icon: '✨', render: () => <ProphetDescription /> },
+                { id: 'timeline', label: 'السيرة', icon: '⏳', render: () => <ProphetTimeline /> },
+                { id: 'moments', label: 'مواقف', icon: '🕌', render: () => <ProphetMoments /> },
+                { id: 'names', label: 'الأسماء', icon: '🏷️', render: () => <ProphetNames /> },
+                { id: 'quiz', label: 'اختبر نفسك', icon: '❓', render: () => (
+                  <Suspense fallback={null}>
+                    <ProphetQuiz />
+                  </Suspense>
+                ) },
+              ]}
+            />
+          )}
         </div>
 
         {/* ===== المزيد ===== */}
         <div className="tab-pane" hidden={tab !== 'more'}>
-        {seen.more && (
-        <>
           <header className="tab-head">
             <h1>المزيد</h1>
             <p>التذكير والأيقونة العايمة والإعدادات</p>
           </header>
-          <SectionChips
-            items={[
-              ...(floatSupported ? [{ id: 's-float', label: 'الأيقونة العايمة', icon: '🫧' }] : []),
-              ...(remSupported
-                ? [
-                    { id: 's-adhkar-rem', label: 'تذكير الأذكار', icon: '🔔' },
-                    { id: 's-rem', label: 'تذكير الصلاة', icon: '⏰' },
-                  ]
-                : []),
-              ...(remSupported ? [{ id: 's-volume', label: 'أزرار الصوت', icon: '🔊' }] : []),
-              { id: 's-lang', label: 'اللغة', icon: '🌐' },
-              { id: 's-font', label: 'حجم الخط', icon: '🔠' },
-              { id: 's-backup', label: 'نسخة احتياطية', icon: '💾' },
-              { id: 's-about', label: 'عن التطبيق', icon: 'ℹ️' },
-            ]}
-          />
-        {floatSupported && (
+          {seen.more && (
+            <SectionGrid
+              secs={[
+                { id: 'float', label: 'الأيقونة العايمة', icon: '🫧', hidden: !floatSupported, render: () => (
           <section className="content-card" id="s-float">
             <h2 className="section-title">الأيقونة العايمة</h2>
             <p className="float-note">
@@ -2138,9 +2109,8 @@ export function PrayerExperience() {
               </p>
             )}
           </section>
-        )}
-
-        {remSupported && (
+                ) },
+                { id: 'adhkar-rem', label: 'تذكير الأذكار', icon: '🔔', hidden: !remSupported, render: () => (
           <section className="content-card" id="s-adhkar-rem">
             <h2 className="section-title">تذكير الأذكار</h2>
             <p className="float-note">
@@ -2184,9 +2154,8 @@ export function PrayerExperience() {
               );
             })}
           </section>
-        )}
-
-        {remSupported && (
+                ) },
+                { id: 'rem', label: 'تذكير الصلاة', icon: '⏰', hidden: !remSupported, render: () => (
           <section className="content-card" id="s-rem">
             <h2 className="section-title">تذكير الصلاة على النبي ﷺ</h2>
             <p className="float-note">
@@ -2287,12 +2256,12 @@ export function PrayerExperience() {
               🔊 جرّب الإشعار الآن
             </button>
           </section>
-        )}
-
-          <LangSwitch />
-          <VolumeKeys />
-          <FontSize />
-          <Backup />
+                ) },
+                { id: 'volume', label: 'أزرار الصوت', icon: '🔊', render: () => <VolumeKeys /> },
+                { id: 'lang', label: 'اللغة', icon: '🌐', render: () => <LangSwitch /> },
+                { id: 'font', label: 'حجم الخط', icon: '🔠', render: () => <FontSize /> },
+                { id: 'backup', label: 'نسخة احتياطية', icon: '💾', render: () => <Backup /> },
+                { id: 'about', label: 'عن التطبيق', icon: 'ℹ️', render: () => (
           <section className="content-card" id="s-about">
             <h2 className="section-title">عن التطبيق</h2>
             <p className="about-text">
@@ -2300,8 +2269,10 @@ export function PrayerExperience() {
               المداومة عليها، بمحتوى مأخوذ من الصحيحين وما صحّ عن أهل العلم.
             </p>
           </section>
-        </>
-        )}
+                ) },
+              ]}
+            />
+          )}
         </div>
       </div>
 
@@ -2309,9 +2280,9 @@ export function PrayerExperience() {
         {(
           [
             ['home', 'الصلاة', <path key="a" d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />],
-            ['tasbih', 'السبحة', <g key="t"><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="2.2" fill="currentColor" /><path d="M12 3.5V6" /></g>],
-            ['multi', 'المضاعف', <g key="m"><path d="M12 3l2.4 5.6L20 9.3l-4.3 3.8L17 19l-5-3-5 3 1.3-5.9L4 9.3l5.6-.7z" /></g>],
-            ['wird', 'وردي', <g key="b"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5V19c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z" /><path d="M12 6v13.5" /></g>],
+            ['quran', 'القرآن', <g key="q"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5V19c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z" /><path d="M12 6v13.5" /><path d="M7 9.5h2.2M14.8 9.5H17" /></g>],
+            ['wird', 'وردي', <g key="t"><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="2.2" fill="currentColor" /><path d="M12 3.5V6" /></g>],
+            ['names', 'الأسماء', <g key="m"><path d="M12 3l2.4 5.6L20 9.3l-4.3 3.8L17 19l-5-3-5 3 1.3-5.9L4 9.3l5.6-.7z" /></g>],
             ['seera', 'السيرة', <g key="c"><circle cx="6" cy="6" r="2" /><circle cx="6" cy="18" r="2" /><path d="M6 8v8M11 6h9M11 12h9M11 18h9" /></g>],
             ['more', 'المزيد', <g key="d" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></g>],
           ] as [Tab, string, ReactNode][]
