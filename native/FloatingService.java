@@ -203,7 +203,7 @@ public class FloatingService extends Service {
             @Override
             public void run() {
                 if (bubble == null) return;
-                bubble.setProgress(readToday(), prefs.getInt("goal", 100));
+                bubble.setProgress(prefs.getInt("fl_count", 0), prefs.getInt("fl_target", 100));
             }
         });
     }
@@ -362,21 +362,38 @@ public class FloatingService extends Service {
     // ---------------------------------------------------------------------- tap
 
     private void onTap() {
-        int goal = prefs.getInt("goal", 100);
+        int target = prefs.getInt("fl_target", 100);
         int today;
+        int flCount;
         synchronized (LOCK) {
             today = readToday() + 1;
+            flCount = prefs.getInt("fl_count", 0) + 1;
             prefs.edit()
                     .putInt("today", today)
                     .putString("today_date", todayKey())
+                    .putInt("fl_count", flCount)
                     .putInt("pending_local", prefs.getInt("pending_local", 0) + 1)
                     .putInt("pending_global", prefs.getInt("pending_global", 0) + 1)
                     .apply();
         }
 
-        bubble.setProgress(today, goal);
+        // الحلقة تعدّ لعدد الزرار العايم نفسه (له هدف مستقل: ١٠٠ أو ١٠٠٠ ... أو ∞) وتتصفّر عند الوصول
+        boolean reachedGoal = target > 0 && flCount >= target;
+        if (reachedGoal) {
+            bubble.setProgress(target, target);
+            prefs.edit().putInt("fl_count", 0).apply();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (bubble != null) {
+                        bubble.setProgress(0, prefs.getInt("fl_target", 100));
+                    }
+                }
+            }, 1400);
+        } else {
+            bubble.setProgress(flCount, target);
+        }
         SalliWidgetProvider.refreshAll(this);
-        boolean reachedGoal = goal > 0 && today == goal;
         vibrate(reachedGoal);
         pulse(reachedGoal);
         floatSalawat();
@@ -588,7 +605,11 @@ public class FloatingService extends Service {
 
             // تقدم الهدف
             float frac = goal > 0 ? Math.min(1f, today / (float) goal) : 0f;
-            if (frac > 0f) {
+            if (goal <= 0 && today > 0) {
+                // هدف لانهائي: حلقة كاملة هادئة
+                paint.setColor(Color.argb(150, 255, 217, 122));
+                canvas.drawArc(oval, 0, 360, false, paint);
+            } else if (frac > 0f) {
                 paint.setColor(Color.parseColor("#FFD97A"));
                 canvas.drawArc(oval, -90, 360f * frac, false, paint);
             }

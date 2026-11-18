@@ -13,6 +13,7 @@ import { HadithFadl } from '@/components/HadithFadl';
 import { AdhkarCard } from '@/components/AdhkarCard';
 import { Tasbeeh } from '@/components/Tasbeeh';
 import { SectionGrid } from '@/components/SectionGrid';
+import { FloatTarget } from '@/components/FloatTarget';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 import { FridayBanner } from '@/components/FridayBanner';
 import { GlobalKhatma } from '@/components/GlobalKhatma';
@@ -2090,7 +2091,7 @@ export function PrayerExperience() {
             <p className="float-note">
               زرار صغير بصورة اللوحة الذهبية يظهر فوق كل التطبيقات. دوس عليه
               للصلاة على النبي ﷺ وإنت بتتصفح، والحلقة الذهبية بتوريك تقدمك في
-              هدفك اليوم. اسحبه لأي مكان، واسحبه على ✕ لإغلاقه.
+              العدد اللي تحدده تحت. اسحبه لأي مكان، واسحبه على ✕ لإغلاقه.
             </p>
             <button
               type="button"
@@ -2108,6 +2109,7 @@ export function PrayerExperience() {
                 هيفتح لك الإعدادات: فعّل الخيار، وارجع للتطبيق.
               </p>
             )}
+            <FloatTarget />
           </section>
                 ) },
                 { id: 'adhkar-rem', label: 'تذكير الأذكار', icon: '🔔', hidden: !remSupported, render: () => (

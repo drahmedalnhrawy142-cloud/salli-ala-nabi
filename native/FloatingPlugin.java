@@ -203,6 +203,34 @@ public class FloatingPlugin extends Plugin {
         call.resolve();
     }
 
+
+    // ===== هدف الزرار العايم (مستقل): ١٠٠ / ١٠٠٠ ... أو ٠ = لانهائي، ويتصفّر عند الوصول =====
+    @PluginMethod
+    public void floatConfig(PluginCall call) {
+        int target = Math.max(0, call.getInt("target", 100));
+        prefs().edit().putInt("fl_target", target).apply();
+        FloatingService s = FloatingService.running;
+        if (s != null) s.refreshFromPrefs();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void floatReset(PluginCall call) {
+        prefs().edit().putInt("fl_count", 0).apply();
+        FloatingService s = FloatingService.running;
+        if (s != null) s.refreshFromPrefs();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void floatState(PluginCall call) {
+        SharedPreferences p = prefs();
+        JSObject r = new JSObject();
+        r.put("count", p.getInt("fl_count", 0));
+        r.put("target", p.getInt("fl_target", 100));
+        call.resolve(r);
+    }
+
     /** يرجّع عدد الصلوات اللي اتعملت من الزرار العايم ولسه التطبيق ماحسبهاش، ويصفّرها. */
     @PluginMethod
     public void getPending(PluginCall call) {
