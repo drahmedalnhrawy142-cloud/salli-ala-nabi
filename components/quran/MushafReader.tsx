@@ -1,10 +1,36 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent as RMouseEvent, type ReactNode, type TouchEvent as RTouchEvent } from 'react';
-import { BASMALA, loadQiraat, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
+import { BASMALA, loadQiraat, loadTajweed, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
 import { VerseShare } from './VerseShare';
 
 type Theme = 'night' | 'paper';
+
+// رمز الحكم -> [مجموعة اللون، الاسم]
+const TJ_INFO: Record<string, [string, string]> = {
+  ghunnah: ['g', 'غنّة'],
+  ikhfa: ['k', 'إخفاء'],
+  ikhfa_shafawi: ['k', 'إخفاء شفوي'],
+  idghaam_ghunnah: ['i', 'إدغام بغنّة'],
+  idghaam_shafawi: ['i', 'إدغام شفوي'],
+  idghaam_mutajanisayn: ['i', 'إدغام متجانسين'],
+  idghaam_mutaqaribayn: ['i', 'إدغام متقاربين'],
+  idghaam_no_ghunnah: ['n', 'إدغام بلا غنّة'],
+  iqlab: ['q', 'إقلاب'],
+  qalqalah: ['l', 'قلقلة'],
+  madd_2: ['m2', 'مدّ طبيعي (حركتان)'],
+  madd_246: ['m4', 'مدّ عارض للسكون / لين (٢ أو ٤ أو ٦)'],
+  madd_muttasil: ['m5', 'مدّ متصل (٤–٥ حركات)'],
+  madd_munfasil: ['m5', 'مدّ منفصل (٤–٥ حركات)'],
+  madd_6: ['m6', 'مدّ لازم (٦ حركات)'],
+  hamzat_wasl: ['s', 'همزة وصل'],
+  lam_shamsiyyah: ['s', 'لام شمسية'],
+  silent: ['s', 'حرف لا يُنطق'],
+};
+const TJ_LEGEND: [string, string][] = [
+  ['g', 'غنّة'], ['k', 'إخفاء'], ['i', 'إدغام بغنّة'], ['n', 'إدغام بلا غنّة'], ['q', 'إقلاب'], ['l', 'قلقلة'],
+  ['m2', 'مدّ طبيعي'], ['m4', 'مدّ عارض/لين'], ['m5', 'مدّ متصل/منفصل'], ['m6', 'مدّ لازم'], ['s', 'لا يُنطق'],
+];
 
 export function MushafReader({
   data,
@@ -29,6 +55,9 @@ export function MushafReader({
   const [showQ, setShowQ] = useState<boolean>(() => lsGet('quran_showq', true));
   const [qv, setQv] = useState<QV[]>([]);
   const [qSel, setQSel] = useState<number | null>(null);
+  const [showT, setShowT] = useState<boolean>(() => lsGet('quran_showt', false));
+  const [tj, setTj] = useState<TJ | null>(null);
+  const [tjName, setTjName] = useState('');
   const [jump, setJump] = useState('');
   const touch = useRef<{ x: number; y: number } | null>(null);
   const focusRef = useRef<HTMLSpanElement | null>(null);
@@ -43,6 +72,17 @@ export function MushafReader({
       live = false;
     };
   }, [showQ, qv.length]);
+
+  useEffect(() => {
+    if (!showT || tj) return;
+    let live = true;
+    loadTajweed()
+      .then((d) => live && setTj(d))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [showT, tj]);
 
   // آية -> مواضع الاختلاف
   const qmap = useMemo(() => {
@@ -97,6 +137,8 @@ export function MushafReader({
       return;
     }
     const i = Number(el.dataset.i);
+    const te = (e.target as HTMLElement).closest('[data-tj]') as HTMLElement | null;
+    setTjName(te ? te.dataset.tj || '' : '');
     const qe = (e.target as HTMLElement).closest('[data-q]') as HTMLElement | null;
     setQSel(qe ? Number(qe.dataset.q) : null);
     setSel((cur) => (cur === i && !qe ? null : i));
@@ -158,20 +200,49 @@ export function MushafReader({
         ref={focus === i ? focusRef : undefined}
         className={`qa${sel === i ? ' qa-sel' : ''}${focus === i ? ' qa-focus' : ''}${marks.includes(i) ? ' qa-mark' : ''}`}
       >
-        {words.map((w, k) => (
-          <Fragment key={k}>
-            {(() => {
-              const k2 = qs?.find((q) => k >= qv[q].f && k < qv[q].t);
-              return k2 != null ? (
-                <span className="qw qw-q" data-q={k2}>
-                  {w}
-                </span>
-              ) : (
-                <span className="qw">{w}</span>
-              );
-            })()}{' '}
-          </Fragment>
-        ))}
+        {(() => {
+          const marks2 = showT && tj ? tj.a[i] || [] : [];
+          let off = 0;
+          return words.map((w, k) => {
+            const wb = off;
+            off += w.length + 1;
+            const k2 = qs?.find((q) => k >= qv[q].f && k < qv[q].t);
+            let inner: ReactNode = w;
+            if (marks2.length) {
+              const parts: ReactNode[] = [];
+              let pos = 0;
+              for (let m = 0; m < marks2.length; m += 3) {
+                const b = Math.max(marks2[m + 1], wb) - wb;
+                const e = Math.min(marks2[m + 2], wb + w.length) - wb;
+                if (e <= b || b < pos) continue;
+                const info = TJ_INFO[tj!.rules[marks2[m]]];
+                if (!info) continue;
+                if (b > pos) parts.push(w.slice(pos, b));
+                parts.push(
+                  <span key={m} className={`tj tj-${info[0]}`} data-tj={info[1]}>
+                    {w.slice(b, e)}
+                  </span>
+                );
+                pos = e;
+              }
+              if (parts.length) {
+                if (pos < w.length) parts.push(w.slice(pos));
+                inner = parts;
+              }
+            }
+            return (
+              <Fragment key={k}>
+                {k2 != null ? (
+                  <span className="qw qw-q" data-q={k2}>
+                    {inner}
+                  </span>
+                ) : (
+                  <span className="qw">{inner}</span>
+                )}{' '}
+              </Fragment>
+            );
+          });
+        })()}
         <span className="qa-n">{toAr(a[1])}</span>{' '}
       </span>
     );
@@ -226,10 +297,34 @@ export function MushafReader({
         >
           ق
         </button>
+        <button
+          type="button"
+          className={`mr-btn mr-sm${showT ? ' mr-on' : ''}`}
+          onClick={() => {
+            const n = !showT;
+            setShowT(n);
+            setTjName('');
+            lsSet('quran_showt', n);
+          }}
+          aria-label="تلوين أحكام التجويد"
+        >
+          ت
+        </button>
         <button type="button" className="mr-btn mr-sm" onClick={changeTheme} aria-label="تغيير الخلفية">
           {theme === 'night' ? '☀' : '☾'}
         </button>
       </div>
+
+      {showT && (
+        <div className="mr-leg">
+          {TJ_LEGEND.map(([c, n]) => (
+            <span key={c}>
+              <i className={`tj-${c}`} />
+              {n}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="mr-page" onClick={onTap} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <div className="mr-head">
@@ -249,6 +344,7 @@ export function MushafReader({
           <div className="mr-sheet-ref">
             {data.suras[data.ayas[sel][0] - 1].name} • آية {toAr(data.ayas[sel][1])}
           </div>
+          {tjName && showT && <div className="mr-tjn">حكم التجويد: {tjName}</div>}
           {qSel != null && qv[qSel] && (
             <div className="mr-q">
               <div className="mr-q-t">اختلاف في قراءة هذه الكلمة</div>
@@ -302,6 +398,13 @@ export function MushafReader({
         }
         .mr-btn:disabled { opacity: .35; }
         .mr-on { background: rgba(232,194,90,.32); border-color: #e8c25a; }
+        .tj-g { color: #16a37f; } .tj-k { color: #e08a1e; } .tj-i { color: #12a4b8; } .tj-n { color: #7f8c9a; }
+        .tj-q { color: #a855d9; } .tj-l { color: #3b82e6; } .tj-m2 { color: #e0605f; } .tj-m4 { color: #d94a8c; }
+        .tj-m5 { color: #e8672a; } .tj-m6 { color: #c81d25; } .tj-s { color: #8a93a0; }
+        .mr-leg { display: flex; flex-wrap: wrap; gap: 6px 12px; justify-content: center; margin: 0 0 8px; padding: 8px; border-radius: 12px; background: rgba(232,194,90,.06); font-family: var(--font-kufi), sans-serif; font-size: 11.5px; color: rgba(255,241,196,.75); }
+        .mr-leg span { display: inline-flex; align-items: center; gap: 4px; }
+        .mr-leg i { width: 10px; height: 10px; border-radius: 50%; background: currentColor; display: inline-block; }
+        .mr-tjn { text-align: center; margin: 0 0 8px; color: #f1d77a; font-family: var(--font-kufi), sans-serif; font-size: 14px; }
         .qw-q { text-decoration: underline dotted #4fc3a1; text-decoration-thickness: 2px; text-underline-offset: 8px; cursor: pointer; }
         .mr-q { margin: 0 0 10px; padding: 10px; border-radius: 14px; border: 1px solid rgba(79,195,161,.5); background: rgba(79,195,161,.08); }
         .mr-q-t { text-align: center; color: #7fe0c0; font-family: var(--font-kufi), sans-serif; font-size: 13px; margin: 0 0 6px; }

@@ -38,6 +38,21 @@ export function loadSimple(): Promise<string[]> {
 }
 
 /** اختلاف شعبة عن حفص (كلاهما عن عاصم): آية، من كلمة، إلى كلمة (غير شاملة)، نص شعبة */
+export type TJ = { rules: string[]; a: number[][] };
+let tjCache: Promise<TJ> | null = null;
+export function loadTajweed(): Promise<TJ> {
+  if (!tjCache) {
+    tjCache = fetch('/quran/tajweed.json').then((r) => {
+      if (!r.ok) throw new Error('tajweed');
+      return r.json() as Promise<TJ>;
+    });
+    tjCache.catch(() => {
+      tjCache = null;
+    });
+  }
+  return tjCache;
+}
+
 export type QV = { a: number; f: number; t: number; v: string };
 let qvCache: Promise<QV[]> | null = null;
 export function loadQiraat(): Promise<QV[]> {
