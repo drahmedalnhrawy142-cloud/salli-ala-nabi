@@ -5,6 +5,7 @@ import { memo as __memo } from 'react';
 import { useEffect, useState } from 'react';
 import { V } from '@/components/quran/verses';
 import { QuranText } from '@/components/quran/QuranText';
+import { WAKING } from '@/components/adhkarWaking';
 
 type Item = { id: string; text: string; count: number; source: string; quran?: boolean };
 
@@ -59,7 +60,7 @@ const SLEEP: Item[] = [
   { id: 'akb34', text: 'الله أكبر', count: 34, source: 'رواه البخاري ومسلم' },
 ];
 
-type Period = 'm' | 'e' | 'p' | 's';
+type Period = 'm' | 'e' | 'p' | 's' | 'w';
 
 function dayStr() {
   return new Date().toLocaleDateString('en-CA');
@@ -72,7 +73,7 @@ function AdhkarCard() {
   const [period, setPeriod] = useState<Period>('m');
   const [done, setDone] = useState<Record<string, number>>({});
   const items =
-    period === 'm' ? MORNING : period === 'e' ? EVENING : period === 'p' ? AFTER_PRAYER : SLEEP;
+    period === 'm' ? MORNING : period === 'e' ? EVENING : period === 'p' ? AFTER_PRAYER : period === 'w' ? (WAKING as Item[]) : SLEEP;
   const key = `adhkar_${dayStr()}_${period}`;
 
   useEffect(() => {
@@ -119,6 +120,7 @@ function AdhkarCard() {
             ['e', 'المساء'],
             ['p', 'بعد الصلاة'],
             ['s', 'النوم'],
+            ['w', 'الاستيقاظ'],
           ] as [Period, string][]
         ).map(([id, label]) => (
           <button

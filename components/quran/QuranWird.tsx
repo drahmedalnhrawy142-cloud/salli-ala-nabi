@@ -40,6 +40,8 @@ export function QuranWird({
   const daysLeft = Math.ceil(remaining / w.perDay);
   const pct = Math.round(((from - 1) / 604) * 100);
 
+  const [fin, setFin] = useState(false);
+
   function complete() {
     if (doneToday) return;
     let pos = to + 1;
@@ -47,6 +49,7 @@ export function QuranWird({
     if (pos > 604) {
       pos = 1;
       kh += 1;
+      setFin(true);
     }
     const streak = w.last === dayKey(-1) ? w.streak + 1 : 1;
     save({ ...w, pos, last: today, streak, khatmat: kh });
@@ -59,6 +62,22 @@ export function QuranWird({
 
   return (
     <div className="qw">
+      {fin && (
+        <div className="qw-fin" role="status">
+          <div className="qw-fin-b">🏅</div>
+          <h3>ما شاء الله! أتممت الختمة رقم {toAr(w.khatmat)}</h3>
+          <p>
+            صحّ عن أنس بن مالك رضي الله عنه أنه كان إذا ختم القرآن جمع أهله ودعا. فاجمع أهلك وادعُ بما تحب لك وللمسلمين.
+          </p>
+          <p className="qw-fin-n">
+            لم يثبت في السنة دعاء مخصوص بعد الختم، ولذلك لا نضع نصًّا بعينه؛ وأما الدعاء المنتشر في آخر بعض المصاحف فلا أصل له. (المصدر: فتوى
+            الإسلام سؤال وجواب رقم ٦٥٥٨١)
+          </p>
+          <button type="button" onClick={() => setFin(false)}>
+            آمين
+          </button>
+        </div>
+      )}
       <div className="qw-card">
         <div className="qw-top">
           <span className="qw-streak">🔥 {toAr(w.streak)} يوم متتالي</span>
@@ -129,6 +148,12 @@ export function QuranWird({
       </div>
 
       <style>{`
+        .qw-fin { margin: 0 0 14px; padding: 16px; text-align: center; border-radius: 20px; border: 1px solid rgba(232,194,90,.6); background: radial-gradient(circle at 50% 0%, rgba(232,194,90,.25), rgba(18,15,8,.9)); }
+        .qw-fin-b { font-size: 44px; }
+        .qw-fin h3 { margin: 6px 0; color: #f1d77a; font-family: var(--font-kufi), sans-serif; font-size: 17px; }
+        .qw-fin p { margin: 6px 0; color: #fff1c4; font-family: var(--font-ruqaa), serif; font-size: 16px; line-height: 1.9; }
+        .qw-fin .qw-fin-n { font-size: 12.5px; color: rgba(255,241,196,.55); }
+        .qw-fin button { margin-top: 8px; padding: 8px 26px; border-radius: 999px; border: 1px solid rgba(232,194,90,.5); background: rgba(232,194,90,.15); color: #f1d77a; font-family: var(--font-kufi), sans-serif; }
         .qw { display: flex; flex-direction: column; gap: 14px; }
         .qw-card { padding: 18px 16px; border-radius: 22px; border: 1px solid rgba(232,194,90,.35); background: rgba(18,15,8,.82); text-align: center; }
         .qw-top { display: flex; justify-content: space-between; margin: 0 0 10px; }
