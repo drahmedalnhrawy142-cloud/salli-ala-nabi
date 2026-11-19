@@ -115,7 +115,7 @@ export function QuranCorner() {
           },
         ]}
       />
-      <p className="qc-credit">نص المصحف وخطه: مجمع الملك فهد لطباعة المصحف الشريف — رواية حفص عن عاصم. مواضع ألوان التجويد: مشروع cpfair/quran-tajweed (CC BY 4.0) على نص تنزيل.</p>
+      <p className="qc-credit">نص المصحف وخطه: مجمع الملك فهد لطباعة المصحف الشريف — رواية حفص عن عاصم. مواضع ألوان التجويد: مشروع cpfair/quran-tajweed (CC BY 4.0) على نص تنزيل. التفسير الميسّر: مجمع الملك فهد عبر مشروع spa5k/tafsir_api (MIT).</p>
     </div>
   );
 }

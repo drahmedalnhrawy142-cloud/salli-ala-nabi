@@ -53,6 +53,21 @@ export function loadTajweed(): Promise<TJ> {
   return tjCache;
 }
 
+const tfCache = new Map<number, Promise<string[]>>();
+/** التفسير الميسّر لسورة كاملة: مصفوفة نصوص بترتيب الآيات */
+export function loadTafsir(surah: number): Promise<string[]> {
+  let p = tfCache.get(surah);
+  if (!p) {
+    p = fetch(`/tafsir/${surah}.json`).then((r) => {
+      if (!r.ok) throw new Error('tafsir');
+      return r.json() as Promise<string[]>;
+    });
+    p.catch(() => tfCache.delete(surah));
+    tfCache.set(surah, p);
+  }
+  return p;
+}
+
 export type QV = { a: number; f: number; t: number; v: string };
 let qvCache: Promise<QV[]> | null = null;
 export function loadQiraat(): Promise<QV[]> {

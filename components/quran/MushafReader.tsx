@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent as RMouseEvent, type ReactNode, type TouchEvent as RTouchEvent } from 'react';
-import { BASMALA, loadQiraat, loadTajweed, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
+import { BASMALA, loadQiraat, loadTajweed, loadTafsir, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
 import { VerseShare } from './VerseShare';
 
 type Theme = 'night' | 'paper';
@@ -58,6 +58,8 @@ export function MushafReader({
   const [showT, setShowT] = useState<boolean>(() => lsGet('quran_showt', false));
   const [tj, setTj] = useState<TJ | null>(null);
   const [tjName, setTjName] = useState('');
+  const [tafOpen, setTafOpen] = useState(false);
+  const [taf, setTaf] = useState<string | null>(null);
   const [jump, setJump] = useState('');
   const touch = useRef<{ x: number; y: number } | null>(null);
   const focusRef = useRef<HTMLSpanElement | null>(null);
@@ -83,6 +85,19 @@ export function MushafReader({
       live = false;
     };
   }, [showT, tj]);
+
+  useEffect(() => {
+    setTaf(null);
+    if (!tafOpen || sel == null) return;
+    const a = data.ayas[sel];
+    let live = true;
+    loadTafsir(a[0])
+      .then((d) => live && setTaf(d[a[1] - 1] || 'لا يوجد تفسير لهذه الآية في المصدر.'))
+      .catch(() => live && setTaf('تعذّر تحميل التفسير. تأكد من الاتصال وأعد المحاولة.'));
+    return () => {
+      live = false;
+    };
+  }, [tafOpen, sel, data]);
 
   // آية -> مواضع الاختلاف
   const qmap = useMemo(() => {
@@ -359,7 +374,17 @@ export function MushafReader({
               <div className="mr-q-n">من نصوص مجمع الملك فهد الرسمية للروايتين.</div>
             </div>
           )}
+          {tafOpen && (
+            <div className="mr-taf">
+              <div className="mr-taf-t">التفسير الميسّر</div>
+              <div className="mr-taf-b">{taf ?? 'جارٍ التحميل…'}</div>
+              <div className="mr-q-n">التفسير الميسّر — مجمع الملك فهد لطباعة المصحف الشريف.</div>
+            </div>
+          )}
           <div className="mr-sheet-btns">
+            <button type="button" className={tafOpen ? 'mr-on' : ''} onClick={() => setTafOpen((o) => !o)}>
+              تفسير
+            </button>
             <button type="button" onClick={() => copyAya(sel)}>
               نسخ
             </button>
@@ -465,7 +490,10 @@ export function MushafReader({
           border: 1px solid rgba(232,194,90,.5); box-shadow: 0 8px 30px rgba(0,0,0,.6);
         }
         .mr-sheet-ref { text-align: center; font-family: var(--font-kufi), sans-serif; color: #f1d77a; margin: 0 0 10px; font-size: 14px; }
-        .mr-sheet-btns { display: flex; gap: 8px; }
+        .mr-sheet-btns { display: flex; gap: 6px; }
+        .mr-taf { margin: 0 0 10px; padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(232,194,90,.35); background: rgba(232,194,90,.06); }
+        .mr-taf-t { text-align: center; color: #f1d77a; font-family: var(--font-kufi), sans-serif; font-size: 13px; margin: 0 0 6px; }
+        .mr-taf-b { max-height: 34vh; overflow-y: auto; white-space: pre-line; direction: rtl; text-align: justify; font-family: var(--font-ruqaa), serif; font-size: 17px; line-height: 2; color: #fff1c4; }
         .mr-sheet-btns button {
           flex: 1; padding: 11px 6px; border-radius: 12px; border: 1px solid rgba(232,194,90,.4);
           background: rgba(232,194,90,.12); color: #f1d77a; font-family: var(--font-kufi), sans-serif; font-size: 14px;
