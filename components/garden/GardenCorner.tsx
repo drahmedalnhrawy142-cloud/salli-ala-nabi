@@ -13,6 +13,7 @@ import {
   gardenTap,
   gardenToggleHouse,
   gardenView,
+  gardenNative,
   daysAway,
   todayKey,
   type GKind,
@@ -128,6 +129,22 @@ function GardenView() {
 
   const [away, setAway] = useState<number | null>(null);
   useEffect(() => setAway(daysAway()), [s.t]);
+  const [rem, setRem] = useState<{ on: boolean; min: number } | null>(null);
+  useEffect(() => {
+    const n = gardenNative();
+    if (!n?.gardenStatus) return;
+    n.gardenStatus().then(setRem).catch(() => {});
+    // مزامنة آخر يوم ذكر عند فتح البستان
+    n.gardenSet?.({ last: localStorage.getItem('garden_last') || '' })?.catch?.(() => {});
+  }, []);
+  async function saveRem(next: { on: boolean; min: number }) {
+    setRem(next);
+    const w = window as unknown as { Capacitor?: { Plugins?: { FloatingButton?: { reminderRequestPermission?: () => Promise<void> } } } };
+    try {
+      if (next.on) await w.Capacitor?.Plugins?.FloatingButton?.reminderRequestPermission?.();
+      await gardenNative()?.gardenSet?.({ on: next.on, min: next.min, last: localStorage.getItem('garden_last') || '' });
+    } catch {}
+  }
   const miss = away != null && away >= 1 && !(typeof document === 'undefined');
 
   return (
@@ -192,6 +209,28 @@ function GardenView() {
         {houseToday ? '✓ صليتُ اليوم ١٢ ركعة سنة (بيت في الجنة)' : 'صليتُ اليوم ١٢ ركعة سنة'}
       </button>
 
+      {rem && (
+        <div className="gd-rem">
+          <button type="button" className={rem.on ? 'on' : ''} onClick={() => saveRem({ ...rem, on: !rem.on })}>
+            {rem.on ? '🔔 تذكير البستان مفعّل' : '🔕 فعّل تذكير البستان (عتاب لطيف إن غبت)'}
+          </button>
+          {rem.on && (
+            <label>
+              وقت التذكير:
+              <input
+                type="time"
+                value={`${String(Math.floor(rem.min / 60)).padStart(2, '0')}:${String(rem.min % 60).padStart(2, '0')}`}
+                onChange={(e) => {
+                  const [h, m] = e.target.value.split(':').map(Number);
+                  if (!Number.isNaN(h)) saveRem({ ...rem, min: h * 60 + (m || 0) });
+                }}
+              />
+            </label>
+          )}
+          <p>يصلك إشعار في الوقت المحدد فقط إن لم تذكر الله في التطبيق ذلك اليوم.</p>
+        </div>
+      )}
+
       <p className="gd-note">
         المشهد تصوير رمزي لتحفيزك على الذكر، أما الجنة الحقيقية فوق ما نتخيل. وكل ما يُعدّ في التطبيق من أذكار (السبحة وأذكار اليوم
         والصلاة على النبي ﷺ) يُنمي بستانك.
@@ -218,6 +257,11 @@ function GardenView() {
         .gd-c.on { background: rgba(232,194,90,.24); border-color: #f1d77a; color: #fff1c4; }
         .gd-miss { display: flex; flex-direction: column; gap: 4px; margin: 0 0 10px; padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(232,150,90,.5); background: rgba(60,28,10,.55); color: #ffd9b0; font-family: var(--font-ruqaa), serif; font-size: 15px; line-height: 1.8; }
         .gd-miss b { font-family: var(--font-kufi), sans-serif; font-size: 14px; color: #ffb877; }
+        .gd-rem { margin-top: 12px; padding: 12px; border-radius: 16px; border: 1px solid rgba(232,194,90,.3); background: rgba(18,15,8,.7); display: flex; flex-direction: column; gap: 8px; font-family: var(--font-kufi), sans-serif; color: #f7ebc1; font-size: 13.5px; }
+        .gd-rem button { padding: 10px; border-radius: 14px; border: 1px solid rgba(232,194,90,.4); background: transparent; color: #f7ebc1; font-family: var(--font-kufi), sans-serif; font-size: 14px; }
+        .gd-rem button.on { background: rgba(232,194,90,.2); color: #f1d77a; border-color: #f1d77a; }
+        .gd-rem input { margin-inline-start: 8px; background: #1a1409; color: #f1d77a; border: 1px solid rgba(232,194,90,.4); border-radius: 8px; padding: 4px 8px; }
+        .gd-rem p { margin: 0; font-family: var(--font-ruqaa), serif; font-size: 13px; color: rgba(255,241,196,.55); }
         .gd-eff { font-family: var(--font-ruqaa), serif; font-size: 14px; color: rgba(255,241,196,.65); margin: 8px 0 12px; }
         .gd-tap { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px; padding: 12px 10px; border-radius: 22px; border: 1.5px solid rgba(232,194,90,.6); background: radial-gradient(120% 100% at 50% 0%, rgba(232,194,90,.22), rgba(18,15,8,.9) 70%); color: #f1d77a; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
         .gd-tap:active { transform: scale(.97); }

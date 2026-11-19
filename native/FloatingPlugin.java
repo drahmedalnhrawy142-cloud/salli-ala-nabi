@@ -154,6 +154,27 @@ public class FloatingPlugin extends Plugin {
         call.resolve();
     }
 
+    @PluginMethod
+    public void gardenStatus(PluginCall call) {
+        SharedPreferences p = remPrefs();
+        JSObject r = new JSObject();
+        r.put("on", p.getBoolean("garden_on", false));
+        r.put("min", p.getInt("garden_min", 20 * 60));
+        call.resolve(r);
+    }
+
+    /** تذكير البستان: on + الدقيقة من اليوم + آخر يوم ذكر فيه (yyyy-MM-dd). كل معامل اختياري فيُحفظ ما وصل فقط. */
+    @PluginMethod
+    public void gardenSet(PluginCall call) {
+        SharedPreferences.Editor e = remPrefs().edit();
+        if (call.hasOption("on")) e.putBoolean("garden_on", call.getBoolean("on", false));
+        if (call.hasOption("min")) e.putInt("garden_min", call.getInt("min", 20 * 60));
+        if (call.hasOption("last")) e.putString("garden_last", call.getString("last", ""));
+        e.apply();
+        GardenReceiver.scheduleAll(getContext());
+        call.resolve();
+    }
+
     /** لو المستخدم فتح التطبيق بعد إشعار أذكار: يرجّع "m" أو "e" ويصفّرها. */
     @PluginMethod
     public void adhkarPending(PluginCall call) {

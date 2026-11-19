@@ -50,10 +50,29 @@ export function gardenAdd(n = 1) {
 
 /** آخر يوم زِيد فيه البستان (لرسالة العتاب اللطيف عند الغياب) */
 export const LAST_KEY = 'garden_last';
-function stamp() {
+type GNative = { gardenSet?: (o: { on?: boolean; min?: number; last?: string }) => Promise<void>; gardenStatus?: () => Promise<{ on: boolean; min: number }> };
+/** إضافة الأندرويد (غير موجودة في المتصفح) */
+export function gardenNative(): GNative | null {
   try {
-    localStorage.setItem(LAST_KEY, todayKey());
+    const w = window as unknown as { Capacitor?: { isNativePlatform?: () => boolean; Plugins?: { FloatingButton?: GNative } } };
+    if (!w.Capacitor?.isNativePlatform?.()) return null;
+    return w.Capacitor.Plugins?.FloatingButton ?? null;
+  } catch {
+    return null;
+  }
+}
+let syncTimer: ReturnType<typeof setTimeout> | undefined;
+function stamp() {
+  const k = todayKey();
+  try {
+    if (localStorage.getItem(LAST_KEY) === k) return;
+    localStorage.setItem(LAST_KEY, k);
   } catch {}
+  // أبلغ الأندرويد أن اليوم ذُكر فيه الله فلا يُرسل عتابًا
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    gardenNative()?.gardenSet?.({ last: k })?.catch?.(() => {});
+  }, 800);
 }
 /** عدد الأيام منذ آخر ذكر؛ null إن لم يبدأ بعد */
 export function daysAway(): number | null {
