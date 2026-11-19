@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent as RMouseEvent, type ReactNode, type TouchEvent as RTouchEvent } from 'react';
+import { AyahPlayer } from './AyahPlayer';
 import { BASMALA, loadQiraat, loadTajweed, loadTafsir, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
 import { VerseShare } from './VerseShare';
 
@@ -59,6 +60,7 @@ export function MushafReader({
   const [tj, setTj] = useState<TJ | null>(null);
   const [tjName, setTjName] = useState('');
   const [tafOpen, setTafOpen] = useState(false);
+  const [playIdx, setPlayIdx] = useState<number | null>(null);
   const [taf, setTaf] = useState<string | null>(null);
   const [jump, setJump] = useState('');
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -213,7 +215,7 @@ export function MushafReader({
         key={i}
         data-i={i}
         ref={focus === i ? focusRef : undefined}
-        className={`qa${sel === i ? ' qa-sel' : ''}${focus === i ? ' qa-focus' : ''}${marks.includes(i) ? ' qa-mark' : ''}`}
+        className={`qa${sel === i ? ' qa-sel' : ''}${playIdx === i ? ' qa-play' : ''}${focus === i ? ' qa-focus' : ''}${marks.includes(i) ? ' qa-mark' : ''}`}
       >
         {(() => {
           const marks2 = showT && tj ? tj.a[i] || [] : [];
@@ -382,6 +384,9 @@ export function MushafReader({
             </div>
           )}
           <div className="mr-sheet-btns">
+            <button type="button" onClick={() => { setPlayIdx(sel); setSel(null); }}>
+              ▶ استماع
+            </button>
             <button type="button" className={tafOpen ? 'mr-on' : ''} onClick={() => setTafOpen((o) => !o)}>
               تفسير
             </button>
@@ -405,6 +410,9 @@ export function MushafReader({
             </button>
           </div>
         </div>
+      )}
+      {playIdx != null && (
+        <AyahPlayer data={data} idx={playIdx} setIdx={setPlayIdx} goPage={(p) => setPage(p)} onClose={() => setPlayIdx(null)} />
       )}
       {toast && <div className="mr-toast">{toast}</div>}
       {shareIdx != null && <VerseShare data={data} idx={shareIdx} onClose={() => setShareIdx(null)} />}
@@ -476,6 +484,7 @@ export function MushafReader({
         .mr-paper .q-sura { color: #5b4208; }
         .q-basmala { display: block; text-align: center; text-align-last: center; margin: 4px 0 8px; }
         .qa { border-radius: 8px; transition: background .2s; }
+        .qa-play { background: rgba(127,224,192,.22); }
         .qa-sel { background: rgba(232,194,90,.25); }
         .qa-focus { background: rgba(120,200,160,.25); }
         .qa-mark .qa-n { background: #e8c25a; color: #1c1405; }
@@ -490,7 +499,8 @@ export function MushafReader({
           border: 1px solid rgba(232,194,90,.5); box-shadow: 0 8px 30px rgba(0,0,0,.6);
         }
         .mr-sheet-ref { text-align: center; font-family: var(--font-kufi), sans-serif; color: #f1d77a; margin: 0 0 10px; font-size: 14px; }
-        .mr-sheet-btns { display: flex; gap: 6px; }
+        .mr-sheet-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+        .mr-sheet-btns button { flex: 1 1 28%; }
         .mr-taf { margin: 0 0 10px; padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(232,194,90,.35); background: rgba(232,194,90,.06); }
         .mr-taf-t { text-align: center; color: #f1d77a; font-family: var(--font-kufi), sans-serif; font-size: 13px; margin: 0 0 6px; }
         .mr-taf-b { max-height: 34vh; overflow-y: auto; white-space: pre-line; direction: rtl; text-align: justify; font-family: var(--font-ruqaa), serif; font-size: 17px; line-height: 2; color: #fff1c4; }
