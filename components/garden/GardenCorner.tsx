@@ -13,6 +13,7 @@ import {
   gardenTap,
   gardenToggleHouse,
   gardenView,
+  daysAway,
   todayKey,
   type GKind,
 } from './store';
@@ -24,6 +25,13 @@ const DHIKR: { id: GKind; text: string; effect: string }[] = [
   { id: 'hamd', text: 'الحمد لله', effect: 'غِراس الجنة: شجرة لكل ٣٣ ذكرًا من الأربعة' },
   { id: 'tahl', text: 'لا إله إلا الله', effect: 'غِراس الجنة: شجرة لكل ٣٣ ذكرًا من الأربعة' },
   { id: 'akbar', text: 'الله أكبر', effect: 'غِراس الجنة: شجرة لكل ٣٣ ذكرًا من الأربعة' },
+];
+
+const MISS = [
+  'بستانك اشتاق إليك… مرّ يوم بلا ذكر. اغرس اليوم نخلة تُسقيها بتسبيحة.',
+  'الورود في بستانك تنتظر من يسقيها بذكر الله. عُد إليه ولو بتسبيحات قليلة.',
+  'أنهارك هدأت قليلًا منذ غبت. كلمة طيبة تُجري الماء من جديد: سبحان الله وبحمده.',
+  'لا تعاتب نفسك طويلًا؛ فأحب الأعمال إلى الله أدومها وإن قلّ. ابدأ الآن بتسبيحة.',
 ];
 
 function stageName(N: number) {
@@ -118,8 +126,18 @@ function GardenView() {
   const pct = next ? Math.round(((v.N - (prev?.at ?? 0)) / (next.at - (prev?.at ?? 0))) * 100) : 100;
   const houseToday = s.houses.includes(todayKey());
 
+  const [away, setAway] = useState<number | null>(null);
+  useEffect(() => setAway(daysAway()), [s.t]);
+  const miss = away != null && away >= 1 && !(typeof document === 'undefined');
+
   return (
     <div className="gd">
+      {miss && (
+        <div className="gd-miss" role="status">
+          <b>{away === 1 ? 'مرّ يوم' : `مرّت ${toAr(away!)} أيام`} منذ آخر ذكر</b>
+          <span>{MISS[(away! + v.palms) % MISS.length]}</span>
+        </div>
+      )}
       <div ref={wrap} className="gd-scene">
         <canvas ref={cv} aria-label="بستانك" />
         <div className="gd-chip">
@@ -127,6 +145,17 @@ function GardenView() {
           <span>{toAr(v.N)} ذكرًا</span>
         </div>
       </div>
+
+      <button type="button" className="gd-tap" onClick={tap} aria-label={`عُدّ ${cur.text}`}>
+        <span className="gd-tap-n" key={bump}>
+          {sel === 'ikhlas' ? toAr(s.ikhlas % 10) + ' / ١٠' : toAr(count)}
+        </span>
+        <span className="gd-tap-t">{cur.text}</span>
+        {sel === 'ikhlas' && <span className="gd-tap-s">قصور: {toAr(v.palaces)}</span>}
+        {(sel === 'sub' || sel === 'hamd' || sel === 'tahl' || sel === 'akbar') && (
+          <span className="gd-tap-s">الأربعة معًا: {toAr(four)} (لكل ٣٣ شجرة)</span>
+        )}
+      </button>
 
       <div className="gd-stats">
         <div><b>{toAr(v.palms)}</b><span>نخلة{v.palms > MAX_PALMS ? ' (يظهر ١٤)' : ''}</span></div>
@@ -158,16 +187,6 @@ function GardenView() {
       </div>
       <p className="gd-eff">{cur.effect}</p>
 
-      <button type="button" className="gd-tap" onClick={tap} aria-label={`عُدّ ${cur.text}`}>
-        <span className="gd-tap-n" key={bump}>
-          {sel === 'ikhlas' ? toAr(s.ikhlas % 10) + ' / ١٠' : toAr(count)}
-        </span>
-        <span className="gd-tap-t">{cur.text}</span>
-        {sel === 'ikhlas' && <span className="gd-tap-s">قصور: {toAr(v.palaces)}</span>}
-        {(sel === 'sub' || sel === 'hamd' || sel === 'tahl' || sel === 'akbar') && (
-          <span className="gd-tap-s">الأربعة معًا: {toAr(four)} (لكل ٣٣ شجرة)</span>
-        )}
-      </button>
 
       <button type="button" className={`gd-house${houseToday ? ' on' : ''}`} onClick={gardenToggleHouse}>
         {houseToday ? '✓ صليتُ اليوم ١٢ ركعة سنة (بيت في الجنة)' : 'صليتُ اليوم ١٢ ركعة سنة'}
@@ -197,12 +216,14 @@ function GardenView() {
         .gd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
         .gd-c { padding: 8px 13px; border-radius: 999px; border: 1px solid rgba(232,194,90,.35); background: rgba(18,15,8,.78); color: #f7ebc1; font-family: var(--font-ruqaa), serif; font-size: 15px; cursor: pointer; }
         .gd-c.on { background: rgba(232,194,90,.24); border-color: #f1d77a; color: #fff1c4; }
+        .gd-miss { display: flex; flex-direction: column; gap: 4px; margin: 0 0 10px; padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(232,150,90,.5); background: rgba(60,28,10,.55); color: #ffd9b0; font-family: var(--font-ruqaa), serif; font-size: 15px; line-height: 1.8; }
+        .gd-miss b { font-family: var(--font-kufi), sans-serif; font-size: 14px; color: #ffb877; }
         .gd-eff { font-family: var(--font-ruqaa), serif; font-size: 14px; color: rgba(255,241,196,.65); margin: 8px 0 12px; }
-        .gd-tap { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 24px 10px; border-radius: 26px; border: 1.5px solid rgba(232,194,90,.6); background: radial-gradient(120% 100% at 50% 0%, rgba(232,194,90,.22), rgba(18,15,8,.9) 70%); color: #f1d77a; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+        .gd-tap { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px; padding: 12px 10px; border-radius: 22px; border: 1.5px solid rgba(232,194,90,.6); background: radial-gradient(120% 100% at 50% 0%, rgba(232,194,90,.22), rgba(18,15,8,.9) 70%); color: #f1d77a; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
         .gd-tap:active { transform: scale(.97); }
-        .gd-tap-n { font-family: var(--font-kufi), sans-serif; font-weight: 700; font-size: 44px; line-height: 1; animation: gdpop .25s ease-out; }
+        .gd-tap-n { font-family: var(--font-kufi), sans-serif; font-weight: 700; font-size: 36px; line-height: 1; animation: gdpop .25s ease-out; }
         @keyframes gdpop { from { transform: scale(1.25); } to { transform: scale(1); } }
-        .gd-tap-t { font-family: var(--font-ruqaa), serif; font-size: 20px; color: #fff1c4; }
+        .gd-tap-t { font-family: var(--font-ruqaa), serif; font-size: 18px; color: #fff1c4; }
         .gd-tap-s { font-family: var(--font-kufi), sans-serif; font-size: 12.5px; color: rgba(255,241,196,.65); }
         .gd-house { width: 100%; margin-top: 10px; padding: 12px; border-radius: 16px; border: 1px solid rgba(232,194,90,.35); background: rgba(18,15,8,.78); color: #f7ebc1; font-family: var(--font-kufi), sans-serif; font-size: 14px; cursor: pointer; }
         .gd-house.on { background: rgba(232,194,90,.2); border-color: #f1d77a; color: #f1d77a; }

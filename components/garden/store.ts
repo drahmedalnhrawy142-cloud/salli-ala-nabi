@@ -42,15 +42,39 @@ function write(s: GState) {
 
 /** ذكر عادي من أي عدّاد في التطبيق (يزيد البستان دون تخصيص) */
 export function gardenAdd(n = 1) {
+  stamp();
   const s = gardenRead();
   s.t += n;
   write(s);
+}
+
+/** آخر يوم زِيد فيه البستان (لرسالة العتاب اللطيف عند الغياب) */
+export const LAST_KEY = 'garden_last';
+function stamp() {
+  try {
+    localStorage.setItem(LAST_KEY, todayKey());
+  } catch {}
+}
+/** عدد الأيام منذ آخر ذكر؛ null إن لم يبدأ بعد */
+export function daysAway(): number | null {
+  try {
+    const l = localStorage.getItem(LAST_KEY);
+    if (!l) return null;
+    const [y, m, d] = l.split('-').map(Number);
+    const a = new Date(y, m - 1, d).getTime();
+    const n = new Date();
+    const b = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime();
+    return Math.max(0, Math.round((b - a) / 86400000));
+  } catch {
+    return null;
+  }
 }
 
 export type GKind = 'palm' | 'ikhlas' | 'sub' | 'hamd' | 'tahl' | 'akbar';
 
 /** نقرة من سبحة البستان */
 export function gardenTap(kind: GKind) {
+  stamp();
   const s = gardenRead();
   s.t += 1;
   if (kind === 'palm') s.palm += 1;

@@ -155,6 +155,7 @@ export class GardenScene {
   private birds: { x: number; y: number; v: number; p: number; s: number }[] = [];
   private sparks: { x: number; y: number; p: number; s: number }[] = [];
   private phase: Phase = 'day';
+  private zoom = 0;
   private lights: { x: number; y: number; r: number }[] = [];
   private stars: { x: number; y: number; r: number; p: number }[] = [];
 
@@ -745,9 +746,16 @@ export class GardenScene {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
     if (!this.statics) return;
-    ctx.drawImage(this.statics, 0, 0, W, H);
     const t = now / 1000;
     const N = this.v?.N ?? 0;
+    // الكاميرا تبتعد تدريجيًا مع نمو البستان: قريبة جدًا في البداية ثم تُظهر المشهد كاملًا
+    const zt = 1 + 0.4 * (1 - clamp(Math.log10(1 + N) / Math.log10(4001), 0, 1));
+    this.zoom = this.zoom === 0 || this.reduce ? zt : this.zoom + (zt - this.zoom) * 0.05;
+    const z = this.zoom;
+    const ax = W * 0.5;
+    const ay = H * 0.9;
+    ctx.setTransform(dpr * z, 0, 0, dpr * z, dpr * (ax - ax * z), dpr * (ay - ay * z));
+    ctx.drawImage(this.statics, 0, 0, W, H);
 
     // بريق الماء
     if (this.river) {
@@ -914,6 +922,7 @@ export class GardenScene {
       ctx.restore();
     }
 
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (this.overlay) {
       ctx.globalAlpha = ph === 'night' ? 0.3 : 1;
       ctx.drawImage(this.overlay, 0, 0, W, H);
