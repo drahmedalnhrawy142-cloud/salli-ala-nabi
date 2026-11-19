@@ -79,10 +79,12 @@ function GardenView() {
     scene.current = sc;
     sc.setView(gardenView());
     sc.start();
+    const tick = setInterval(() => sc.setView(gardenView()), 60000);
     const vis = () => (document.hidden ? sc.stop() : sc.start());
     document.addEventListener('visibilitychange', vis);
     return () => {
       document.removeEventListener('visibilitychange', vis);
+      clearInterval(tick);
       sc.stop();
       scene.current = null;
     };

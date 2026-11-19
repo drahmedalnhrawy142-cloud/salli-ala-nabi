@@ -116,6 +116,20 @@ type Rec = {
 };
 type Sprite = { c: HTMLCanvasElement; w: number; h: number; baseX: number; baseY: number; crownX?: number; crownY?: number; trunk?: HTMLCanvasElement };
 
+export type Phase = 'dawn' | 'day' | 'dusk' | 'night';
+/** الوقت بحسب ساعة الجهاز: فجر ٥–٧، نهار ٧–١٧، غروب ١٧–١٩، ليل بعد ذلك */
+export function currentPhase(d = new Date()): Phase {
+  try {
+    const f = (window as unknown as { __gardenPhase?: Phase }).__gardenPhase;
+    if (f) return f;
+  } catch {}
+  const h = d.getHours();
+  if (h >= 5 && h < 7) return 'dawn';
+  if (h >= 7 && h < 17) return 'day';
+  if (h >= 17 && h < 19) return 'dusk';
+  return 'night';
+}
+
 export class GardenScene {
   private cv: HTMLCanvasElement;
   private ctx: Ctx;
@@ -140,6 +154,9 @@ export class GardenScene {
   private spring: { x: number; y: number; r: number } | null = null;
   private birds: { x: number; y: number; v: number; p: number; s: number }[] = [];
   private sparks: { x: number; y: number; p: number; s: number }[] = [];
+  private phase: Phase = 'day';
+  private lights: { x: number; y: number; r: number }[] = [];
+  private stars: { x: number; y: number; r: number; p: number }[] = [];
 
   constructor(cv: HTMLCanvasElement, W: number, H: number, dpr: number) {
     this.cv = cv;
@@ -153,6 +170,7 @@ export class GardenScene {
     const r = rng(9);
     for (let i = 0; i < 6; i++) this.birds.push({ x: r() * W, y: H * (0.08 + r() * 0.2), v: 8 + r() * 10, p: r() * 6, s: 0.8 + r() * 0.8 });
     for (let i = 0; i < 38; i++) this.sparks.push({ x: r() * W, y: H * (0.3 + r() * 0.65), p: r() * 6, s: 0.5 + r() * 1.3 });
+    for (let i = 0; i < 90; i++) this.stars.push({ x: r() * W, y: r() * H * 0.4, r: 0.4 + r() * 1.1, p: r() * 6 });
     this.buildOverlay();
   }
 
@@ -196,7 +214,9 @@ export class GardenScene {
     const riverOn = N >= 100;
     const rs = riverOn ? 0.55 + 0.45 * clamp((N - 100) / 1500, 0, 1) : 0;
     const flowers = clamp((N - 250) / 1200, 0, 1);
+    const ph = currentPhase();
     const sig = [
+      ph,
       q(g, 30),
       riverOn ? q(rs, 20) : -1,
       q(flowers, 24),
@@ -212,6 +232,7 @@ export class GardenScene {
     ].join('|');
     if (sig === this.sig) return;
     this.sig = sig;
+    this.phase = ph;
 
     // قائمة الأشجار
     const palms = Math.min(v.palms, MAX_PALMS);
@@ -279,6 +300,7 @@ export class GardenScene {
     const S = mk(W, H, dpr);
     const x = S.x;
     const u = W / 390;
+    this.lights = [];
     this.drawSky(x, W, H);
     this.drawHills(x, W, H, g);
     this.drawGround(x, W, H, g);
@@ -331,6 +353,7 @@ export class GardenScene {
           x.fillStyle = sh;
           x.fillRect(bx - pw * 0.7, by - pw, pw * 1.4, pw * 2);
           x.restore();
+          this.lights.push({ x: bx, y: by - pw * 0.36, r: pw * 0.55 });
           const sp = renderPalace(pw, dpr, haze + (1 - s.w / 0.4) * 0.12, 3 + i);
           x.drawImage(sp, bx - pw / 2, by - pw * 0.86 + pw * 0.04, pw, pw * 0.86);
         },
@@ -348,6 +371,7 @@ export class GardenScene {
           x.beginPath();
           x.ellipse(bx, by + 1, pw * 0.5, pw * 0.07, 0, 0, Math.PI * 2);
           x.fill();
+          this.lights.push({ x: bx, y: by - pw * 0.4, r: pw * 0.5 });
           const sp = renderPavilion(pw, dpr, 0.12);
           x.drawImage(sp, bx - pw / 2, by - pw * 0.95, pw, pw * 1.05);
         },
@@ -380,20 +404,54 @@ export class GardenScene {
   }
 
   private drawSky(x: Ctx, W: number, H: number) {
+    const ph = this.phase;
+    const pal: Record<Phase, string[]> = {
+      day: ['#3f93dc', '#86c4ee', '#cde9f1', '#fff0cc'],
+      dawn: ['#35508f', '#9a7fb0', '#f0a58a', '#ffd9a0'],
+      dusk: ['#2b3f7a', '#8a5d96', '#e8895a', '#ffc27a'],
+      night: ['#050b1f', '#0a1634', '#132447', '#1d3358'],
+    };
+    const c = pal[ph];
     const g = x.createLinearGradient(0, 0, 0, H * 0.5);
-    g.addColorStop(0, '#3f93dc');
-    g.addColorStop(0.35, '#86c4ee');
-    g.addColorStop(0.72, '#cde9f1');
-    g.addColorStop(1, '#fff0cc');
+    g.addColorStop(0, c[0]);
+    g.addColorStop(0.35, c[1]);
+    g.addColorStop(0.72, c[2]);
+    g.addColorStop(1, c[3]);
     x.fillStyle = g;
     x.fillRect(0, 0, W, H * 0.55);
-    // وهج الشمس
-    const sx = W * 0.16;
-    const sy = H * 0.12;
+    if (ph === 'night') {
+      for (const st of this.stars) {
+        x.fillStyle = `rgba(255,250,230,${0.45 + 0.4 * Math.abs(Math.sin(st.p))})`;
+        x.beginPath();
+        x.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+        x.fill();
+      }
+      // هلال القمر مع هالته
+      const mx = W * 0.78;
+      const my = H * 0.13;
+      const mr = W * 0.06;
+      const halo = x.createRadialGradient(mx, my, mr * 0.5, mx, my, mr * 6);
+      halo.addColorStop(0, 'rgba(240,240,210,0.38)');
+      halo.addColorStop(1, 'rgba(240,240,210,0)');
+      x.fillStyle = halo;
+      x.fillRect(mx - mr * 6, my - mr * 6, mr * 12, mr * 12);
+      x.fillStyle = '#f4efd2';
+      x.beginPath();
+      x.arc(mx, my, mr, 0, Math.PI * 2);
+      x.fill();
+      x.fillStyle = '#0a1634';
+      x.beginPath();
+      x.arc(mx + mr * 0.45, my - mr * 0.15, mr * 0.92, 0, Math.PI * 2);
+      x.fill();
+      return;
+    }
+    // وهج الشمس (عالية في النهار، قريبة من الأفق عند الفجر والغروب)
+    const sx = ph === 'day' ? W * 0.16 : ph === 'dawn' ? W * 0.82 : W * 0.2;
+    const sy = ph === 'day' ? H * 0.12 : H * 0.4;
     const sun = x.createRadialGradient(sx, sy, 0, sx, sy, W * 0.75);
     sun.addColorStop(0, 'rgba(255,250,224,1)');
     sun.addColorStop(0.06, 'rgba(255,244,200,0.95)');
-    sun.addColorStop(0.2, 'rgba(255,226,150,0.45)');
+    sun.addColorStop(0.2, ph === 'day' ? 'rgba(255,226,150,0.45)' : 'rgba(255,170,100,0.5)');
     sun.addColorStop(1, 'rgba(255,226,150,0)');
     x.fillStyle = sun;
     x.fillRect(0, 0, W, H * 0.6);
@@ -786,8 +844,35 @@ export class GardenScene {
     // بذرة في البداية
     if (this.recs.length === 0 && (this.v?.palaces ?? 0) === 0) this.drawSprout(ctx, W * 0.5, H * 0.86, t, clamp(N / 25, 0, 1));
 
+    // تدرّج الإضاءة بحسب الوقت، ثم الأنوار فوقه
+    const ph = this.phase;
+    if (ph !== 'day') {
+      const tint = ph === 'night' ? 'rgba(6,14,46,0.55)' : ph === 'dawn' ? 'rgba(255,150,120,0.14)' : 'rgba(255,120,60,0.2)';
+      const tg = ctx.createLinearGradient(0, H * 0.2, 0, H * 0.5);
+      tg.addColorStop(0, tint.replace(/[\d.]+\)$/, '0)'));
+      tg.addColorStop(1, tint);
+      ctx.fillStyle = tg;
+      ctx.fillRect(0, H * 0.2, W, H * 0.3);
+      ctx.fillStyle = tint;
+      ctx.fillRect(0, H * 0.5, W, H * 0.5);
+      if (ph === 'night') {
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        for (const L of this.lights) {
+          const f = 0.8 + 0.2 * Math.sin(t * 1.7 + L.x);
+          const gl = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, L.r);
+          gl.addColorStop(0, `rgba(255,205,110,${0.3 * f})`);
+          gl.addColorStop(0.4, `rgba(255,170,70,${0.1 * f})`);
+          gl.addColorStop(1, 'rgba(255,170,70,0)');
+          ctx.fillStyle = gl;
+          ctx.fillRect(L.x - L.r, L.y - L.r, L.r * 2, L.r * 2);
+        }
+        ctx.restore();
+      }
+    }
+
     // طيور
-    if (N >= 400) {
+    if (N >= 400 && ph !== 'night') {
       ctx.strokeStyle = 'rgba(40,50,60,0.75)';
       ctx.lineWidth = 1.2;
       for (const b of this.birds) {
@@ -803,7 +888,7 @@ export class GardenScene {
     }
 
     // بريق ذهبي
-    if (N >= 1500) {
+    if (N >= 1500 || ph === 'night') {
       for (const s of this.sparks) {
         const a = 0.5 + 0.5 * Math.sin(t * 2 + s.p);
         if (a < 0.15) continue;
@@ -829,7 +914,11 @@ export class GardenScene {
       ctx.restore();
     }
 
-    if (this.overlay) ctx.drawImage(this.overlay, 0, 0, W, H);
+    if (this.overlay) {
+      ctx.globalAlpha = ph === 'night' ? 0.3 : 1;
+      ctx.drawImage(this.overlay, 0, 0, W, H);
+      ctx.globalAlpha = 1;
+    }
   }
 
   private drawSprout(x: Ctx, px: number, py: number, t: number, k: number) {
