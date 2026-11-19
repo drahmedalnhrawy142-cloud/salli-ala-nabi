@@ -180,7 +180,7 @@ export function SectionGrid({
           padding: 8px 10px;
           border-radius: 18px;
           border: 1px solid rgba(232, 194, 90, 0.28);
-          background: rgba(18, 15, 8, 0.78);
+          background: rgba(18, 15, 8, 0.97);
           position: sticky;
           top: 8px;
           z-index: 6;

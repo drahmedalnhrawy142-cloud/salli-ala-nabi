@@ -29,6 +29,7 @@ import { initI18n, useLang } from '@/components/i18n';
 
 // بنك الأسئلة تقيل: بيتحمّل لما تفتح السيرة أو وردي
 const ProphetQuiz = lazy(() => import('@/components/ProphetQuiz').then((m) => ({ default: m.ProphetQuiz })));
+const SiraCorner = lazy(() => import('@/components/sira/SiraCorner').then((m) => ({ default: m.SiraCorner })));
 const QuranCorner = lazy(() => import('@/components/quran/QuranCorner').then((m) => ({ default: m.QuranCorner })));
 const DailyQuestion = lazy(() => import('@/components/DailyQuestion').then((m) => ({ default: m.DailyQuestion })));
 
@@ -2068,6 +2069,11 @@ export function PrayerExperience() {
                 { id: 'timeline', label: 'السيرة', icon: '⏳', render: () => <ProphetTimeline /> },
                 { id: 'moments', label: 'مواقف', icon: '🕌', render: () => <ProphetMoments /> },
                 { id: 'names', label: 'الأسماء', icon: '🏷️', render: () => <ProphetNames /> },
+                { id: 'sira', label: 'السيرة الكاملة', icon: '📚', hint: 'ابن هشام • بفهرس', render: () => (
+                  <Suspense fallback={null}>
+                    <SiraCorner />
+                  </Suspense>
+                ) },
                 { id: 'quiz', label: 'اختبر نفسك', icon: '❓', render: () => (
                   <Suspense fallback={null}>
                     <ProphetQuiz />
