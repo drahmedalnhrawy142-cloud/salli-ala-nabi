@@ -1,21 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import { Reem_Kufi, Aref_Ruqaa } from 'next/font/google';
 import './globals.css';
-
-// كوفي للعناوين (تشبه لوجو التطبيق) ورقعة للنصوص
-const kufi = Reem_Kufi({
-  subsets: ['arabic'],
-  weight: ['400', '500', '700'],
-  variable: '--font-kufi',
-  display: 'swap',
-});
-
-const ruqaa = Aref_Ruqaa({
-  subsets: ['arabic'],
-  weight: ['400', '700'],
-  variable: '--font-ruqaa',
-  display: 'swap',
-});
+import { FONT_CLASSES } from './fonts';
 
 export const metadata: Metadata = {
   title: 'صلي على النبي ﷺ | تبادل مفاتيح نسك',
@@ -34,9 +19,15 @@ export const viewport: Viewport = {
   themeColor: '#090817',
 };
 
+// يطبّق الخط المختار قبل أول رسم للصفحة (لتفادي وميض الخط الافتراضي)
+const FONT_BOOT = `try{var m={amiri:1,naskh:1,schehe:1,cairo:1,tajawal:1,almarai:1,plex:1,notokufi:1,messiri:1},r=document.documentElement.style,b=localStorage.getItem('ui_font_body'),h=localStorage.getItem('ui_font_head');if(b&&m[b])r.setProperty('--font-ruqaa','var(--f-'+b+')');if(h&&m[h])r.setProperty('--font-kufi','var(--f-'+h+')')}catch(e){}`;
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ar" dir="rtl" className={`${kufi.variable} ${ruqaa.variable}`}>
+    <html lang="ar" dir="rtl" className={FONT_CLASSES} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: FONT_BOOT }} />
+      </head>
       <body>{children}</body>
     </html>
   );

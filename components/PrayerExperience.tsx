@@ -22,6 +22,7 @@ import { AsmaAllah } from '@/components/AsmaAllah';
 import { ProphetMoments } from '@/components/ProphetMoments';
 import { Backup } from '@/components/Backup';
 import { FontSize } from '@/components/FontSize';
+import { FontFamily } from '@/components/FontFamily';
 import { PrayerTimes } from '@/components/PrayerTimes';
 import { VolumeKeys } from '@/components/VolumeKeys';
 import { LangSwitch } from '@/components/LangSwitch';
@@ -2270,6 +2271,7 @@ export function PrayerExperience() {
                 { id: 'volume', label: 'أزرار الصوت', icon: '🔊', render: () => <VolumeKeys /> },
                 { id: 'lang', label: 'اللغة', icon: '🌐', render: () => <LangSwitch /> },
                 { id: 'font', label: 'حجم الخط', icon: '🔠', render: () => <FontSize /> },
+                { id: 'fontfam', label: 'نوع الخط', icon: '✒️', hint: 'اختار الأريح لعينك', render: () => <FontFamily /> },
                 { id: 'backup', label: 'نسخة احتياطية', icon: '💾', render: () => <Backup /> },
                 { id: 'about', label: 'عن التطبيق', icon: 'ℹ️', render: () => (
           <section className="content-card" id="s-about">
