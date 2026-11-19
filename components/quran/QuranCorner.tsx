@@ -56,6 +56,11 @@ export function QuranCorner() {
           src: url('/fonts/hafs.18.woff2') format('woff2');
           font-display: swap;
         }
+        @font-face {
+          font-family: 'KFGQPC Naskh';
+          src: url('/fonts/uthmantn.10.woff2') format('woff2');
+          font-display: swap;
+        }
         .qc-msg { text-align: center; color: #f1d77a; font-family: var(--font-ruqaa), serif; font-size: 18px; padding: 24px 0; }
         .qc-credit { text-align: center; margin: 18px 0 0; font-family: var(--font-ruqaa), serif; font-size: 13px; color: rgba(255,241,196,.5); }
       `}</style>

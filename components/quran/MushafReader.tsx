@@ -28,6 +28,13 @@ const TJ_INFO: Record<string, [string, string]> = {
   lam_shamsiyyah: ['s', 'لام شمسية'],
   silent: ['s', 'حرف لا يُنطق'],
 };
+// خطوط المصحف المتاحة (كلها مضمَّنة في التطبيق فتعمل بلا نت)
+const MFONTS: { id: string; name: string; css: string }[] = [
+  { id: 'hafs', name: 'العثماني — مجمع الملك فهد (الأصلي)', css: "'KFGQPC Hafs', 'Aref Ruqaa', serif" },
+  { id: 'naskh', name: 'عثمان طه نسخ — مجمع الملك فهد', css: "'KFGQPC Naskh', 'KFGQPC Hafs', serif" },
+  { id: 'amiriq', name: 'أميري قرآن', css: "var(--f-amiriq), 'Amiri Quran', 'KFGQPC Hafs', serif" },
+  { id: 'schehe', name: 'شهرزاد الجديد', css: "var(--f-schehe), 'Scheherazade New', 'KFGQPC Hafs', serif" },
+];
 const TJ_LEGEND: [string, string][] = [
   ['g', 'غنّة'], ['k', 'إخفاء'], ['i', 'إدغام بغنّة'], ['n', 'إدغام بلا غنّة'], ['q', 'إقلاب'], ['l', 'قلقلة'],
   ['m2', 'مدّ طبيعي'], ['m4', 'مدّ عارض/لين'], ['m5', 'مدّ متصل/منفصل'], ['m6', 'مدّ لازم'], ['s', 'لا يُنطق'],
@@ -60,6 +67,8 @@ export function MushafReader({
   const [tj, setTj] = useState<TJ | null>(null);
   const [tjName, setTjName] = useState('');
   const [tafOpen, setTafOpen] = useState(false);
+  const [mfont, setMfont] = useState<string>(() => String(lsGet('quran_mfont', 'hafs')));
+  const [fontsOpen, setFontsOpen] = useState(false);
   const [playIdx, setPlayIdx] = useState<number | null>(null);
   const [taf, setTaf] = useState<string | null>(null);
   const [jump, setJump] = useState('');
@@ -327,10 +336,32 @@ export function MushafReader({
         >
           ت
         </button>
+        <button type="button" className={`mr-btn mr-sm${fontsOpen ? ' mr-on' : ''}`} onClick={() => setFontsOpen((o) => !o)} aria-label="خط المصحف">
+          خط
+        </button>
         <button type="button" className="mr-btn mr-sm" onClick={changeTheme} aria-label="تغيير الخلفية">
           {theme === 'night' ? '☀' : '☾'}
         </button>
       </div>
+
+      {fontsOpen && (
+        <div className="mr-fonts">
+          {MFONTS.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              className={mfont === f.id ? 'on' : ''}
+              onClick={() => {
+                setMfont(f.id);
+                lsSet('quran_mfont', f.id);
+              }}
+            >
+              <span style={{ fontFamily: f.css }}>بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</span>
+              <small>{f.name}</small>
+            </button>
+          ))}
+        </div>
+      )}
 
       {showT && (
         <div className="mr-leg">
@@ -348,7 +379,7 @@ export function MushafReader({
           <span>{suraNames}</span>
           <span>الجزء {toAr(juz)}</span>
         </div>
-        <div className="mr-text" style={{ fontSize: `${fs}px` }}>
+        <div className="mr-text" style={{ fontSize: `${fs}px`, fontFamily: (MFONTS.find((f) => f.id === mfont) || MFONTS[0]).css }}>
           {rows}
         </div>
         <div className="mr-foot">
@@ -420,7 +451,7 @@ export function MushafReader({
       <style>{`
         .mr { position: relative; }
         .mr-tools {
-          display: flex; align-items: center; gap: 8px; margin: 0 0 12px;
+          display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; margin: 0 0 12px;
           position: sticky; top: 64px; z-index: 5; padding: 6px;
           border-radius: 16px; background: rgba(14,12,6,.92); border: 1px solid rgba(232,194,90,.25);
         }
@@ -434,6 +465,11 @@ export function MushafReader({
         .tj-g { color: #16a37f; } .tj-k { color: #e08a1e; } .tj-i { color: #12a4b8; } .tj-n { color: #7f8c9a; }
         .tj-q { color: #a855d9; } .tj-l { color: #3b82e6; } .tj-m2 { color: #e0605f; } .tj-m4 { color: #d94a8c; }
         .tj-m5 { color: #e8672a; } .tj-m6 { color: #c81d25; } .tj-s { color: #8a93a0; }
+.mr-fonts { display: flex; flex-direction: column; gap: 6px; margin: 0 0 8px; padding: 8px; border-radius: 14px; border: 1px solid rgba(232,194,90,.3); background: rgba(18,15,8,.9); }
+        .mr-fonts button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px; border-radius: 12px; border: 1px solid rgba(232,194,90,.25); background: transparent; color: #fff1c4; }
+        .mr-fonts button.on { border-color: #f1d77a; background: rgba(232,194,90,.18); }
+        .mr-fonts span { font-size: 22px; direction: rtl; }
+        .mr-fonts small { font-family: var(--font-kufi), sans-serif; font-size: 11.5px; color: #f1d77a; }
         .mr-leg { display: flex; flex-wrap: wrap; gap: 6px 12px; justify-content: center; margin: 0 0 8px; padding: 8px; border-radius: 12px; background: rgba(232,194,90,.06); font-family: var(--font-kufi), sans-serif; font-size: 11.5px; color: rgba(255,241,196,.75); }
         .mr-leg span { display: inline-flex; align-items: center; gap: 4px; }
         .mr-leg i { width: 10px; height: 10px; border-radius: 50%; background: currentColor; display: inline-block; }

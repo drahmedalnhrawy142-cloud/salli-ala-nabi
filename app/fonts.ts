@@ -2,6 +2,7 @@ import {
   Reem_Kufi,
   Aref_Ruqaa,
   Amiri,
+  Amiri_Quran,
   Noto_Naskh_Arabic,
   Noto_Kufi_Arabic,
   Scheherazade_New,
@@ -22,6 +23,7 @@ const ruqaa = Aref_Ruqaa({ subsets: ['arabic'], weight: ['400', '700'], variable
 
 // ملاحظة: next/font يشترط قيمًا مكتوبة حرفيًا داخل كل استدعاء (لا spread ولا متغيرات).
 const amiri = Amiri({ subsets: ['arabic'], display: 'swap', preload: false, weight: ['400', '700'], variable: '--f-amiri' });
+const amiriQ = Amiri_Quran({ subsets: ['arabic'], display: 'swap', preload: false, weight: '400', variable: '--f-amiriq' });
 const naskh = Noto_Naskh_Arabic({ subsets: ['arabic'], display: 'swap', preload: false, variable: '--f-naskh' });
 const notoKufi = Noto_Kufi_Arabic({ subsets: ['arabic'], display: 'swap', preload: false, variable: '--f-notokufi' });
 const schehe = Scheherazade_New({ subsets: ['arabic'], display: 'swap', preload: false, weight: ['400', '700'], variable: '--f-schehe' });
@@ -32,7 +34,7 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ['arabic'], display: 'swap', preloa
 const messiri = El_Messiri({ subsets: ['arabic'], display: 'swap', preload: false, variable: '--f-messiri' });
 
 export const FONT_CLASSES = [
-  kufi, ruqaa, amiri, naskh, notoKufi, schehe, cairo, tajawal, almarai, plex, messiri,
+  kufi, ruqaa, amiri, amiriQ, naskh, notoKufi, schehe, cairo, tajawal, almarai, plex, messiri,
 ]
   .map((f) => f.variable)
   .join(' ');
