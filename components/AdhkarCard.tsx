@@ -1,5 +1,6 @@
 'use client';
 
+import { gardenAdd } from '@/components/garden/store';
 import { memo as __memo } from 'react';
 import { useEffect, useState } from 'react';
 import { V } from '@/components/quran/verses';
@@ -95,6 +96,7 @@ function AdhkarCard() {
   function tap(it: Item) {
     const cur = done[it.id] || 0;
     if (cur >= it.count) return;
+    gardenAdd(1);
     const next = { ...done, [it.id]: cur + 1 };
     setDone(next);
     try {

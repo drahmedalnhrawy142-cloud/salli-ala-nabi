@@ -30,6 +30,7 @@ import { initI18n, useLang } from '@/components/i18n';
 
 // بنك الأسئلة تقيل: بيتحمّل لما تفتح السيرة أو وردي
 const ProphetQuiz = lazy(() => import('@/components/ProphetQuiz').then((m) => ({ default: m.ProphetQuiz })));
+const GardenCorner = lazy(() => import('@/components/garden/GardenCorner').then((m) => ({ default: m.GardenCorner })));
 const SiraCorner = lazy(() => import('@/components/sira/SiraCorner').then((m) => ({ default: m.SiraCorner })));
 const QuranCorner = lazy(() => import('@/components/quran/QuranCorner').then((m) => ({ default: m.QuranCorner })));
 const DailyQuestion = lazy(() => import('@/components/DailyQuestion').then((m) => ({ default: m.DailyQuestion })));
@@ -2022,6 +2023,11 @@ export function PrayerExperience() {
                   onOpenChange={setCornerSec}
                   secs={[
                     { id: 'tasbih', label: 'السبحة', icon: '📿', render: () => <Tasbeeh /> },
+                    { id: 'garden', label: 'بستانك', icon: '🌴', hint: 'يكبر مع كل ذكر', render: () => (
+                      <Suspense fallback={null}>
+                        <GardenCorner />
+                      </Suspense>
+                    ) },
                     { id: 'multi', label: 'الذكر المضاعف', icon: '✨', render: () => <Tasbeeh mode="multi" /> },
                     { id: 'adhkar', label: 'أذكار اليوم', icon: '🌅', render: () => <AdhkarCard /> },
                   ]}

@@ -2,6 +2,7 @@
 
 import { memo as __memo } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { gardenAdd } from '@/components/garden/store';
 import { SectionChips } from '@/components/SectionChips';
 
 type Item = { label: string; text: string; source?: string };
@@ -117,6 +118,7 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
   tapRef.current = tap;
 
   function tap() {
+    gardenAdd(1);
     let next = c + 1;
     let nr = r;
     let done = false;
