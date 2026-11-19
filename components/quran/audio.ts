@@ -3,14 +3,31 @@
  * للاستماع بلا نت: يحمّل المستخدم السورة فتُخزَّن في مخزن المتصفح (Cache Storage) على جهازه.
  * حقوق التلاوات لأصحابها؛ التطبيق مجاني بلا إعلانات.
  */
-export type Reciter = { id: string; name: string; folder: string };
+export type Reciter = { id: string; name: string; folder: string; riwaya: 'hafs' | 'warsh'; note?: string };
 
+/** أسماء المجلدات مطابقة لقائمة everyayah.com (recitations_ayat). ملفات عبد الباسط ورش فيها نقص فلم تُضف. */
 export const RECITERS: Reciter[] = [
-  { id: 'husary', name: 'محمود خليل الحصري (مرتل)', folder: 'Husary_64kbps' },
-  { id: 'minshawy', name: 'محمد صديق المنشاوي (مرتل)', folder: 'Minshawy_Murattal_128kbps' },
-  { id: 'basit', name: 'عبد الباسط عبد الصمد (مرتل)', folder: 'Abdul_Basit_Murattal_64kbps' },
-  { id: 'shuraim', name: 'سعود الشريم', folder: 'Saood_ash-Shuraym_128kbps' },
-  { id: 'shatri', name: 'أبو بكر الشاطري', folder: 'Abu_Bakr_Ash-Shaatree_128kbps' },
+  { id: 'husary', name: 'محمود خليل الحصري (مرتل)', folder: 'Husary_64kbps', riwaya: 'hafs' },
+  { id: 'husary-muallim', name: 'الحصري (المعلّم — للحفظ والتعليم)', folder: 'Husary_Muallim_128kbps', riwaya: 'hafs' },
+  { id: 'minshawy', name: 'محمد صديق المنشاوي (مرتل)', folder: 'Minshawy_Murattal_128kbps', riwaya: 'hafs' },
+  { id: 'basit', name: 'عبد الباسط عبد الصمد (مرتل)', folder: 'Abdul_Basit_Murattal_64kbps', riwaya: 'hafs' },
+  { id: 'banna', name: 'محمود علي البنا', folder: 'mahmoud_ali_al_banna_32kbps', riwaya: 'hafs' },
+  { id: 'tablawy', name: 'محمد الطبلاوي', folder: 'Mohammad_al_Tablaway_64kbps', riwaya: 'hafs' },
+  { id: 'maher', name: 'ماهر المعيقلي', folder: 'Maher_AlMuaiqly_64kbps', riwaya: 'hafs' },
+  { id: 'shuraim', name: 'سعود الشريم', folder: 'Saood_ash-Shuraym_128kbps', riwaya: 'hafs' },
+  { id: 'shatri', name: 'أبو بكر الشاطري', folder: 'Abu_Bakr_Ash-Shaatree_128kbps', riwaya: 'hafs' },
+  { id: 'ghamdi', name: 'سعد الغامدي', folder: 'Ghamadi_40kbps', riwaya: 'hafs' },
+  { id: 'hudhaify', name: 'علي الحذيفي', folder: 'Hudhaify_64kbps', riwaya: 'hafs' },
+  { id: 'budair', name: 'صلاح البدير', folder: 'Salah_Al_Budair_128kbps', riwaya: 'hafs' },
+  { id: 'dussary', name: 'ياسر الدوسري', folder: 'Yasser_Ad-Dussary_128kbps', riwaya: 'hafs' },
+  { id: 'ayman', name: 'أيمن سويد (تجويد)', folder: 'Ayman_Sowaid_64kbps', riwaya: 'hafs' },
+  { id: 'ayyoub', name: 'محمد أيوب', folder: 'Muhammad_Ayyoub_64kbps', riwaya: 'hafs' },
+  { id: 'jibreel', name: 'محمد جبريل', folder: 'Muhammad_Jibreel_64kbps', riwaya: 'hafs' },
+  { id: 'rifai', name: 'هاني الرفاعي', folder: 'Hani_Rifai_64kbps', riwaya: 'hafs' },
+  { id: 'ajamy', name: 'أحمد بن علي العجمي', folder: 'ahmed_ibn_ali_al_ajamy_128kbps', riwaya: 'hafs' },
+  { id: 'basfar', name: 'عبد الله بصفر', folder: 'Abdullah_Basfar_64kbps', riwaya: 'hafs' },
+  { id: 'dosary-w', name: 'إبراهيم الدوسري — رواية ورش', folder: 'warsh/warsh_ibrahim_aldosary_128kbps', riwaya: 'warsh' },
+  { id: 'jazaery-w', name: 'ياسين الجزائري — رواية ورش', folder: 'warsh/warsh_yassin_al_jazaery_64kbps', riwaya: 'warsh' },
 ];
 
 const pad = (n: number, w = 3) => String(n).padStart(w, '0');

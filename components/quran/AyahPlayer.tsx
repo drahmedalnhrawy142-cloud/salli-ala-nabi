@@ -146,11 +146,20 @@ export function AyahPlayer({
       </div>
       <div className="ap-row">
         <select value={rid} onChange={(e) => (setRid(e.target.value), lsSet('quran_reciter', e.target.value))} aria-label="القارئ">
-          {RECITERS.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name}
-            </option>
-          ))}
+          <optgroup label="رواية حفص عن عاصم">
+            {RECITERS.filter((r) => r.riwaya === 'hafs').map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="رواية ورش عن نافع">
+            {RECITERS.filter((r) => r.riwaya === 'warsh').map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </optgroup>
         </select>
         <select
           value={rep}
@@ -179,6 +188,9 @@ export function AyahPlayer({
           <button type="button" onClick={download}>⬇ حمّل السورة للاستماع بلا نت</button>
         )}
       </div>
+      {rec.riwaya === 'warsh' && (
+        <div className="ap-msg">رواية ورش: النص المعروض بحفص، فقد تختلف بعض الكلمات عمّا تسمعه.</div>
+      )}
       {msg && <div className="ap-msg">{msg}</div>}
       <div className="ap-n">التلاوات من everyayah.com — حقوقها لأصحابها.</div>
       <style>{`
