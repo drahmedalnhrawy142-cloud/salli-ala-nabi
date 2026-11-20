@@ -38,6 +38,31 @@ export function loadSimple(): Promise<string[]> {
 }
 
 /** اختلاف شعبة عن حفص (كلاهما عن عاصم): آية، من كلمة، إلى كلمة (غير شاملة)، نص شعبة */
+/** الروايات المتاحة: نص كل رواية وخطها من مجمع الملك فهد، وترقيم آياتها وصفحاتها كما في مصحفها */
+export const RIWAYAT: { id: string; name: string; font: string; file: string }[] = [
+  { id: 'hafs', name: 'حفص عن عاصم', font: 'KFGQPC Hafs', file: '' },
+  { id: 'shouba', name: 'شعبة عن عاصم', font: 'KFGQPC Shouba', file: 'shouba.8.woff2' },
+  { id: 'warsh', name: 'ورش عن نافع', font: 'KFGQPC Warsh', file: 'warsh.10.woff2' },
+  { id: 'qaloon', name: 'قالون عن نافع', font: 'KFGQPC Qaloon', file: 'qaloon.10.woff2' },
+  { id: 'doori', name: 'الدوري عن أبي عمرو', font: 'KFGQPC Doori', file: 'doori.9.woff2' },
+  { id: 'soosi', name: 'السوسي عن أبي عمرو', font: 'KFGQPC Soosi', file: 'soosi.9.woff2' },
+  { id: 'bazzi', name: 'البزي عن ابن كثير', font: 'KFGQPC Bazzi', file: 'bazzi.7.woff2' },
+  { id: 'qumbul', name: 'قنبل عن ابن كثير', font: 'KFGQPC Qumbul', file: 'qumbul.7.woff2' },
+];
+const rwCache = new Map<string, Promise<QData>>();
+export function loadRiwaya(id: string): Promise<QData> {
+  let p = rwCache.get(id);
+  if (!p) {
+    p = fetch(`/quran/r/${id}.json`).then((r) => {
+      if (!r.ok) throw new Error('riwaya');
+      return r.json() as Promise<QData>;
+    });
+    p.catch(() => rwCache.delete(id));
+    rwCache.set(id, p);
+  }
+  return p;
+}
+
 export type TJ = { rules: string[]; a: number[][] };
 let tjCache: Promise<TJ> | null = null;
 export function loadTajweed(): Promise<TJ> {

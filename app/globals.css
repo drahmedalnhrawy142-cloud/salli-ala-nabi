@@ -158,3 +158,33 @@ a { color: inherit; text-decoration: none; }
   src: url('/fonts/shouba.8.woff2') format('woff2');
   font-display: swap;
 }
+@font-face {
+  font-family: 'KFGQPC Warsh';
+  src: url('/fonts/warsh.10.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'KFGQPC Qaloon';
+  src: url('/fonts/qaloon.10.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'KFGQPC Doori';
+  src: url('/fonts/doori.9.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'KFGQPC Soosi';
+  src: url('/fonts/soosi.9.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'KFGQPC Bazzi';
+  src: url('/fonts/bazzi.7.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'KFGQPC Qumbul';
+  src: url('/fonts/qumbul.7.woff2') format('woff2');
+  font-display: swap;
+}

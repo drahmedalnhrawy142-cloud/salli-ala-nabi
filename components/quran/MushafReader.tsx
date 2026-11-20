@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent as RMouseEvent, type ReactNode, type TouchEvent as RTouchEvent } from 'react';
 import { AyahPlayer } from './AyahPlayer';
-import { BASMALA, loadQiraat, loadTajweed, loadTafsir, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
+import { BASMALA, RIWAYAT, loadRiwaya, loadQiraat, loadTajweed, loadTafsir, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
 import { VerseShare } from './VerseShare';
 
 type Theme = 'night' | 'paper';
@@ -41,7 +41,7 @@ const TJ_LEGEND: [string, string][] = [
 ];
 
 export function MushafReader({
-  data,
+  data: hdata,
   page,
   setPage,
   focus,
@@ -55,6 +55,9 @@ export function MushafReader({
   marks: number[];
   toggleMark: (i: number) => void;
 }) {
+  const [rw, setRw] = useState<string>(() => String(lsGet('quran_riwaya', 'hafs')));
+  const [rdata, setRdata] = useState<{ id: string; d: QData } | null>(null);
+  const [rerr, setRerr] = useState(false);
   const [fs, setFs] = useState<number>(() => lsGet('quran_fs', 25));
   const [theme, setTheme] = useState<Theme>(() => lsGet<Theme>('quran_theme', 'night'));
   const [sel, setSel] = useState<number | null>(null);
@@ -72,6 +75,21 @@ export function MushafReader({
   const [playIdx, setPlayIdx] = useState<number | null>(null);
   const [taf, setTaf] = useState<string | null>(null);
   const [jump, setJump] = useState('');
+  // نص الرواية المختارة (حفص هو الأساس، وبقية الروايات تُحمَّل عند الاختيار وتُخزَّن للاستخدام بلا نت)
+  const data: QData = rw === 'hafs' || rdata?.id !== rw ? hdata : rdata.d;
+  const isH = data === hdata;
+  const rinfo = RIWAYAT.find((r) => r.id === rw) || RIWAYAT[0];
+  useEffect(() => {
+    setRerr(false);
+    let live = true;
+    if (rw !== 'hafs')
+      loadRiwaya(rw)
+        .then((d) => live && setRdata({ id: rw, d }))
+        .catch(() => live && setRerr(true));
+    return () => {
+      live = false;
+    };
+  }, [rw]);
   const touch = useRef<{ x: number; y: number } | null>(null);
   const focusRef = useRef<HTMLSpanElement | null>(null);
 
@@ -199,6 +217,8 @@ export function MushafReader({
     }
   }
 
+  // هل آية الفاتحة الأولى في هذه الرواية هي البسملة؟ (حفص وشعبة نعم، وغيرهما تُعدّ البسملة غير آية)
+  const hasBas = data.ayas[0][4].replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '').startsWith('بسم');
   const rows: ReactNode[] = [];
   for (const i of idxs) {
     const a = data.ayas[i];
@@ -209,7 +229,7 @@ export function MushafReader({
           <span>سورة {s.name}</span>
         </div>
       );
-      if (a[0] !== 1 && a[0] !== 9) {
+      if (a[0] !== 9 && (a[0] !== 1 || !hasBas)) {
         rows.push(
           <div className="q-basmala" key={`b${i}`}>
             {BASMALA}
@@ -218,16 +238,16 @@ export function MushafReader({
       }
     }
     const words = a[4].split(' ');
-    const qs = showQ ? qmap.get(i) : undefined;
+    const qs = isH && showQ ? qmap.get(i) : undefined;
     rows.push(
       <span
         key={i}
         data-i={i}
-        ref={focus === i ? focusRef : undefined}
-        className={`qa${sel === i ? ' qa-sel' : ''}${playIdx === i ? ' qa-play' : ''}${focus === i ? ' qa-focus' : ''}${marks.includes(i) ? ' qa-mark' : ''}`}
+        ref={isH && focus === i ? focusRef : undefined}
+        className={`qa${sel === i ? ' qa-sel' : ''}${playIdx === i ? ' qa-play' : ''}${isH && focus === i ? ' qa-focus' : ''}${isH && marks.includes(i) ? ' qa-mark' : ''}`}
       >
         {(() => {
-          const marks2 = showT && tj ? tj.a[i] || [] : [];
+          const marks2 = isH && showT && tj ? tj.a[i] || [] : [];
           let off = 0;
           return words.map((w, k) => {
             const wb = off;
@@ -311,6 +331,8 @@ export function MushafReader({
         <button type="button" className="mr-btn mr-sm" onClick={() => changeFs(1)} aria-label="تكبير الخط">
           أ+
         </button>
+        {isH && (
+          <>
         <button
           type="button"
           className={`mr-btn mr-sm${showQ ? ' mr-on' : ''}`}
@@ -336,8 +358,10 @@ export function MushafReader({
         >
           ت
         </button>
-        <button type="button" className={`mr-btn mr-sm${fontsOpen ? ' mr-on' : ''}`} onClick={() => setFontsOpen((o) => !o)} aria-label="خط المصحف">
-          خط
+          </>
+        )}
+        <button type="button" className={`mr-btn mr-sm${fontsOpen ? ' mr-on' : ''}`} onClick={() => setFontsOpen((o) => !o)} aria-label="الرواية وخط المصحف">
+          رواية
         </button>
         <button type="button" className="mr-btn mr-sm" onClick={changeTheme} aria-label="تغيير الخلفية">
           {theme === 'night' ? '☀' : '☾'}
@@ -346,7 +370,27 @@ export function MushafReader({
 
       {fontsOpen && (
         <div className="mr-fonts">
-          {MFONTS.map((f) => (
+          <div className="mr-rw">
+            {RIWAYAT.map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                className={rw === r.id ? 'on' : ''}
+                onClick={() => {
+                  setRw(r.id);
+                  lsSet('quran_riwaya', r.id);
+                  setSel(null);
+                  setPlayIdx(null);
+                  setTafOpen(false);
+                }}
+              >
+                {r.name}
+              </button>
+            ))}
+          </div>
+          {rerr && <div className="mr-q-n">تعذّر تحميل هذه الرواية. تأكد من الاتصال وأعد المحاولة (تُحفظ بعدها على جهازك).</div>}
+          {rw !== 'hafs' && !rerr && !rdata && <div className="mr-q-n">جارٍ تحميل الرواية…</div>}
+          {rw === 'hafs' && MFONTS.map((f) => (
             <button
               key={f.id}
               type="button"
@@ -379,7 +423,7 @@ export function MushafReader({
           <span>{suraNames}</span>
           <span>الجزء {toAr(juz)}</span>
         </div>
-        <div className="mr-text" style={{ fontSize: `${fs}px`, fontFamily: (MFONTS.find((f) => f.id === mfont) || MFONTS[0]).css }}>
+        <div className="mr-text" style={{ fontSize: `${fs}px`, fontFamily: isH && rw === 'hafs' ? (MFONTS.find((f) => f.id === mfont) || MFONTS[0]).css : `'${rinfo.font}', serif` }}>
           {rows}
         </div>
         <div className="mr-foot">
@@ -407,7 +451,7 @@ export function MushafReader({
               <div className="mr-q-n">من نصوص مجمع الملك فهد الرسمية للروايتين.</div>
             </div>
           )}
-          {tafOpen && (
+          {isH && tafOpen && (
             <div className="mr-taf">
               <div className="mr-taf-t">التفسير الميسّر</div>
               <div className="mr-taf-b">{taf ?? 'جارٍ التحميل…'}</div>
@@ -415,15 +459,21 @@ export function MushafReader({
             </div>
           )}
           <div className="mr-sheet-btns">
-            <button type="button" onClick={() => { setPlayIdx(sel); setSel(null); }}>
-              ▶ استماع
-            </button>
-            <button type="button" className={tafOpen ? 'mr-on' : ''} onClick={() => setTafOpen((o) => !o)}>
-              تفسير
-            </button>
+            {isH && (
+              <>
+                <button type="button" onClick={() => { setPlayIdx(sel); setSel(null); }}>
+                  ▶ استماع
+                </button>
+                <button type="button" className={tafOpen ? 'mr-on' : ''} onClick={() => setTafOpen((o) => !o)}>
+                  تفسير
+                </button>
+              </>
+            )}
             <button type="button" onClick={() => copyAya(sel)}>
               نسخ
             </button>
+            {isH && (
+              <>
             <button
               type="button"
               onClick={() => {
@@ -436,6 +486,8 @@ export function MushafReader({
             <button type="button" onClick={() => setShareIdx(sel)}>
               مشاركة 🎴
             </button>
+              </>
+            )}
             <button type="button" onClick={() => setSel(null)}>
               إغلاق
             </button>
@@ -466,6 +518,8 @@ export function MushafReader({
         .tj-q { color: #a855d9; } .tj-l { color: #3b82e6; } .tj-m2 { color: #e0605f; } .tj-m4 { color: #d94a8c; }
         .tj-m5 { color: #e8672a; } .tj-m6 { color: #c81d25; } .tj-s { color: #8a93a0; }
 .mr-fonts { display: flex; flex-direction: column; gap: 6px; margin: 0 0 8px; padding: 8px; border-radius: 14px; border: 1px solid rgba(232,194,90,.3); background: rgba(18,15,8,.9); }
+.mr-rw { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+        .mr-rw button { flex: 0 1 auto; padding: 6px 10px; font-family: var(--font-kufi), sans-serif; font-size: 12.5px; }
         .mr-fonts button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px; border-radius: 12px; border: 1px solid rgba(232,194,90,.25); background: transparent; color: #fff1c4; }
         .mr-fonts button.on { border-color: #f1d77a; background: rgba(232,194,90,.18); }
         .mr-fonts span { font-size: 22px; direction: rtl; }
