@@ -1,5 +1,7 @@
 'use client';
 
+import { bumpAct } from '@/components/weekStats';
+
 /**
  * بستانك: يكبر مع كل ذكر.
  *  - total: أذكار السبحة والأذكار وسبحة البستان (الصلاة على النبي تُضاف من عدّادها الأصلي prayer_personal_count)
@@ -43,6 +45,7 @@ function write(s: GState) {
 /** ذكر عادي من أي عدّاد في التطبيق (يزيد البستان دون تخصيص) */
 export function gardenAdd(n = 1) {
   stamp();
+  bumpAct('d', n);
   const s = gardenRead();
   s.t += n;
   write(s);
@@ -94,6 +97,7 @@ export type GKind = 'palm' | 'ikhlas' | 'sub' | 'hamd' | 'tahl' | 'akbar';
 /** نقرة من سبحة البستان */
 export function gardenTap(kind: GKind) {
   stamp();
+  bumpAct('d', 1);
   const s = gardenRead();
   s.t += 1;
   if (kind === 'palm') s.palm += 1;

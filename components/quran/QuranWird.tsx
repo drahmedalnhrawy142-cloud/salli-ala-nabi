@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { lsGet, lsSet, toAr, type QData } from './data';
+import { bumpAct } from '../weekStats';
 
 type Wird = { perDay: number; pos: number; last: string; streak: number; khatmat: number };
 const DEF: Wird = { perDay: 20, pos: 1, last: '', streak: 0, khatmat: 0 };
@@ -44,6 +45,7 @@ export function QuranWird({
 
   function complete() {
     if (doneToday) return;
+    bumpAct('q', Math.max(1, to - from + 1));
     let pos = to + 1;
     let kh = w.khatmat;
     if (pos > 604) {

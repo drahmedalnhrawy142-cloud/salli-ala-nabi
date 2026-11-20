@@ -19,6 +19,7 @@ import { FloatTarget } from '@/components/FloatTarget';
 import { HadithQudsi } from '@/components/HadithQudsi';
 import { HadithLibrary } from '@/components/HadithLibrary';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
+import { WeeklyStats } from '@/components/WeeklyStats';
 import { FridayBanner } from '@/components/FridayBanner';
 import { GlobalKhatma } from '@/components/GlobalKhatma';
 import { AsmaAllah } from '@/components/AsmaAllah';
@@ -2049,7 +2050,12 @@ export function PrayerExperience() {
                   <DailyQuestion />
                 </Suspense>
               ) },
-              { id: 'stats', label: 'إحصائياتك', icon: '📊', render: () => <ProphetStats count={count} todayCount={todayCount} streak={streak} /> },
+              { id: 'stats', label: 'إحصائياتك', icon: '📊', render: () => (
+                <>
+                  <WeeklyStats />
+                  <ProphetStats count={count} todayCount={todayCount} streak={streak} />
+                </>
+              ) },
               { id: 'share', label: 'بطاقتك', icon: '🎴', render: () => <ShareCard count={count} /> },
             ]}
           />
