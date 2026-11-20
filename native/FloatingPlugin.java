@@ -8,6 +8,12 @@ import android.provider.Settings;
 
 import android.Manifest;
 import android.os.Build;
+import android.os.Bundle;
+import android.content.pm.PackageManager;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
+import java.util.ArrayList;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -152,6 +158,111 @@ public class FloatingPlugin extends Plugin {
                 .apply();
         AdhkarReceiver.scheduleAll(getContext());
         call.resolve();
+    }
+
+    // ===== التسميع الصوتي (SpeechRecognizer) =====
+    private SpeechRecognizer sr;
+
+    @PluginMethod
+    public void speechPermission(PluginCall call) {
+        boolean g = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_GRANTED;
+        if (!g && getActivity() != null) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, 9002);
+        }
+        JSObject r = new JSObject();
+        r.put("granted", g);
+        call.resolve(r);
+    }
+
+    private void speechEmit(String text, boolean fin) {
+        JSObject o = new JSObject();
+        o.put("text", text);
+        o.put("final", fin);
+        notifyListeners("speechResult", o);
+    }
+
+    private void speechEnd(String err) {
+        JSObject o = new JSObject();
+        if (err != null) o.put("error", err);
+        notifyListeners("speechEnd", o);
+    }
+
+    @PluginMethod
+    public void speechStart(final PluginCall call) {
+        if (getActivity() == null) {
+            call.reject("no activity");
+            return;
+        }
+        final String lang = call.getString("lang", "ar-SA");
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (!SpeechRecognizer.isRecognitionAvailable(getContext())) {
+                        call.reject("unavailable");
+                        return;
+                    }
+                    if (sr != null) {
+                        sr.destroy();
+                        sr = null;
+                    }
+                    sr = SpeechRecognizer.createSpeechRecognizer(getContext());
+                    sr.setRecognitionListener(new RecognitionListener() {
+                        private String first(Bundle b) {
+                            ArrayList<String> l = b == null ? null : b.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                            return (l == null || l.isEmpty()) ? "" : l.get(0);
+                        }
+                        @Override public void onReadyForSpeech(Bundle p) { }
+                        @Override public void onBeginningOfSpeech() { }
+                        @Override public void onRmsChanged(float v) { }
+                        @Override public void onBufferReceived(byte[] b) { }
+                        @Override public void onEndOfSpeech() { }
+                        @Override public void onEvent(int t, Bundle p) { }
+                        @Override public void onPartialResults(Bundle b) {
+                            String t = first(b);
+                            if (!t.isEmpty()) speechEmit(t, false);
+                        }
+                        @Override public void onResults(Bundle b) {
+                            String t = first(b);
+                            if (!t.isEmpty()) speechEmit(t, true);
+                            speechEnd(null);
+                        }
+                        @Override public void onError(int e) {
+                            // 7 لا كلام مطابق، 6 انتهت مهلة الصمت: عادي ونعيد الاستماع. 9 إذن الميكروفون ناقص
+                            speechEnd(e == 9 ? "permission" : (e == 7 || e == 6) ? null : "error" + e);
+                        }
+                    });
+                    Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                    i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                    i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang);
+                    i.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+                    i.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+                    i.putExtra("android.speech.extra.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS", 3500L);
+                    i.putExtra("android.speech.extra.SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS", 3500L);
+                    sr.startListening(i);
+                    call.resolve();
+                } catch (Exception ex) {
+                    call.reject(String.valueOf(ex.getMessage()));
+                }
+            }
+        });
+    }
+
+    @PluginMethod
+    public void speechStop(final PluginCall call) {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (sr != null) {
+                        sr.destroy();
+                        sr = null;
+                    }
+                    call.resolve();
+                }
+            });
+        } else call.resolve();
     }
 
     @PluginMethod

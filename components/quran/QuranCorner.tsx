@@ -7,6 +7,7 @@ import { QuranIndex } from './QuranIndex';
 import { QuranSearch } from './QuranSearch';
 import { QuranWird } from './QuranWird';
 import { QuranTasmee } from './QuranTasmee';
+import { TasmeeSheikh } from './TasmeeSheikh';
 import { TajweedRules } from './TajweedRules';
 import { lsGet, lsSet, toAr, useQuran } from './data';
 
@@ -78,7 +79,8 @@ export function QuranCorner() {
               )),
           },
           { id: 'wird', label: 'ورد القرآن', icon: '🗓️', hint: 'خطة الختمة', render: () => need((d) => <QuranWird data={d} currentPage={page} onOpenAt={openAt} />) },
-          { id: 'tasmee', label: 'التسميع', icon: '🎙️', hint: 'اختبر حفظك', render: () => need((d) => <QuranTasmee data={d} currentPage={page} />) },
+          { id: 'sheikh', label: 'التسميع على الشيخ', icon: '🎙️', hint: 'بالصوت', render: () => need((d) => <TasmeeSheikh data={d} />) },
+          { id: 'tasmee', label: 'التسميع الذاتي', icon: '📝', hint: 'اختبر حفظك', render: () => need((d) => <QuranTasmee data={d} currentPage={page} />) },
           { id: 'tajweed', label: 'أحكام التجويد', icon: '🎓', hint: 'بأمثلة من المصحف', render: () => need((d) => <TajweedRules data={d} onOpenAt={openAt} />) },
           { id: 'index', label: 'الفهرس', icon: '🗂️', hint: 'السور والأجزاء', render: () => need((d) => <QuranIndex data={d} onGo={openAt} />) },
           { id: 'search', label: 'بحث', icon: '🔎', hint: 'في كل الآيات', render: () => need((d) => <QuranSearch data={d} onGo={openAt} />) },

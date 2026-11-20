@@ -41,6 +41,7 @@ permissions = [
     "android.permission.POST_NOTIFICATIONS",
     "android.permission.VIBRATE",
     "android.permission.RECEIVE_BOOT_COMPLETED",
+    "android.permission.RECORD_AUDIO",
 ]
 lines = ""
 for p in permissions:
@@ -50,6 +51,13 @@ if lines:
     if "<application" not in text:
         sys.exit("AndroidManifest.xml has no <application> tag")
     text = text.replace("<application", lines + "\n    <application", 1)
+
+if "android.speech.RecognitionService" not in text:
+    text = text.replace(
+        "<application",
+        '<queries>\n        <intent>\n            <action android:name="android.speech.RecognitionService" />\n        </intent>\n    </queries>\n\n    <application',
+        1,
+    )
 
 if "FloatingService" not in text:
     service = (
