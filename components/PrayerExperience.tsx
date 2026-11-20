@@ -11,6 +11,7 @@ import { ShareCard } from '@/components/ShareCard';
 import { ProphetNames } from '@/components/ProphetNames';
 import { HadithFadl } from '@/components/HadithFadl';
 import { AdhkarCard } from '@/components/AdhkarCard';
+import { VirtueDays } from '@/components/VirtueDays';
 import { SituationAdhkar } from '@/components/SituationAdhkar';
 import { Tasbeeh } from '@/components/Tasbeeh';
 import { SectionGrid } from '@/components/SectionGrid';
@@ -31,6 +32,7 @@ import { initI18n, useLang } from '@/components/i18n';
 
 // بنك الأسئلة تقيل: بيتحمّل لما تفتح السيرة أو وردي
 const ProphetQuiz = lazy(() => import('@/components/ProphetQuiz').then((m) => ({ default: m.ProphetQuiz })));
+const AyahOnOpen = lazy(() => import('@/components/quran/AyahOnOpen').then((m) => ({ default: m.AyahOnOpen })));
 const GardenCorner = lazy(() => import('@/components/garden/GardenCorner').then((m) => ({ default: m.GardenCorner })));
 const SiraCorner = lazy(() => import('@/components/sira/SiraCorner').then((m) => ({ default: m.SiraCorner })));
 const QuranCorner = lazy(() => import('@/components/quran/QuranCorner').then((m) => ({ default: m.QuranCorner })));
@@ -1840,6 +1842,9 @@ export function PrayerExperience() {
       <div className="content-area">
         {/* ===== الصلاة (مشهد الضريح فوق ممنوع المساس به) ===== */}
         <div className="tab-pane" hidden={tab !== 'home'}>
+        <Suspense fallback={null}>
+          <AyahOnOpen />
+        </Suspense>
         <FridayBanner onGo={() => goTab('wird')} />
         <SectionGrid
           secs={[
@@ -2019,16 +2024,17 @@ export function PrayerExperience() {
           <SectionGrid
             onOpenChange={setWirdSec}
             secs={[
+              { id: 'garden', label: 'بستانك', icon: '🌴', hint: 'يكبر مع كل ذكر', render: () => (
+                <Suspense fallback={null}>
+                  <GardenCorner />
+                </Suspense>
+              ) },
+              { id: 'virtue', label: 'أيام الفضل', icon: '🌙', hint: 'عرفة وعاشوراء والبيض…', render: () => <VirtueDays /> },
               { id: 'corner', label: 'السبحة والأذكار', icon: '📿', render: () => (
                 <SectionGrid
                   onOpenChange={setCornerSec}
                   secs={[
                     { id: 'tasbih', label: 'السبحة', icon: '📿', render: () => <Tasbeeh /> },
-                    { id: 'garden', label: 'بستانك', icon: '🌴', hint: 'يكبر مع كل ذكر', render: () => (
-                      <Suspense fallback={null}>
-                        <GardenCorner />
-                      </Suspense>
-                    ) },
                     { id: 'multi', label: 'الذكر المضاعف', icon: '✨', render: () => <Tasbeeh mode="multi" /> },
                     { id: 'adhkar', label: 'أذكار اليوم', icon: '🌅', render: () => <AdhkarCard /> },
                     { id: 'situ', label: 'أذكار المواقف', icon: '🧭', hint: 'سفر، طعام، مطر…', render: () => <SituationAdhkar /> },

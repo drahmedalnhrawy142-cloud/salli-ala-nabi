@@ -11,6 +11,8 @@ public class BootReceiver extends BroadcastReceiver {
         ReminderReceiver.schedule(ctx);
         AdhkarReceiver.scheduleAll(ctx);
         GardenReceiver.scheduleAll(ctx);
+        EventReceiver.scheduleAll(ctx);
+        UnlockAyahService.apply(ctx);
         PrayerAfterReceiver.scheduleNext(ctx);
         SalliWidgetProvider.refreshAll(ctx);
     }

@@ -286,6 +286,42 @@ public class FloatingPlugin extends Plugin {
         call.resolve();
     }
 
+    /** آية عند فتح قفل الهاتف: on + mode ("seq" | "rand"). يرجّع حالة إذن العرض فوق التطبيقات. */
+    @PluginMethod
+    public void unlockAyahSet(PluginCall call) {
+        SharedPreferences.Editor e = getContext().getSharedPreferences(UnlockAyahService.PREFS, Context.MODE_PRIVATE).edit();
+        if (call.hasOption("on")) e.putBoolean("on", call.getBoolean("on", false));
+        if (call.hasOption("mode")) e.putString("mode", call.getString("mode", "seq"));
+        e.apply();
+        UnlockAyahService.apply(getContext());
+        JSObject r = new JSObject();
+        r.put("overlay", Settings.canDrawOverlays(getContext()));
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void unlockAyahStatus(PluginCall call) {
+        SharedPreferences p = getContext().getSharedPreferences(UnlockAyahService.PREFS, Context.MODE_PRIVATE);
+        JSObject r = new JSObject();
+        r.put("on", p.getBoolean("on", false));
+        r.put("mode", p.getString("mode", "seq"));
+        r.put("overlay", Settings.canDrawOverlays(getContext()));
+        call.resolve(r);
+    }
+
+    /** إشعارات بمواعيد محددة: group ("virtue" | "adhan") + items [{at (ms), title, text}] تستبدل قائمة المجموعة بالكامل. */
+    @PluginMethod
+    public void eventsSet(PluginCall call) {
+        String g = call.getString("group", "");
+        try {
+            org.json.JSONArray arr = call.getArray("items");
+            EventReceiver.set(getContext(), g, arr);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("bad items");
+        }
+    }
+
     /** لو المستخدم فتح التطبيق بعد إشعار أذكار: يرجّع "m" أو "e" ويصفّرها. */
     @PluginMethod
     public void adhkarPending(PluginCall call) {

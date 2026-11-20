@@ -147,11 +147,15 @@ function PrayerTimes() {
   const [heading, setHeading] = useState<number | null>(null);
   const [after, setAfter] = useState(false);
   const [native, setNative] = useState(false);
+  const [adhan, setAdhan] = useState(false);
 
   useEffect(() => {
     try {
       const v = Number(localStorage.getItem('pt_city'));
       if (Number.isFinite(v) && v >= 0 && v < CITIES.length) setCity(v);
+    } catch {}
+    try {
+      setAdhan(localStorage.getItem('pt_adhan') === '1');
     } catch {}
     setNow(new Date());
     const t = setInterval(() => setNow(new Date()), 30_000);
@@ -192,6 +196,25 @@ function PrayerTimes() {
     }
     fp.prayerAfterSet?.({ on: after, list: items.join(';') }).catch(() => {});
   }, [after, lat, lng, now?.toDateString()]);
+
+  // تنبيه عند دخول وقت الصلاة (إشعار بصوت الإشعارات الافتراضي، ٧ أيام قدّام)
+  useEffect(() => {
+    const fp = nativeFp();
+    if (!fp) return;
+    const items: { at: number; title: string; text: string }[] = [];
+    if (adhan) {
+      for (let i = 0; i < 7; i++) {
+        const day = new Date();
+        day.setDate(day.getDate() + i);
+        const tm = computeTimes(day, lat, lng);
+        for (const [k, name] of NAMES) {
+          if (k === 'sunrise') continue;
+          items.push({ at: tm[k].getTime(), title: `حان وقت صلاة ${name}`, text: `حسب مواقيت ${cn} (حساب تقريبي). حيّ على الصلاة.` });
+        }
+      }
+    }
+    (fp as unknown as { eventsSet?: (o: unknown) => Promise<void> }).eventsSet?.({ group: 'adhan', items })?.catch?.(() => {});
+  }, [adhan, lat, lng, cn, now?.toDateString()]);
 
   if (!now) return null;
   const today = computeTimes(now, lat, lng);
@@ -263,6 +286,23 @@ function PrayerTimes() {
         </div>
       </div>
 
+      {native && (
+        <button
+          type="button"
+          className={'pt-toggle' + (adhan ? ' pt-toggle-on' : '')}
+          onClick={() => {
+            const v = !adhan;
+            setAdhan(v);
+            if (v) (nativeFp() as unknown as { reminderRequestPermission?: () => Promise<void> } | null)?.reminderRequestPermission?.()?.catch?.(() => {});
+            try {
+              localStorage.setItem('pt_adhan', v ? '1' : '0');
+            } catch {}
+          }}
+          style={{ marginBottom: 8 }}
+        >
+          {adhan ? '✓ ' : ''}نبّهني عند دخول وقت كل صلاة (إشعار بلا صوت أذان)
+        </button>
+      )}
       {native && (
         <button
           type="button"

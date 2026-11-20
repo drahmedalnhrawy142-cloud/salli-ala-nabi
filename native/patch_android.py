@@ -16,7 +16,7 @@ if not java_dir.exists():
 
 # 1) ملفات الجافا
 for name in ("FloatingService.java", "FloatingPlugin.java", "MainActivity.java",
-             "ReminderReceiver.java", "BootReceiver.java", "AdhkarReceiver.java", "GardenReceiver.java", "PrayerAfterReceiver.java",
+             "ReminderReceiver.java", "BootReceiver.java", "AdhkarReceiver.java", "GardenReceiver.java", "EventReceiver.java", "UnlockAyahService.java", "UnlockAyahActivity.java", "PrayerAfterReceiver.java",
              "SalliWidgetProvider.java", "SalliFileProvider.java"):
     shutil.copyfile(NATIVE / name, java_dir / name)
     print("copied", name)
@@ -74,6 +74,25 @@ if "FloatingService" not in text:
         sys.exit("AndroidManifest.xml has no </application> tag")
     text = text.replace("</application>", service + "    </application>", 1)
 
+if "UnlockAyahService" not in text:
+    ua = (
+        '        <service\n'
+        '            android:name=".UnlockAyahService"\n'
+        '            android:exported="false"\n'
+        '            android:foregroundServiceType="specialUse">\n'
+        '            <property\n'
+        '                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"\n'
+        '                android:value="unlock_ayah" />\n'
+        '        </service>\n'
+        '        <activity\n'
+        '            android:name=".UnlockAyahActivity"\n'
+        '            android:exported="false"\n'
+        '            android:taskAffinity=""\n'
+        '            android:excludeFromRecents="true"\n'
+        '            android:theme="@android:style/Theme.Translucent.NoTitleBar" />\n'
+    )
+    text = text.replace("</application>", ua + "    </application>", 1)
+
 # صوت وأيقونة التذكيرات
 raw = MAIN / "res" / "raw"
 raw.mkdir(parents=True, exist_ok=True)
@@ -115,6 +134,7 @@ if "SalliWidgetProvider" not in text:
         '        </receiver>\n'
         '        <receiver android:name=".AdhkarReceiver" android:exported="false" />\n'
         '        <receiver android:name=".GardenReceiver" android:exported="false" />\n'
+        '        <receiver android:name=".EventReceiver" android:exported="false" />\n'
         '        <receiver android:name=".PrayerAfterReceiver" android:exported="false" />\n'
     )
     text = text.replace("</application>", widget + "    </application>", 1)
