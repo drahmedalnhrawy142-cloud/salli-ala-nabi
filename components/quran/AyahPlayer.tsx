@@ -22,12 +22,18 @@ function lsSet(k: string, v: string) {
 /** مشغّل التلاوة: آية بآية مع التكرار للحفظ والانتقال التلقائي، وتحميل السورة للاستماع بلا نت */
 export function AyahPlayer({
   data,
+  amap,
+  hsuras,
+  rwName,
   idx,
   setIdx,
   goPage,
   onClose,
 }: {
   data: QData;
+  amap: Record<string, [number, number]> | null;
+  hsuras: QData['suras'];
+  rwName: string;
   idx: number;
   setIdx: (i: number | null) => void;
   goPage: (p: number) => void;
@@ -46,8 +52,12 @@ export function AyahPlayer({
   const rec = RECITERS.find((r) => r.id === rid) || RECITERS[0];
   const a = data.ayas[idx];
   const sura = data.suras[a[0] - 1];
-  const st = useRef({ rep, cont, round, idx });
-  st.current = { rep, cont, round, idx };
+  const hcount = hsuras[a[0] - 1].ayas;
+  const rng = (amap && amap[`${a[0]}:${a[1]}`]) || [a[1], a[1]];
+  const [part, setPart] = useState(0);
+  const hv = rng[0] + Math.min(part, rng[1] - rng[0]);
+  const st = useRef({ rep, cont, round, idx, part: 0, last: 0 });
+  st.current = { rep, cont, round, idx, part, last: rng[1] - rng[0] };
 
   // تشغيل الآية الحالية
   useEffect(() => {
@@ -55,7 +65,7 @@ export function AyahPlayer({
     const el = au.current!;
     setMsg('');
     (async () => {
-      const { src, local } = await audioSrc(ayahUrl(rec, a[0], a[1]));
+      const { src, local } = await audioSrc(ayahUrl(rec, a[0], hv));
       if (!live) return;
       el.src = src;
       try {
@@ -71,11 +81,11 @@ export function AyahPlayer({
       el.pause();
       if (el.src.startsWith('blob:')) URL.revokeObjectURL(el.src);
     };
-  }, [idx, rid]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [idx, rid, part]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    surahDownloaded(rec, a[0], sura.ayas).then(setHave);
-  }, [rec, a, sura.ayas, dl]);
+    surahDownloaded(rec, a[0], hcount).then(setHave);
+  }, [rec, a, hcount, dl]);
 
   useEffect(
     () => () => {
@@ -86,14 +96,23 @@ export function AyahPlayer({
 
   function ended() {
     const s = st.current;
+    if (s.part < s.last) {
+      setPart(s.part + 1);
+      return;
+    }
     if (s.rep === 0 || s.round < s.rep) {
       setRound(s.round + 1);
+      if (s.part > 0) {
+        setPart(0);
+        return;
+      }
       const el = au.current!;
       el.currentTime = 0;
       el.play().catch(() => {});
       return;
     }
     setRound(1);
+    setPart(0);
     const next = s.idx + 1;
     if (s.cont && next < data.ayas.length) {
       setIdx(next);
@@ -113,19 +132,20 @@ export function AyahPlayer({
     const n = idx + d;
     if (n < 0 || n >= data.ayas.length) return;
     setRound(1);
+    setPart(0);
     setIdx(n);
     if (data.ayas[n][2] !== a[2]) goPage(data.ayas[n][2]);
   }
 
   async function download() {
     stop.current = { v: false };
-    setDl({ done: 0, total: sura.ayas });
-    const r = await downloadSurah(rec, a[0], sura.ayas, (d) => setDl({ done: d, total: sura.ayas }), stop.current);
+    setDl({ done: 0, total: hcount });
+    const r = await downloadSurah(rec, a[0], hcount, (d) => setDl({ done: d, total: hcount }), stop.current);
     setDl(null);
     setMsg(r === 'ok' ? 'تم تحميل السورة، تعمل الآن بلا نت' : r === 'stopped' ? 'أُوقف التحميل' : 'تعذّر التحميل. تأكد من الاتصال وحاول مرة أخرى.');
   }
   async function remove() {
-    await deleteSurah(rec, a[0], sura.ayas);
+    await deleteSurah(rec, a[0], hcount);
     setHave(false);
     setMsg('حُذفت السورة من جهازك');
   }
@@ -193,9 +213,14 @@ export function AyahPlayer({
           <button type="button" onClick={download}>⬇ حمّل السورة للاستماع بلا نت</button>
         )}
       </div>
-      {rec.riwaya === 'warsh' && (
-        <div className="ap-msg">رواية ورش: النص المعروض بحفص، فقد تختلف بعض الكلمات عمّا تسمعه.</div>
+      {(rwName === 'warsh' ? rec.riwaya !== 'warsh' : rwName === 'hafs' ? rec.riwaya !== 'hafs' : true) && (
+        <div className="ap-msg">
+          {rwName === 'hafs'
+            ? 'رواية ورش: النص المعروض بحفص، فقد تختلف بعض الكلمات عمّا تسمعه.'
+            : 'التلاوة المتاحة بروايتَي حفص وورش فقط، فقد تختلف بعض الكلمات عن النص المعروض.'}
+        </div>
       )}
+      {rng[1] > rng[0] && <div className="ap-msg">هذه الآية في هذه الرواية تقابل آيتين أو أكثر في ترقيم التلاوة، وتُقرأ متتابعة.</div>}
       {msg && <div className="ap-msg">{msg}</div>}
       <div className="ap-n">التلاوات من everyayah.com — حقوقها لأصحابها.</div>
       <style>{`

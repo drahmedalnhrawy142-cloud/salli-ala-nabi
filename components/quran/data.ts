@@ -177,3 +177,16 @@ export function lsSet(k: string, v: unknown) {
     localStorage.setItem(k, JSON.stringify(v));
   } catch {}
 }
+
+let amapP: Promise<Record<string, Record<string, [number, number]>>> | null = null;
+/** خريطة آيات الرواية ← أرقام آيات حفص (تسمية ملفات التلاوة) */
+export function loadAudioMap(id: string): Promise<Record<string, [number, number]>> {
+  if (!amapP) {
+    amapP = fetch('/quran/r/audiomap.json').then((r) => {
+      if (!r.ok) throw new Error('amap');
+      return r.json();
+    });
+    amapP.catch(() => (amapP = null));
+  }
+  return amapP.then((m) => m[id]);
+}

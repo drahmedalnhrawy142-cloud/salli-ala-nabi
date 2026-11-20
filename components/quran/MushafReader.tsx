@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent as RMouseEvent, type ReactNode, type TouchEvent as RTouchEvent } from 'react';
 import { AyahPlayer } from './AyahPlayer';
-import { BASMALA, RIWAYAT, loadRiwaya, loadQiraat, loadTajweed, loadTafsir, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
+import { BASMALA, RIWAYAT, loadRiwaya, loadAudioMap, loadQiraat, loadTajweed, loadTafsir, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
 import { VerseShare } from './VerseShare';
 
 type Theme = 'night' | 'paper';
@@ -90,6 +90,15 @@ export function MushafReader({
       live = false;
     };
   }, [rw]);
+  const [amap, setAmap] = useState<{ id: string; m: Record<string, [number, number]> } | null>(null);
+  useEffect(() => {
+    if (rw === 'hafs' || playIdx == null || amap?.id === rw) return;
+    let live = true;
+    loadAudioMap(rw).then((m) => live && setAmap({ id: rw, m })).catch(() => live && setPlayIdx(null));
+    return () => {
+      live = false;
+    };
+  }, [rw, playIdx]); // eslint-disable-line react-hooks/exhaustive-deps
   const touch = useRef<{ x: number; y: number } | null>(null);
   const focusRef = useRef<HTMLSpanElement | null>(null);
 
@@ -468,11 +477,11 @@ export function MushafReader({
             </div>
           )}
           <div className="mr-sheet-btns">
+            <button type="button" onClick={() => { setPlayIdx(sel); setSel(null); }}>
+              ▶ استماع
+            </button>
             {isH && (
               <>
-                <button type="button" onClick={() => { setPlayIdx(sel); setSel(null); }}>
-                  ▶ استماع
-                </button>
                 <button type="button" className={tafOpen ? 'mr-on' : ''} onClick={() => setTafOpen((o) => !o)}>
                   تفسير
                 </button>
@@ -503,8 +512,8 @@ export function MushafReader({
           </div>
         </div>
       )}
-      {playIdx != null && (
-        <AyahPlayer data={data} idx={playIdx} setIdx={setPlayIdx} goPage={(p) => setPage(p)} onClose={() => setPlayIdx(null)} />
+      {playIdx != null && (rw === 'hafs' || amap?.id === rw) && (
+        <AyahPlayer data={data} amap={rw === 'hafs' ? null : amap!.m} hsuras={hdata.suras} rwName={rw} idx={playIdx} setIdx={setPlayIdx} goPage={(p) => setPage(p)} onClose={() => setPlayIdx(null)} />
       )}
       {toast && <div className="mr-toast">{toast}</div>}
       {shareIdx != null && <VerseShare data={data} idx={shareIdx} onClose={() => setShareIdx(null)} />}
