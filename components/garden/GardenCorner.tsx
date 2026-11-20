@@ -1,5 +1,6 @@
 'use client';
 
+import { GardenShare } from './GardenShare';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SectionGrid } from '@/components/SectionGrid';
 import { QuranText } from '@/components/quran/QuranText';
@@ -67,6 +68,7 @@ function GardenView() {
   const scene = useRef<GardenScene | null>(null);
   const [sel, setSel] = useState<GKind>('palm');
   const [bump, setBump] = useState(0);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -193,6 +195,11 @@ function GardenView() {
           <div className="gd-next-t">وصل بستانك لأعلى مراحله. زِد ما شئت من الذكر.</div>
         )}
       </div>
+
+      <button type="button" className="gd-house" onClick={() => setShareOpen(true)}>
+        📤 شارك بستانك أو أهدِ نخلة
+      </button>
+      {shareOpen && <GardenShare scene={cv.current} total={v.N} palms={v.palms} onClose={() => setShareOpen(false)} />}
 
       <h3 className="gd-h">سبحة البستان</h3>
       <div className="gd-chips">
