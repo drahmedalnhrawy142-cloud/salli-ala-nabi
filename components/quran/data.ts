@@ -190,3 +190,17 @@ export function loadAudioMap(id: string): Promise<Record<string, [number, number
   }
   return amapP.then((m) => m[id]);
 }
+
+export type AsbabData = { h: { b: string; n: string; c: string; t: string }[]; a: Record<string, number[]> };
+let asbabP: Promise<AsbabData> | null = null;
+/** ما ورد في الصحيحين عن نزول الآيات (tools/build_asbab.py) */
+export function loadAsbab(): Promise<AsbabData> {
+  if (!asbabP) {
+    asbabP = fetch('/quran/asbab.json').then((r) => {
+      if (!r.ok) throw new Error('asbab');
+      return r.json();
+    });
+    asbabP.catch(() => (asbabP = null));
+  }
+  return asbabP;
+}

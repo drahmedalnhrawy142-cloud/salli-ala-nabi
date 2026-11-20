@@ -31,7 +31,7 @@ export function AyahCard({ d, i, onClose, onNext }: { d: QData; i: number; onClo
   const a = d.ayas[i];
   const s = d.suras[a[0] - 1];
   const [taf, setTaf] = useState<string | null>(null);
-  const [showTaf, setShowTaf] = useState(true);
+  const [showTaf, setShowTaf] = useState(false);
   useEffect(() => {
     setTaf(null);
   }, [i]);
@@ -69,7 +69,7 @@ export function AyahCard({ d, i, onClose, onNext }: { d: QData; i: number; onClo
         .ao { width: min(460px, 100%); max-height: 92vh; overflow: auto; padding: 16px; border-radius: 22px; border: 1px solid rgba(232,194,90,.6); background: linear-gradient(180deg,#14100a,#0b0905); box-shadow: 0 10px 40px rgba(0,0,0,.7); font-family: var(--font-kufi), sans-serif; color: #f7ebc1; }
         .ao-top { display: flex; justify-content: space-between; align-items: center; color: #f1d77a; font-size: 14px; }
         .ao-top button { background: none; border: 0; color: #f1d77a; font-size: 18px; padding: 4px 8px; }
-        .ao-t { margin: 14px 0; font-family: 'KFGQPC Hafs', 'Aref Ruqaa', serif; font-size: 30px; line-height: 2.3; text-align: center; color: #fff1c4; }
+        .ao-t { margin: 14px 0; font-family: var(--f-amiriq), 'Amiri Quran', 'KFGQPC Hafs', serif; font-size: 30px; line-height: 2.3; text-align: center; color: #fff1c4; }
         .ao-n { color: #e8c25a; font-size: 22px; white-space: nowrap; }
         .ao-taf { padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(232,194,90,.35); background: rgba(232,194,90,.06); font-size: 14.5px; line-height: 1.9; margin-bottom: 10px; }
         .ao-taf small { display: block; margin-top: 4px; font-size: 11px; opacity: .6; }

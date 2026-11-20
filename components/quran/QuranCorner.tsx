@@ -7,6 +7,7 @@ import { QuranIndex } from './QuranIndex';
 import { QuranSearch } from './QuranSearch';
 import { QuranWird } from './QuranWird';
 import { QuranTasmee } from './QuranTasmee';
+import { QuranSciences } from './QuranSciences';
 import { AyahOnOpenSettings } from './AyahOnOpen';
 import { TasmeeSheikh } from './TasmeeSheikh';
 import { TajweedRules } from './TajweedRules';
@@ -80,6 +81,7 @@ export function QuranCorner() {
               )),
           },
           { id: 'wird', label: 'ورد القرآن', icon: '🗓️', hint: 'خطة الختمة', render: () => need((d) => <QuranWird data={d} currentPage={page} onOpenAt={openAt} />) },
+          { id: 'uloom', label: 'علوم القرآن', icon: '🔬', hint: 'مكي ومدني وأسباب النزول', render: () => need((d) => <QuranSciences data={d} />) },
           { id: 'aoo', label: 'آية عند الفتح', icon: '🌟', hint: 'كل مرة تفتح التطبيق', render: () => <AyahOnOpenSettings /> },
           { id: 'sheikh', label: 'التسميع على الشيخ', icon: '🎙️', hint: 'بالصوت', render: () => need((d) => <TasmeeSheikh data={d} />) },
           { id: 'tasmee', label: 'التسميع الذاتي', icon: '📝', hint: 'اختبر حفظك', render: () => need((d) => <QuranTasmee data={d} currentPage={page} />) },
@@ -124,7 +126,7 @@ export function QuranCorner() {
           },
         ]}
       />
-      <p className="qc-credit">نص المصحف وخطه: مجمع الملك فهد لطباعة المصحف الشريف (حفص، شعبة، ورش، قالون، الدوري، السوسي، البزي، قنبل — نص كل رواية وخطها من المجمع، عبر مرآة ibnhazm/KFGQPC). مواضع ألوان التجويد: مشروع cpfair/quran-tajweed (CC BY 4.0) على نص تنزيل. التفسير الميسّر: مجمع الملك فهد عبر مشروع spa5k/tafsir_api (MIT).</p>
+      <p className="qc-credit">نص المصحف وخطه: مجمع الملك فهد لطباعة المصحف الشريف (حفص، شعبة، ورش، قالون، الدوري، السوسي، البزي، قنبل — نص كل رواية وخطها من المجمع، عبر مرآة ibnhazm/KFGQPC). مواضع ألوان التجويد: مشروع cpfair/quran-tajweed (CC BY 4.0) على نص تنزيل. التفسير الميسّر: مجمع الملك فهد عبر مشروع spa5k/tafsir_api (MIT). المكي والمدني: Tanzil عبر risan/quran-json (CC BY-SA 4.0). أحاديث أسباب النزول: صحيحا البخاري ومسلم من موقع sunnah.com عبر مشروع hadith-json.</p>
     </div>
   );
 }

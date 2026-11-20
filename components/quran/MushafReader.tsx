@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent as RMouseEvent, type ReactNode, type TouchEvent as RTouchEvent } from 'react';
 import { AyahPlayer } from './AyahPlayer';
-import { BASMALA, RIWAYAT, loadRiwaya, loadAudioMap, loadQiraat, loadTajweed, loadTafsir, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
+import { BASMALA, RIWAYAT, loadRiwaya, loadAudioMap, loadAsbab, type AsbabData, loadQiraat, loadTajweed, loadTafsir, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
 import { VerseShare } from './VerseShare';
 
 type Theme = 'night' | 'paper';
@@ -70,6 +70,17 @@ export function MushafReader({
   const [tj, setTj] = useState<TJ | null>(null);
   const [tjName, setTjName] = useState('');
   const [tafOpen, setTafOpen] = useState(false);
+  const [asb, setAsb] = useState<AsbabData | null>(null);
+  const [asbOpen, setAsbOpen] = useState(false);
+  useEffect(() => {
+    if (sel == null || asb) return;
+    let live = true;
+    loadAsbab().then((d) => live && setAsb(d)).catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [sel, asb]);
+  useEffect(() => setAsbOpen(false), [sel]);
   const [mfont, setMfont] = useState<string>(() => String(lsGet('quran_mfont', 'hafs')));
   const [fontsOpen, setFontsOpen] = useState(false);
   const [playIdx, setPlayIdx] = useState<number | null>(null);
@@ -469,6 +480,20 @@ export function MushafReader({
               <div className="mr-q-n">من نصوص مجمع الملك فهد الرسمية للروايتين.</div>
             </div>
           )}
+          {isH && asbOpen && sel != null && asb && (
+            <div className="mr-taf">
+              <div className="mr-taf-t">ما ورد عن نزولها في الصحيحين</div>
+              <div className="mr-taf-b">
+                {(asb.a[`${data.ayas[sel][0]}:${data.ayas[sel][1]}`] || []).map((i) => (
+                  <div key={i} style={{ marginBottom: 12 }}>
+                    <div style={{ color: '#e8c25a', fontSize: 13 }}>{asb.h[i].b} — {asb.h[i].c} (حديث {toAr(Number(asb.h[i].n) || 0)})</div>
+                    <div>{asb.h[i].t}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mr-q-n">أحاديث من البخاري ومسلم ذُكر فيها نزول الآية، رُبطت بها بمطابقة نص الآية. قد يكون المذكور سببًا أو وقتَ نزول، فاقرأ الحديث كاملًا.</div>
+            </div>
+          )}
           {isH && tafOpen && (
             <div className="mr-taf">
               <div className="mr-taf-t">التفسير الميسّر</div>
@@ -485,6 +510,11 @@ export function MushafReader({
                 <button type="button" className={tafOpen ? 'mr-on' : ''} onClick={() => setTafOpen((o) => !o)}>
                   تفسير
                 </button>
+                {sel != null && asb?.a[`${data.ayas[sel][0]}:${data.ayas[sel][1]}`] && (
+                  <button type="button" className={asbOpen ? 'mr-on' : ''} onClick={() => setAsbOpen((o) => !o)}>
+                    سبب النزول
+                  </button>
+                )}
               </>
             )}
             <button type="button" onClick={() => copyAya(sel)}>
