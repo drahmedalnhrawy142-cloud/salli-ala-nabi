@@ -17,6 +17,7 @@ import { Tasbeeh } from '@/components/Tasbeeh';
 import { SectionGrid } from '@/components/SectionGrid';
 import { FloatTarget } from '@/components/FloatTarget';
 import { HadithQudsi } from '@/components/HadithQudsi';
+import { HadithLibrary } from '@/components/HadithLibrary';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 import { FridayBanner } from '@/components/FridayBanner';
 import { GlobalKhatma } from '@/components/GlobalKhatma';
@@ -2065,6 +2066,7 @@ export function PrayerExperience() {
               secs={[
                 { id: 'asma', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
                 { id: 'qudsi', label: 'الأحاديث القدسية', icon: '📜', hint: 'من الصحيحين', render: () => <HadithQudsi /> },
+                { id: 'books', label: 'كتب الحديث', icon: '📚', hint: 'البخاري ومسلم والأربعون', render: () => <HadithLibrary /> },
               ]}
             />
           )}
