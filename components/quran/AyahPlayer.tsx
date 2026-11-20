@@ -77,7 +77,12 @@ export function AyahPlayer({
     surahDownloaded(rec, a[0], sura.ayas).then(setHave);
   }, [rec, a, sura.ayas, dl]);
 
-  useEffect(() => () => (stop.current.v = true), []);
+  useEffect(
+    () => () => {
+      stop.current.v = true;
+    },
+    []
+  );
 
   function ended() {
     const s = st.current;
