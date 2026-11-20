@@ -301,71 +301,80 @@ export function MushafReader({
   return (
     <div className={`mr mr-${theme}`}>
       <div className="mr-tools">
-        <button type="button" className="mr-btn" onClick={() => go(page - 1)} disabled={page <= 1} aria-label="الصفحة السابقة">
-          ›
-        </button>
-        <form
-          className="mr-jump"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const n = Number(jump.replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))));
-            if (n >= 1 && n <= 604) go(n);
-            setJump('');
-          }}
-        >
-          <input
-            inputMode="numeric"
-            value={jump}
-            onChange={(e) => setJump(e.target.value)}
-            placeholder={`صفحة ${toAr(page)}`}
-            aria-label="اذهب إلى صفحة"
-          />
-        </form>
-        <button type="button" className="mr-btn" onClick={() => go(page + 1)} disabled={page >= 604} aria-label="الصفحة التالية">
-          ‹
-        </button>
-        <span className="mr-gap" />
-        <button type="button" className="mr-btn mr-sm" onClick={() => changeFs(-1)} aria-label="تصغير الخط">
-          أ-
-        </button>
-        <button type="button" className="mr-btn mr-sm" onClick={() => changeFs(1)} aria-label="تكبير الخط">
-          أ+
-        </button>
-        {isH && (
-          <>
-        <button
-          type="button"
-          className={`mr-btn mr-sm${showQ ? ' mr-on' : ''}`}
-          onClick={() => {
-            const n = !showQ;
-            setShowQ(n);
-            lsSet('quran_showq', n);
-          }}
-          aria-label="علامات اختلاف القراءات"
-        >
-          ق
-        </button>
-        <button
-          type="button"
-          className={`mr-btn mr-sm${showT ? ' mr-on' : ''}`}
-          onClick={() => {
-            const n = !showT;
-            setShowT(n);
-            setTjName('');
-            lsSet('quran_showt', n);
-          }}
-          aria-label="تلوين أحكام التجويد"
-        >
-          ت
-        </button>
-          </>
-        )}
-        <button type="button" className={`mr-btn mr-sm${fontsOpen ? ' mr-on' : ''}`} onClick={() => setFontsOpen((o) => !o)} aria-label="الرواية وخط المصحف">
-          رواية
-        </button>
-        <button type="button" className="mr-btn mr-sm" onClick={changeTheme} aria-label="تغيير الخلفية">
-          {theme === 'night' ? '☀' : '☾'}
-        </button>
+        <div className="mr-nav">
+          <button type="button" className="mr-btn" onClick={() => go(page - 1)} disabled={page <= 1} aria-label="الصفحة السابقة">
+            ›
+          </button>
+          <form
+            className="mr-jump"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const n = Number(jump.replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))));
+              if (n >= 1 && n <= 604) go(n);
+              setJump('');
+            }}
+          >
+            <input
+              inputMode="numeric"
+              value={jump}
+              onChange={(e) => setJump(e.target.value)}
+              placeholder={`صفحة ${toAr(page)} من ٦٠٤`}
+              aria-label="اذهب إلى صفحة"
+            />
+          </form>
+          <button type="button" className="mr-btn" onClick={() => go(page + 1)} disabled={page >= 604} aria-label="الصفحة التالية">
+            ‹
+          </button>
+        </div>
+        <div className="mr-acts">
+          <button type="button" className="mr-act" onClick={() => changeFs(-1)} aria-label="تصغير الخط">
+            <b>أ−</b>
+            <small>تصغير</small>
+          </button>
+          <button type="button" className="mr-act" onClick={() => changeFs(1)} aria-label="تكبير الخط">
+            <b>أ+</b>
+            <small>تكبير</small>
+          </button>
+          {isH && (
+            <>
+              <button
+                type="button"
+                className={`mr-act${showT ? ' mr-on' : ''}`}
+                onClick={() => {
+                  const n = !showT;
+                  setShowT(n);
+                  setTjName('');
+                  lsSet('quran_showt', n);
+                }}
+                aria-label="تلوين أحكام التجويد"
+              >
+                <b>ت</b>
+                <small>التجويد</small>
+              </button>
+              <button
+                type="button"
+                className={`mr-act${showQ ? ' mr-on' : ''}`}
+                onClick={() => {
+                  const n = !showQ;
+                  setShowQ(n);
+                  lsSet('quran_showq', n);
+                }}
+                aria-label="علامات اختلاف القراءات"
+              >
+                <b>ق</b>
+                <small>القراءات</small>
+              </button>
+            </>
+          )}
+          <button type="button" className={`mr-act${fontsOpen ? ' mr-on' : ''}`} onClick={() => setFontsOpen((o) => !o)} aria-label="الرواية وخط المصحف">
+            <b>⚙</b>
+            <small>الرواية</small>
+          </button>
+          <button type="button" className="mr-act" onClick={changeTheme} aria-label="تغيير الخلفية">
+            <b>{theme === 'night' ? '☀' : '☾'}</b>
+            <small>الخلفية</small>
+          </button>
+        </div>
       </div>
 
       {fontsOpen && (
@@ -503,16 +512,27 @@ export function MushafReader({
       <style>{`
         .mr { position: relative; }
         .mr-tools {
-          display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; margin: 0 0 12px;
-          position: sticky; top: 64px; z-index: 5; padding: 6px;
-          border-radius: 16px; background: rgba(14,12,6,.92); border: 1px solid rgba(232,194,90,.25);
+          display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; padding: 8px;
+          position: sticky; top: 64px; z-index: 5;
+          border-radius: 20px; background: linear-gradient(180deg, rgba(24,20,9,.97), rgba(12,10,5,.97));
+          border: 1px solid rgba(232,194,90,.35); box-shadow: 0 6px 18px rgba(0,0,0,.45), inset 0 0 0 3px rgba(232,194,90,.05);
         }
+        .mr-nav { display: grid; grid-template-columns: 52px 1fr 52px; gap: 8px; align-items: center; }
+        .mr-acts { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
         .mr-btn {
-          min-width: 40px; height: 40px; padding: 0 10px; border-radius: 12px;
-          border: 1px solid rgba(232,194,90,.4); background: rgba(232,194,90,.1); color: #f1d77a;
-          font-family: var(--font-kufi), sans-serif; font-size: 22px; cursor: pointer;
+          height: 42px; border-radius: 14px; border: 1px solid rgba(232,194,90,.4); background: rgba(232,194,90,.1);
+          color: #f1d77a; font-family: var(--font-kufi), sans-serif; font-size: 24px; line-height: 1; cursor: pointer;
         }
         .mr-btn:disabled { opacity: .35; }
+        .mr-act {
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 0;
+          padding: 7px 2px 6px; border-radius: 14px; border: 1px solid rgba(232,194,90,.28);
+          background: rgba(232,194,90,.06); color: #f1d77a; cursor: pointer;
+        }
+        .mr-act b { font-family: var(--font-kufi), sans-serif; font-size: 18px; line-height: 1.1; font-weight: 400; }
+        .mr-act small { font-family: var(--font-kufi), sans-serif; font-size: 9.5px; color: rgba(255,241,196,.7); white-space: nowrap; }
+        .mr-act.mr-on { background: linear-gradient(180deg, rgba(232,194,90,.38), rgba(232,194,90,.16)); border-color: #f1d77a; }
+        .mr-act.mr-on small { color: #fff1c4; }
         .mr-on { background: rgba(232,194,90,.32); border-color: #e8c25a; }
         .tj-g { color: #16a37f; } .tj-k { color: #e08a1e; } .tj-i { color: #12a4b8; } .tj-n { color: #7f8c9a; }
         .tj-q { color: #a855d9; } .tj-l { color: #3b82e6; } .tj-m2 { color: #e0605f; } .tj-m4 { color: #d94a8c; }
@@ -535,11 +555,9 @@ export function MushafReader({
         .mr-q-h { font-family: 'KFGQPC Hafs', serif; font-size: 24px; color: #fff1c4; font-weight: 400; direction: rtl; }
         .mr-q-s { font-family: 'KFGQPC Shouba', serif; font-size: 24px; color: #fff1c4; font-weight: 400; direction: rtl; }
         .mr-q-n { text-align: center; font-size: 11.5px; color: rgba(255,241,196,.5); font-family: var(--font-ruqaa), serif; margin-top: 4px; }
-        .mr-sm { font-size: 15px; min-width: 36px; }
-        .mr-gap { flex: 1; }
-        .mr-jump { flex: 1.2; min-width: 0; }
+        .mr-jump { min-width: 0; }
         .mr-jump input {
-          width: 100%; height: 40px; text-align: center; border-radius: 12px; border: 1px solid rgba(232,194,90,.3);
+          width: 100%; height: 42px; text-align: center; border-radius: 14px; border: 1px solid rgba(232,194,90,.3);
           background: rgba(0,0,0,.4); color: #f1d77a; font-family: var(--font-kufi), sans-serif; font-size: 14px;
         }
         .mr-page {
