@@ -22,7 +22,7 @@ function nativeFp() {
 
 function nextIdx(d: QData, mode: string): number {
   if (mode === 'rand') return Math.floor(Math.random() * d.ayas.length);
-  const i = Number(lsGet(K_IDX, 0)) || 0;
+  const i = Number(lsGet<number>(K_IDX, 0)) || 0;
   lsSet(K_IDX, (i + 1) % d.ayas.length);
   return i % d.ayas.length;
 }
@@ -89,11 +89,11 @@ export function AyahOnOpen() {
   const first = useRef(true);
 
   const trigger = useCallback(() => {
-    if (lsGet(K_ON, false) !== true) return;
+    if (lsGet<boolean>(K_ON, false) !== true) return;
     loadQuran()
       .then((q) => {
         setD(q);
-        setI(nextIdx(q, String(lsGet(K_MODE, 'seq'))));
+        setI(nextIdx(q, String(lsGet<string>(K_MODE, 'seq'))));
       })
       .catch(() => {});
   }, []);
@@ -118,7 +118,7 @@ export function AyahOnOpen() {
   }, [trigger]);
 
   if (!d || i == null) return null;
-  return <AyahCard d={d} i={i} onClose={() => setI(null)} onNext={() => setI(nextIdx(d, String(lsGet(K_MODE, 'seq'))))} />;
+  return <AyahCard d={d} i={i} onClose={() => setI(null)} onNext={() => setI(nextIdx(d, String(lsGet<string>(K_MODE, 'seq'))))} />;
 }
 
 /** قسم الإعداد داخل القرآن */
@@ -140,8 +140,8 @@ export function AyahOnOpenSettings() {
         .catch(() => {});
       return;
     }
-    setOn(lsGet(K_ON, false) === true);
-    setMode(String(lsGet(K_MODE, 'seq')));
+    setOn(lsGet<boolean>(K_ON, false) === true);
+    setMode(String(lsGet<string>(K_MODE, 'seq')));
   }, []);
   async function apply(nextOn: boolean, nextMode: string) {
     setOn(nextOn);
