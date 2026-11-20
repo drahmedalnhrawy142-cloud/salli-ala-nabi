@@ -11,6 +11,7 @@ import { ShareCard } from '@/components/ShareCard';
 import { ProphetNames } from '@/components/ProphetNames';
 import { HadithFadl } from '@/components/HadithFadl';
 import { AdhkarCard } from '@/components/AdhkarCard';
+import { SituationAdhkar } from '@/components/SituationAdhkar';
 import { Tasbeeh } from '@/components/Tasbeeh';
 import { SectionGrid } from '@/components/SectionGrid';
 import { FloatTarget } from '@/components/FloatTarget';
@@ -2030,6 +2031,7 @@ export function PrayerExperience() {
                     ) },
                     { id: 'multi', label: 'الذكر المضاعف', icon: '✨', render: () => <Tasbeeh mode="multi" /> },
                     { id: 'adhkar', label: 'أذكار اليوم', icon: '🌅', render: () => <AdhkarCard /> },
+                    { id: 'situ', label: 'أذكار المواقف', icon: '🧭', hint: 'سفر، طعام، مطر…', render: () => <SituationAdhkar /> },
                   ]}
                 />
               ) },
