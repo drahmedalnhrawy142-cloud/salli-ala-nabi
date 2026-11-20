@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { loadAsbab, toAr, type AsbabData, type QData } from './data';
 import { SURAH_META } from './surahMeta';
+import { QuranEncyclopedia } from './QuranEncyclopedia';
 
 /** علوم القرآن: فهرس السور (مكي/مدني وأعداد) وفهرس ما ورد في الصحيحين عن نزول الآيات. */
 export function QuranSciences({ data }: { data: QData }) {
-  const [tab, setTab] = useState<'idx' | 'asb'>('idx');
+  const [tab, setTab] = useState<'idx' | 'asb' | 'enc'>('enc');
   const [f, setF] = useState<'all' | 0 | 1>('all');
   const [asb, setAsb] = useState<AsbabData | null>(null);
   const [open, setOpen] = useState<string | null>(null);
@@ -31,9 +32,11 @@ export function QuranSciences({ data }: { data: QData }) {
   return (
     <div className="qs">
       <div className="qs-tabs">
+        <button type="button" className={tab === 'enc' ? 'on' : ''} onClick={() => setTab('enc')}>الموسوعة</button>
         <button type="button" className={tab === 'idx' ? 'on' : ''} onClick={() => setTab('idx')}>فهرس السور</button>
         <button type="button" className={tab === 'asb' ? 'on' : ''} onClick={() => setTab('asb')}>أسباب النزول</button>
       </div>
+      {tab === 'enc' && <QuranEncyclopedia />}
       {tab === 'idx' && (
         <>
           <div className="qs-sum">
