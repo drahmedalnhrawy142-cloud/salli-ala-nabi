@@ -9,22 +9,26 @@ import { norm, toAr } from './data';
  * استُبعدت الأنواع التي يغلب عليها جمع مرويات متفاوتة الدرجة. تعمل بلا نت داخل التطبيق.
  */
 type T = { n: number; l: string | null; t: string; k: number; c: number };
-const cache = new Map<number, Promise<string[]>>();
-function loadT(n: number): Promise<string[]> {
-  let p = cache.get(n);
+type Bk = { id: string; title: string; author: string; types: T[] };
+const cache = new Map<string, Promise<string[]>>();
+function loadT(b: string, n: number): Promise<string[]> {
+  const k = `${b}/${n}`;
+  let p = cache.get(k);
   if (!p) {
-    p = fetch(`/ulum/${n}.json`).then((r) => {
+    p = fetch(`/ulum/${k}.json`).then((r) => {
       if (!r.ok) throw new Error('ulum');
       return r.json() as Promise<string[]>;
     });
-    p.catch(() => cache.delete(n));
-    cache.set(n, p);
+    p.catch(() => cache.delete(k));
+    cache.set(k, p);
   }
   return p;
 }
 
 export function QuranEncyclopedia() {
-  const [idx, setIdx] = useState<T[] | null>(null);
+  const [books, setBooks] = useState<Bk[] | null>(null);
+  const [bk, setBk] = useState<Bk | null>(null);
+  const idx = bk ? bk.types : null;
   const [err, setErr] = useState(false);
   const [cur, setCur] = useState<T | null>(null);
   const [paras, setParas] = useState<string[] | null>(null);
@@ -37,22 +41,22 @@ export function QuranEncyclopedia() {
   useEffect(() => {
     fetch('/ulum/index.json')
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then(setIdx)
+      .then(setBooks)
       .catch(() => setErr(true));
   }, []);
   useEffect(() => {
     setParas(null);
     setShow(30);
-    if (!cur) return;
+    if (!cur || !bk) return;
     let live = true;
-    loadT(cur.n).then((d) => live && setParas(d)).catch(() => live && setErr(true));
+    loadT(bk.id, cur.n).then((d) => live && setParas(d)).catch(() => live && setErr(true));
     return () => {
       live = false;
     };
-  }, [cur]);
+  }, [cur, bk]);
 
   async function search() {
-    if (!idx) return;
+    if (!idx || !bk) return;
     const w = norm(q).split(' ').filter(Boolean);
     if (!w.length) return;
     const my = ++stop.current;
@@ -62,7 +66,7 @@ export function QuranEncyclopedia() {
     for (let i = 0; i < idx.length && out.length < 60; i += 6) {
       if (my !== stop.current) return;
       const part = idx.slice(i, i + 6);
-      const data = await Promise.all(part.map((t) => loadT(t.n).catch(() => [] as string[])));
+      const data = await Promise.all(part.map((t) => loadT(bk.id, t.n).catch(() => [] as string[])));
       data.forEach((arr, k) => {
         for (const p of arr) if (out.length < 60 && w.every((x) => norm(p).includes(x))) out.push({ t: part[k], p });
       });
@@ -93,19 +97,35 @@ export function QuranEncyclopedia() {
   );
   const credit = (
     <p className="qe-note" style={{ marginTop: 14 }}>
-      «الإتقان في علوم القرآن» لجلال الدين السيوطي (ت ٩١١هـ)، طبعة الهيئة المصرية العامة للكتاب بتحقيق محمد أبو الفضل إبراهيم، نصّها من المكتبة الشاملة عبر مشروع OpenITI (CC BY-NC-SA 4.0). الكتاب يجمع أقوال العلماء والمرويات على اختلاف درجاتها، فلا يُحتج بما فيه دون تحقق. حذفنا منه الأنواع التي أغلبها روايات غير مُحقَّقة (سبب النزول، المبهمات، فضائل القرآن وخواصه…).
+      «الإتقان» للسيوطي (ت ٩١١هـ) و«البرهان» للزركشي (ت ٧٩٤هـ)، بتحقيق محمد أبو الفضل إبراهيم، ونصّاهما من المكتبة الشاملة عبر مشروع OpenITI (CC BY-NC-SA 4.0). الكتابان يجمعان أقوال العلماء والمرويات على اختلاف درجاتها، فلا يُحتج بما فيهما دون تحقق. حذفنا الأنواع التي أغلبها روايات غير مُحقَّقة (سبب النزول، المبهمات، فضائل القرآن وخواصه…).
     </p>
   );
 
   if (err) return <p style={{ textAlign: 'center', color: '#ffd9a0' }}>تعذّر تحميل الموسوعة.</p>;
-  if (!idx) return <p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p>;
+  if (!books) return <p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p>;
+
+  if (!bk || !idx)
+    return (
+      <div className="qe">
+        <p className="qe-note">اختر كتابًا من كتب علوم القرآن الجامعة:</p>
+        {books.map((b) => (
+          <button key={b.id} type="button" className="qe-t" onClick={() => (setBk(b), setCur(null), setRes(null), setQ(''))} style={{ display: 'block' }}>
+            <b style={{ display: 'block', color: '#f1d77a' }}>{b.title}</b>
+            <small style={{ opacity: 0.7 }}>{b.author} • {toAr(b.types.length)} نوعًا</small>
+          </button>
+        ))}
+        {credit}
+        {css}
+      </div>
+    );
 
   if (!cur)
     return (
       <div className="qe">
-        <p className="qe-note">{toAr(idx.length)} نوعًا من علوم القرآن. اضغط نوعًا لقراءته، أو ابحث في نصوص الموسوعة كلها.</p>
+        <button type="button" className="qe-back" onClick={() => (stop.current++, setBk(null), setRes(null), setProg(null))}>← الكتب</button>
+        <p className="qe-note">{bk.title} — {toAr(idx.length)} نوعًا من علوم القرآن. اضغط نوعًا لقراءته، أو ابحث في نصوص الموسوعة كلها.</p>
         <div className="qe-s">
-          <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && search()} placeholder="بحث في الموسوعة" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && search()} placeholder={`بحث في ${bk.title}`} />
           <button type="button" onClick={search}>بحث</button>
         </div>
         {prog != null && <div className="qe-g">جارٍ البحث… {toAr(prog)}٪</div>}
