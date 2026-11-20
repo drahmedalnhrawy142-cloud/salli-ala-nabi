@@ -66,6 +66,8 @@ public class FloatingService extends Service {
     private SharedPreferences prefs;
     private BubbleView bubble;
     private WindowManager.LayoutParams bubbleParams;
+    private BubbleView bubble2;
+    private WindowManager.LayoutParams bubble2Params;
     private TextView closeTarget;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ExecutorService network = Executors.newSingleThreadExecutor();
@@ -73,6 +75,7 @@ public class FloatingService extends Service {
         @Override
         public void run() {
             if (bubble != null) bubble.animate().alpha(0.5f).setDuration(400).start();
+            if (bubble2 != null) bubble2.animate().alpha(0.5f).setDuration(400).start();
         }
     };
 
@@ -108,6 +111,7 @@ public class FloatingService extends Service {
         }
 
         if (bubble == null) showBubble();
+        syncBubble2();
         flushGlobal();
         return START_STICKY;
     }
@@ -116,8 +120,10 @@ public class FloatingService extends Service {
     public void onDestroy() {
         handler.removeCallbacksAndMessages(null);
         removeView(bubble);
+        removeView(bubble2);
         removeView(closeTarget);
         bubble = null;
+        bubble2 = null;
         closeTarget = null;
         network.shutdown();
         running = null;
@@ -206,6 +212,170 @@ public class FloatingService extends Service {
                 bubble.setProgress(prefs.getInt("fl_count", 0), prefs.getInt("fl_target", 100));
             }
         });
+        syncBubble2();
+    }
+
+    // ------------------------------------------------- الزرار الثاني: «الذكر» (أي ذكر غير الصلاة على النبي)
+
+    /** يظهر/يختفي/يتحدّث الزرار الثاني حسب الإعدادات المحفوظة (d2_*). */
+    void syncBubble2() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                boolean on = prefs.getBoolean("d2_enabled", true);
+                if (on && bubble2 == null && bubble != null) {
+                    showBubble2();
+                } else if (!on && bubble2 != null) {
+                    removeView(bubble2);
+                    bubble2 = null;
+                }
+                if (bubble2 != null) {
+                    bubble2.setLabel(prefs.getString("d2_dhikr", "سبحان الله"));
+                    bubble2.setProgress(prefs.getInt("d2_count", 0), prefs.getInt("d2_target", 33));
+                }
+            }
+        });
+    }
+
+    private void showBubble2() {
+        int size = dp(56);
+        bubble2 = new BubbleView(this);
+        bubble2.setLabel(prefs.getString("d2_dhikr", "سبحان الله"));
+        bubble2Params = newParams(size, size, true);
+        int defY = Math.min(screenH() - size - dp(24), bubbleParams.y + dp(78));
+        bubble2Params.x = prefs.getInt("d2_x", bubbleParams.x);
+        bubble2Params.y = prefs.getInt("d2_y", defY);
+        bubble2.setProgress(prefs.getInt("d2_count", 0), prefs.getInt("d2_target", 33));
+        bubble2.setOnTouchListener(new Drag2());
+        wm.addView(bubble2, bubble2Params);
+        scheduleFade();
+    }
+
+    private class Drag2 implements View.OnTouchListener {
+        private float downX, downY;
+        private int startX, startY;
+        private boolean dragging;
+        private final int slop = ViewConfiguration.get(FloatingService.this).getScaledTouchSlop();
+
+        @Override
+        public boolean onTouch(View v, MotionEvent e) {
+            if (bubble2 == null) return false;
+            switch (e.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    downX = e.getRawX();
+                    downY = e.getRawY();
+                    startX = bubble2Params.x;
+                    startY = bubble2Params.y;
+                    dragging = false;
+                    handler.removeCallbacks(fadeTask);
+                    bubble2.animate().alpha(1f).setDuration(120).start();
+                    return true;
+                case MotionEvent.ACTION_MOVE: {
+                    float dx = e.getRawX() - downX;
+                    float dy = e.getRawY() - downY;
+                    if (!dragging && Math.hypot(dx, dy) > slop) {
+                        dragging = true;
+                        showCloseTarget();
+                    }
+                    if (dragging) {
+                        bubble2Params.x = (int) (startX + dx);
+                        bubble2Params.y = (int) (startY + dy);
+                        wm.updateViewLayout(bubble2, bubble2Params);
+                        highlightClose(isOverClose(bubble2Params));
+                    }
+                    return true;
+                }
+                case MotionEvent.ACTION_UP:
+                    if (dragging) {
+                        boolean close = isOverClose(bubble2Params);
+                        hideCloseTarget();
+                        if (close) {
+                            prefs.edit().putBoolean("d2_enabled", false).apply();
+                            removeView(bubble2);
+                            bubble2 = null;
+                        } else {
+                            int size = bubble2Params.width;
+                            int maxY = Math.max(0, screenH() - size - dp(24));
+                            bubble2Params.y = Math.max(0, Math.min(bubble2Params.y, maxY));
+                            bubble2Params.x = (bubble2Params.x + size / 2 < screenW() / 2) ? 0 : screenW() - size;
+                            try {
+                                wm.updateViewLayout(bubble2, bubble2Params);
+                            } catch (Exception ignored) {
+                            }
+                            prefs.edit().putInt("d2_x", bubble2Params.x).putInt("d2_y", bubble2Params.y).apply();
+                        }
+                    } else {
+                        onTap2();
+                    }
+                    scheduleFade();
+                    return true;
+                case MotionEvent.ACTION_CANCEL:
+                    hideCloseTarget();
+                    scheduleFade();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    }
+
+    private void onTap2() {
+        if (bubble2 == null) return;
+        int target = prefs.getInt("d2_target", 33);
+        int c = prefs.getInt("d2_count", 0) + 1;
+        String today = todayKey();
+        int dayCount = today.equals(prefs.getString("d2_date", "")) ? prefs.getInt("d2_today", 0) : 0;
+        boolean reached = target > 0 && c >= target;
+        prefs.edit()
+                .putInt("d2_today", dayCount + 1)
+                .putString("d2_date", today)
+                .putInt("d2_count", reached ? 0 : c)
+                .putInt("d2_total", prefs.getInt("d2_total", 0) + 1)
+                .apply();
+        bubble2.setProgress(reached ? target : c, target);
+        if (reached) {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (bubble2 != null) bubble2.setProgress(0, prefs.getInt("d2_target", 33));
+                }
+            }, 1400);
+        }
+        vibrate(reached);
+        bubble2.animate().cancel();
+        bubble2.setScaleX(1f);
+        bubble2.setScaleY(1f);
+        float peak = reached ? 1.3f : 1.15f;
+        bubble2.animate().scaleX(peak).scaleY(peak).setDuration(110)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (bubble2 != null) bubble2.animate().scaleX(1f).scaleY(1f).setDuration(160).start();
+                    }
+                }).start();
+        final TextView t = new TextView(this);
+        t.setText("+١");
+        t.setTextColor(Color.parseColor("#7FE0C0"));
+        t.setTextSize(22);
+        t.setTypeface(Typeface.DEFAULT_BOLD);
+        t.setShadowLayer(12f, 0f, 0f, Color.parseColor("#2BA58A"));
+        WindowManager.LayoutParams lp = newParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT, false);
+        lp.x = bubble2Params.x + bubble2Params.width / 2 - dp(12);
+        lp.y = Math.max(0, bubble2Params.y - dp(22));
+        try {
+            wm.addView(t, lp);
+        } catch (Exception ex) {
+            return;
+        }
+        t.animate().translationY(-dp(70)).alpha(0f).setDuration(800)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        removeView(t);
+                    }
+                }).start();
     }
 
     private void scheduleFade() {
@@ -253,14 +423,14 @@ public class FloatingService extends Service {
                         bubbleParams.x = (int) (startX + dx);
                         bubbleParams.y = (int) (startY + dy);
                         wm.updateViewLayout(bubble, bubbleParams);
-                        highlightClose(isOverClose());
+                        highlightClose(isOverClose(bubbleParams));
                     }
                     return true;
                 }
 
                 case MotionEvent.ACTION_UP:
                     if (dragging) {
-                        boolean close = isOverClose();
+                        boolean close = isOverClose(bubbleParams);
                         hideCloseTarget();
                         if (close) {
                             prefs.edit().putBoolean("float_enabled", false).apply();
@@ -345,10 +515,10 @@ public class FloatingService extends Service {
         closeTarget.setScaleY(over ? 1.2f : 1f);
     }
 
-    private boolean isOverClose() {
-        if (closeTarget == null || bubble == null) return false;
-        float bx = bubbleParams.x + bubbleParams.width / 2f;
-        float by = bubbleParams.y + bubbleParams.height / 2f;
+    private boolean isOverClose(WindowManager.LayoutParams p) {
+        if (closeTarget == null || p == null) return false;
+        float bx = p.x + p.width / 2f;
+        float by = p.y + p.height / 2f;
         float cx = screenW() / 2f;
         float cy = screenH() - dp(64) / 2f - dp(96);
         return Math.hypot(bx - cx, by - cy) < dp(70);
@@ -548,6 +718,7 @@ public class FloatingService extends Service {
         private int today = 0;
         private int goal = 100;
         private boolean glow = false;
+        private String label = null;
 
         BubbleView(Context context) {
             super(context);
@@ -560,9 +731,20 @@ public class FloatingService extends Service {
             invalidate();
         }
 
+        void setLabel(String l) {
+            label = l;
+            invalidate();
+        }
+
         void setGlow(boolean on) {
             glow = on;
             invalidate();
+        }
+
+        private String[] splitTwo(String t) {
+            int mid = t.length() / 2, best = -1;
+            for (int i = 0; i < t.length(); i++) if (t.charAt(i) == ' ' && (best < 0 || Math.abs(i - mid) < Math.abs(best - mid))) best = i;
+            return best < 0 ? new String[]{t} : new String[]{t.substring(0, best), t.substring(best + 1)};
         }
 
         private float dp(float v) {
@@ -580,7 +762,7 @@ public class FloatingService extends Service {
 
             // خلفية داكنة
             paint.setStyle(Paint.Style.FILL);
-            paint.setColor(Color.parseColor("#0B1B3A"));
+            paint.setColor(Color.parseColor(label != null ? "#0C2B25" : "#0B1B3A"));
             canvas.drawCircle(cx, cy, outer, paint);
 
             // صورة اللوحة داخل الدايرة
@@ -589,7 +771,21 @@ public class FloatingService extends Service {
             clip.addCircle(cx, cy, inner, Path.Direction.CW);
             canvas.save();
             canvas.clipPath(clip);
-            if (icon != null) {
+            if (label != null) {
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(Color.parseColor("#BFFFE9"));
+                paint.setTextAlign(Paint.Align.CENTER);
+                paint.setTypeface(Typeface.DEFAULT_BOLD);
+                String[] ln = label.length() > 9 && label.contains(" ") ? splitTwo(label) : new String[]{label};
+                float ts = inner * (ln.length > 1 ? 0.52f : 0.62f);
+                paint.setTextSize(ts);
+                float maxW = inner * 1.75f;
+                for (String x : ln) while (paint.measureText(x) > maxW && ts > dp(7)) { ts -= 1f; paint.setTextSize(ts); }
+                float lh = ts * 1.15f;
+                float y0 = cy - (ln.length - 1) * lh / 2f + ts * 0.35f;
+                for (int i = 0; i < ln.length; i++) canvas.drawText(ln[i], cx, y0 + i * lh, paint);
+                paint.setTextAlign(Paint.Align.LEFT);
+            } else if (icon != null) {
                 RectF dst = new RectF(cx - inner, cy - inner, cx + inner, cy + inner);
                 canvas.drawBitmap(icon, null, dst, paint);
             }
@@ -610,7 +806,7 @@ public class FloatingService extends Service {
                 paint.setColor(Color.argb(150, 255, 217, 122));
                 canvas.drawArc(oval, 0, 360, false, paint);
             } else if (frac > 0f) {
-                paint.setColor(Color.parseColor("#FFD97A"));
+                paint.setColor(Color.parseColor(label != null ? "#7FE0C0" : "#FFD97A"));
                 canvas.drawArc(oval, -90, 360f * frac, false, paint);
             }
 

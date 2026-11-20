@@ -399,6 +399,35 @@ public class FloatingPlugin extends Plugin {
         call.resolve(r);
     }
 
+    /** الزرار العايم الثاني («الذكر»): enabled / target / dhikr — أي منها اختياري. */
+    @PluginMethod
+    public void float2Config(PluginCall call) {
+        SharedPreferences.Editor e = prefs().edit();
+        if (call.hasOption("enabled")) e.putBoolean("d2_enabled", call.getBoolean("enabled", true));
+        if (call.hasOption("target")) e.putInt("d2_target", Math.max(0, call.getInt("target", 33)));
+        if (call.hasOption("dhikr")) {
+            String d = call.getString("dhikr", "سبحان الله");
+            if (d != null && !d.trim().isEmpty() && d.length() <= 60) e.putString("d2_dhikr", d.trim());
+        }
+        if (call.getBoolean("reset", false)) e.putInt("d2_count", 0);
+        e.apply();
+        FloatingService s = FloatingService.running;
+        if (s != null) s.refreshFromPrefs();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void float2State(PluginCall call) {
+        SharedPreferences p = prefs();
+        JSObject r = new JSObject();
+        r.put("enabled", p.getBoolean("d2_enabled", true));
+        r.put("count", p.getInt("d2_count", 0));
+        r.put("target", p.getInt("d2_target", 33));
+        r.put("dhikr", p.getString("d2_dhikr", "سبحان الله"));
+        r.put("total", p.getInt("d2_total", 0));
+        call.resolve(r);
+    }
+
     /** يرجّع عدد الصلوات اللي اتعملت من الزرار العايم ولسه التطبيق ماحسبهاش، ويصفّرها. */
     @PluginMethod
     public void getPending(PluginCall call) {
