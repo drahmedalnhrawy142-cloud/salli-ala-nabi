@@ -9,18 +9,22 @@ body{display:flex;align-items:center;justify-content:center;padding:14px;box-siz
 .top{color:#f1d77a;font-size:14px;text-align:center}
 .t{margin:14px 0;font-family:'KFGQPC Hafs',serif;font-size:30px;line-height:2.3;text-align:center;color:#fff1c4}
 .n{color:#e8c25a;font-size:22px;white-space:nowrap}
+.tf{margin:0 0 12px;padding:10px 12px;border-radius:14px;border:1px solid rgba(232,194,90,.35);background:rgba(232,194,90,.06);font-size:15px;line-height:1.9;color:#f7ebc1}.tf b{display:block;color:#f1d77a;font-size:12.5px;margin-bottom:4px}.tf small{display:block;margin-top:4px;font-size:11px;opacity:.6}
 .b{display:flex;gap:8px}
 button{flex:1;padding:12px 6px;border-radius:12px;border:1px solid rgba(232,194,90,.4);background:#1a1409;color:#f7ebc1;font-size:14px}
 .ok{background:rgba(232,194,90,.25);color:#f1d77a}
 </style></head><body>
 <div class="c"><div class="top" id="top">…</div><p class="t" id="t"></p>
+<div class="tf" id="tf" style="display:none"><b>التفسير الميسّر</b><span id="tft">…</span><small>مجمع الملك فهد لطباعة المصحف الشريف</small></div>
 <div class="b"><button id="nx">آية أخرى</button><button class="ok" id="ok">اللهم بارك</button></div></div>
 <script>
 (function(){
 var q=new URLSearchParams(location.search),i=parseInt(q.get('i')||'0',10),rnd=q.get('m')==='r',D=null;
 function ar(n){return String(n).replace(/\d/g,function(d){return '٠١٢٣٤٥٦٧٨٩'[d]})}
 function show(){var a=D.ayas[i],s=D.suras[a[0]-1];document.getElementById('top').textContent='سورة '+s.name.replace(/^سورة\s*/,'')+' • آية '+ar(a[1]);
-document.getElementById('t').innerHTML=a[4]+' <span class="n">﴿'+ar(a[1])+'﴾</span>'}
+document.getElementById('t').innerHTML=a[4]+' <span class="n">﴿'+ar(a[1])+'﴾</span>';tafsir(a[0],a[1])}
+var TC={};function tafsir(su,ay){var tf=document.getElementById('tf'),tt=document.getElementById('tft');tf.style.display='block';tt.textContent='…';function put(arr){if(su===cur[0]&&ay===cur[1])tt.textContent=arr[ay-1]||'لا يوجد تفسير لهذه الآية في المصدر.'}cur=[su,ay];if(TC[su])return put(TC[su]);var r=new XMLHttpRequest();r.open('GET','tafsir/'+su+'.json');r.onload=function(){try{TC[su]=JSON.parse(r.responseText);put(TC[su])}catch(e){tt.textContent='تعذّر تحميل التفسير'}};r.onerror=function(){tt.textContent='تعذّر تحميل التفسير'};r.send()}
+var cur=[0,0];
 function close(){try{Android.close()}catch(e){history.back()}}
 document.getElementById('ok').onclick=close;
 document.body.onclick=function(e){if(e.target===document.body)close()};

@@ -31,9 +31,8 @@ export function AyahCard({ d, i, onClose, onNext }: { d: QData; i: number; onClo
   const a = d.ayas[i];
   const s = d.suras[a[0] - 1];
   const [taf, setTaf] = useState<string | null>(null);
-  const [showTaf, setShowTaf] = useState(false);
+  const [showTaf, setShowTaf] = useState(true);
   useEffect(() => {
-    setShowTaf(false);
     setTaf(null);
   }, [i]);
   useEffect(() => {
