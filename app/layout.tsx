@@ -20,7 +20,7 @@ export const viewport: Viewport = {
 };
 
 // يطبّق الخط المختار قبل أول رسم للصفحة (لتفادي وميض الخط الافتراضي)
-const FONT_BOOT = `try{var m={amiri:1,naskh:1,schehe:1,cairo:1,tajawal:1,almarai:1,plex:1,notokufi:1,messiri:1},r=document.documentElement.style,b=localStorage.getItem('ui_font_body'),h=localStorage.getItem('ui_font_head');if(b&&m[b])r.setProperty('--font-ruqaa','var(--f-'+b+')');if(h&&m[h])r.setProperty('--font-kufi','var(--f-'+h+')')}catch(e){}`;
+const FONT_BOOT = `try{var m={amiri:1,naskh:1,schehe:1,cairo:1,tajawal:1,almarai:1,plex:1,notokufi:1,messiri:1},r=document.documentElement.style,b=localStorage.getItem('ui_font_body')||'amiri',h=localStorage.getItem('ui_font_head')||'amiri';if(b&&m[b])r.setProperty('--font-ruqaa','var(--f-'+b+')');if(h&&m[h])r.setProperty('--font-kufi','var(--f-'+h+')')}catch(e){}`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

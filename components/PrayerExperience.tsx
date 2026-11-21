@@ -1103,8 +1103,26 @@ export function PrayerExperience() {
           text-align: center;
         }
 
+        .poem-verse {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: baseline;
+          column-gap: 10px;
+          margin: 4px 0 10px;
+          direction: rtl;
+        }
+        .poem-verse .poem-sadr,
+        .poem-verse .poem-ajz {
+          flex: 1 1 42%;
+          min-width: 140px;
+        }
+        .poem-verse .poem-sadr { text-align: right; }
+        .poem-verse .poem-ajz { text-align: left; }
+        .poem-verse .poem-one { flex: 1 1 100%; text-align: center; }
+        .poem-sep { color: #e8c25a; font-size: 12px; opacity: 0.8; }
         .poem-line {
-          margin: 9px 0;
+          margin: 0;
           color: #fff7e8;
           font-size: 19px;
           font-weight: 700;
@@ -1600,7 +1618,7 @@ export function PrayerExperience() {
         }
 
         .poem-line {
-          font-size: 22px;
+          font-size: 19px;
           line-height: 2.1;
           font-weight: 400;
         }
@@ -1913,12 +1931,20 @@ export function PrayerExperience() {
           <h2 className="section-title">من مدح رسول الله ﷺ</h2>
 
           {poems[poemIndex].v.map((verse, index) => (
-            <div key={index} style={{ marginBottom: 6 }}>
-              {verse.map((line, j) => (
-                <p className="poem-line" key={j}>
-                  {line}
-                </p>
-              ))}
+            <div className="poem-verse" key={index}>
+              {verse.length === 2 ? (
+                <>
+                  <span className="poem-line poem-sadr">{verse[0]}</span>
+                  <span className="poem-sep" aria-hidden="true">✦</span>
+                  <span className="poem-line poem-ajz">{verse[1]}</span>
+                </>
+              ) : (
+                verse.map((line, j) => (
+                  <span className="poem-line poem-one" key={j}>
+                    {line}
+                  </span>
+                ))
+              )}
             </div>
           ))}
           <p style={{ textAlign: 'center', fontSize: 12.5, opacity: 0.75, margin: '8px 0' }}>

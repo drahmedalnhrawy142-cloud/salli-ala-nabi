@@ -5,12 +5,15 @@ import { useEffect, useState } from 'react';
 type Opt = { id: string; label: string; v: string; serif: boolean };
 
 /** v = متغير الخط المعرَّف في app/fonts.ts */
-const DEFAULT_BODY: Opt = { id: 'ruqaa', label: 'رقعة (الافتراضي)', v: '--font-ruqaa', serif: true };
-const DEFAULT_HEAD: Opt = { id: 'kufi', label: 'كوفي (الافتراضي)', v: '--font-kufi', serif: false };
+const RUQAA: Opt = { id: 'ruqaa', label: 'رقعة', v: '--font-ruqaa', serif: true };
+const KUFI: Opt = { id: 'kufi', label: 'كوفي', v: '--font-kufi', serif: false };
+const AMIRI: Opt = { id: 'amiri', label: 'أميري (الافتراضي)', v: '--f-amiri', serif: true };
+const DEFAULT_BODY = AMIRI;
+const DEFAULT_HEAD = AMIRI;
 
 const BODY: Opt[] = [
-  DEFAULT_BODY,
-  { id: 'amiri', label: 'أميري', v: '--f-amiri', serif: true },
+  AMIRI,
+  RUQAA,
   { id: 'naskh', label: 'نسخ', v: '--f-naskh', serif: true },
   { id: 'schehe', label: 'شهرزاد', v: '--f-schehe', serif: true },
   { id: 'cairo', label: 'القاهرة', v: '--f-cairo', serif: false },
@@ -21,12 +24,12 @@ const BODY: Opt[] = [
 ];
 
 const HEAD: Opt[] = [
-  DEFAULT_HEAD,
+  AMIRI,
+  KUFI,
   { id: 'notokufi', label: 'نوتو كوفي', v: '--f-notokufi', serif: false },
   { id: 'cairo', label: 'القاهرة', v: '--f-cairo', serif: false },
   { id: 'messiri', label: 'المسيري', v: '--f-messiri', serif: false },
   { id: 'tajawal', label: 'تجوّل', v: '--f-tajawal', serif: false },
-  { id: 'amiri', label: 'أميري', v: '--f-amiri', serif: true },
 ];
 
 const KEYS = { body: 'ui_font_body', head: 'ui_font_head' } as const;
@@ -48,8 +51,8 @@ function read(kind: 'body' | 'head'): string {
 
 /** اختيار نوع الخط: خط للنصوص وخط للعناوين، ويُحفظ على الجهاز. */
 export function FontFamily() {
-  const [body, setBody] = useState('ruqaa');
-  const [head, setHead] = useState('kufi');
+  const [body, setBody] = useState('amiri');
+  const [head, setHead] = useState('amiri');
 
   useEffect(() => {
     const b = read('body');
@@ -68,8 +71,8 @@ export function FontFamily() {
   }
 
   function reset() {
-    setBody('ruqaa');
-    setHead('kufi');
+    setBody('amiri');
+    setHead('amiri');
     apply('body', DEFAULT_BODY);
     apply('head', DEFAULT_HEAD);
     try {
