@@ -20,6 +20,7 @@ import { HadithQudsi } from '@/components/HadithQudsi';
 import { HadithLibrary } from '@/components/HadithLibrary';
 import { QuranSciencesHub } from '@/components/QuranSciencesHub';
 import { IlmTools } from '@/components/ilm/IlmTools';
+import { POEMS } from '@/components/poemsData';
 import { CreditsPage } from '@/components/CreditsPage';
 import { IslamicLibrary } from '@/components/IslamicLibrary';
 import { FiqhMadhahib } from '@/components/FiqhMadhahib';
@@ -50,76 +51,7 @@ type Celebration = {
   left: number;
 };
 
-const poems = [
-  [
-    'أَغَرُّ عَلَيْهِ لِلنُّبُوَّةِ خَاتَمٌ',
-    'مِنَ اللَّهِ مَشْهُودٌ يَلُوحُ وَيُشْهَدُ',
-  ],
-  [
-    'وَضَمَّ الْإِلَهُ اسْمَ النَّبِيِّ إِلَى اسْمِهِ',
-    'إِذَا قَالَ فِي الْخَمْسِ الْمُؤَذِّنُ أَشْهَدُ',
-  ],
-  [
-    'نَبِيٌّ أَتَانَا بَعْدَ يَأْسٍ وَفَتْرَةٍ',
-    'مِنَ الرُّسُلِ وَالْأَوْثَانُ فِي الْأَرْضِ تُعْبَدُ',
-  ],
-  [
-    'مُحَمَّدٌ سَيِّدُ الْكَوْنَيْنِ وَالثَّقَلَيْنِ',
-    'وَالْفَرِيقَيْنِ مِنْ عُرْبٍ وَمِنْ عَجَمِ',
-  ],
-  [
-    'نَبِيُّنَا الْآمِرُ النَّاهِي فَلَا أَحَدٌ',
-    'أَبَرُّ فِي قَوْلِ لَا مِنْهُ وَلَا نَعَمِ',
-  ],
-  [
-    'هُوَ الْحَبِيبُ الَّذِي تُرْجَى شَفَاعَتُهُ',
-    'لِكُلِّ هَوْلٍ مِنَ الْأَهْوَالِ مُقْتَحَمِ',
-  ],
-  [
-    'فَاقَ النَّبِيِّينَ فِي خَلْقٍ وَفِي خُلُقٍ',
-    'وَلَمْ يُدَانُوهُ فِي عِلْمٍ وَلَا كَرَمٍ',
-  ],
-  [
-    'وُلِدَ الْهُدَى فَالْكَائِنَاتُ ضِيَاءُ',
-    'وَفَمُ الزَّمَانِ تَبَسُّمٌ وَثَنَاءُ',
-  ],
-  [
-    'يَا خَيْرَ مَنْ جَاءَ الْوُجُودَ تَحِيَّةً',
-    'مِنْ مُرْسَلِينَ إِلَى الْهُدَى بِكَ جَاءُوا',
-  ],
-  [
-    'وَأَبْيَضَ يُسْتَسْقَى الْغَمَامُ بِوَجْهِهِ',
-    'ثِمَالُ الْيَتَامَى عِصْمَةٌ لِلْأَرَامِلِ',
-  ],
-  [
-    'وَشَقَّ لَهُ مِنِ اسْمِهِ لِيُجِلَّهُ',
-    'فَذُو الْعَرْشِ مَحْمُودٌ وَهَذَا مُحَمَّدُ',
-  ],
-  [
-    'فَأَمْسَى سِرَاجًا مُسْتَنِيرًا وَهَادِيًا',
-    'يَلُوحُ كَمَا لَاحَ الصَّقِيلُ الْمُهَنَّدُ',
-  ],
-  [
-    'مُحَمَّدٌ صَفْوَةُ الْبَارِي وَرَحْمَتُهُ',
-    'وَبُغْيَةُ اللَّهِ مِنْ خَلْقٍ وَمِنْ نَسَمِ',
-  ],
-  [
-    'وَأَنْذَرَنَا نَارًا وَبَشَّرَ جَنَّةً',
-    'وَعَلَّمَنَا الْإِسْلَامَ فَاللَّهَ نَحْمَدُ',
-  ],
-  [
-    'وَمَا حَمَلَتْ مِنْ نَاقَةٍ فَوْقَ رَحْلِهَا',
-    'أَعَفَّ وَأَوْفَى ذِمَّةً مِنْ مُحَمَّدِ',
-  ],
-  [
-    'دَعَا إِلَى اللَّهِ فَالْمُسْتَمْسِكُونَ بِهِ',
-    'مُسْتَمْسِكُونَ بِحَبْلٍ غَيْرِ مُنْفَصِمِ',
-  ],
-  [
-    'أَلَا إِنَّ خَيْرَ النَّاسِ نَفْسًا وَوَالِدًا',
-    'إِذَا عُدَّ سَادَاتُ الْبَرِيَّةِ أَحْمَدُ',
-  ],
-];
+const poems = POEMS;
 
 type FloatingPlugin = {
   status(): Promise<{ permission: boolean; running: boolean }>;
@@ -681,7 +613,7 @@ export function PrayerExperience() {
   async function copyPoem() {
     try {
       await navigator.clipboard.writeText(
-        poems[poemIndex].join('\n')
+        poems[poemIndex].v.map((x) => x.join(' ... ')).join('\n') + '\n— ' + poems[poemIndex].poet
       );
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
@@ -1980,11 +1912,18 @@ export function PrayerExperience() {
         <section className="content-card" id="s-poems">
           <h2 className="section-title">من مدح رسول الله ﷺ</h2>
 
-          {poems[poemIndex].map((line, index) => (
-            <p className="poem-line" key={index}>
-              {line}
-            </p>
+          {poems[poemIndex].v.map((verse, index) => (
+            <div key={index} style={{ marginBottom: 6 }}>
+              {verse.map((line, j) => (
+                <p className="poem-line" key={j}>
+                  {line}
+                </p>
+              ))}
+            </div>
           ))}
+          <p style={{ textAlign: 'center', fontSize: 12.5, opacity: 0.75, margin: '8px 0' }}>
+            {poems[poemIndex].poet} — {poems[poemIndex].src}
+          </p>
 
           <div className="poem-actions">
             <button

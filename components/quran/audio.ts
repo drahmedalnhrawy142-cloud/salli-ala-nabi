@@ -25,6 +25,7 @@ export const RECITERS: Reciter[] = [
   { id: 'jibreel', name: 'محمد جبريل', folder: 'Muhammad_Jibreel_64kbps', riwaya: 'hafs' },
   { id: 'rifai', name: 'هاني الرفاعي', folder: 'Hani_Rifai_64kbps', riwaya: 'hafs' },
   { id: 'ajamy', name: 'أحمد بن علي العجمي', folder: 'ahmed_ibn_ali_al_ajamy_128kbps', riwaya: 'hafs' },
+  { id: 'fares', name: 'فارس عباد', folder: 'Fares_Abbad_64kbps', riwaya: 'hafs' },
   { id: 'basfar', name: 'عبد الله بصفر', folder: 'Abdullah_Basfar_64kbps', riwaya: 'hafs' },
   { id: 'dosary-w', name: 'إبراهيم الدوسري — رواية ورش', folder: 'warsh/warsh_ibrahim_aldosary_128kbps', riwaya: 'warsh' },
   { id: 'jazaery-w', name: 'ياسين الجزائري — رواية ورش', folder: 'warsh/warsh_yassin_al_jazaery_64kbps', riwaya: 'warsh' },
