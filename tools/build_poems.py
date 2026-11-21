@@ -33,7 +33,15 @@ out = []
 for poet, src, V, idx in sets:
     lines = [v for i in idx for v in [V[i]] if len(v) == 2]
     out.append({'poet': poet, 'src': src, 'v': lines})
+SB = 'الشوقيات — نهج البردة (مؤسسة هنداوي عبر OpenITI)'
+nahj = [
+  [(13136, 13138), (13142, 13144), (13148, 13150)],
+  [(13256, 13258), (13260, 13262), (13266, 13268)],
+  [(13364, 13366), (13368, 13370)],
+  [(13422, 13424)],
+]
 for g in shawqi: out.append({'poet': 'أحمد شوقي', 'src': SH, 'v': [[hem(a), hem(b)] for a, b in g]})
+for g in nahj: out.append({'poet': 'أحمد شوقي', 'src': SB, 'v': [[hem(a), hem(b)] for a, b in g]})
 out.insert(0, {'poet': 'أبو طالب (ممّا تمثّل به ابن عمر ﵄ ورواه البخاري)', 'src': 'صحيح البخاري، كتاب الاستسقاء',
                'v': [['وَأَبْيَضَ يُسْتَسْقَى الْغَمَامُ بِوَجْهِهِ', 'ثِمَالُ الْيَتَامَى عِصْمَةٌ لِلأَرَامِلِ']]})
 ts = '// مولَّد بـ tools/build_poems.py — لا يُعدَّل يدويًا\nexport type Poem = { poet: string; src: string; v: string[][] };\nexport const POEMS: Poem[] = ' + json.dumps(out, ensure_ascii=False, indent=1) + ';\n'
