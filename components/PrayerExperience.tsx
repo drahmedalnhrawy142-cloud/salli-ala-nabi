@@ -19,6 +19,7 @@ import { FloatTarget } from '@/components/FloatTarget';
 import { HadithQudsi } from '@/components/HadithQudsi';
 import { HadithLibrary } from '@/components/HadithLibrary';
 import { QuranSciencesHub } from '@/components/QuranSciencesHub';
+import { CreditsPage } from '@/components/CreditsPage';
 import { IslamicLibrary } from '@/components/IslamicLibrary';
 import { FiqhMadhahib } from '@/components/FiqhMadhahib';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
@@ -2073,17 +2074,17 @@ export function PrayerExperience() {
           {seen.names && (
             <SectionGrid
               secs={[
-                { id: 'asma', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
-                { id: 'qudsi', label: 'الأحاديث القدسية', icon: '📜', hint: 'من الصحيحين', render: () => <HadithQudsi /> },
+                { id: 'lib', label: 'المكتبة العلمية', icon: '🏛️', hint: 'عقيدة • حديث • أصول • لغة • آداب', render: () => <IslamicLibrary /> },
+                { id: 'uloom', label: 'علوم القرآن', icon: '🔬', hint: 'موسوعة ومكي ومدني وأسباب النزول', render: () => <QuranSciencesHub /> },
                 { id: 'books', label: 'كتب الحديث', icon: '📚', hint: 'البخاري ومسلم والأربعون', render: () => <HadithLibrary /> },
+                { id: 'qudsi', label: 'الأحاديث القدسية', icon: '📜', hint: 'من الصحيحين', render: () => <HadithQudsi /> },
+                { id: 'fiqh', label: 'المذاهب الأربعة', icon: '⚖️', hint: 'الفقه المقارن: إجماع الأئمة وخلافهم', render: () => <FiqhMadhahib /> },
                 { id: 'sira', label: 'السيرة الكاملة', icon: '📚', hint: 'ابن هشام • بفهرس', render: () => (
                   <Suspense fallback={null}>
                     <SiraCorner />
                   </Suspense>
                 ) },
-                { id: 'uloom', label: 'علوم القرآن', icon: '🔬', hint: 'موسوعة ومكي ومدني وأسباب النزول', render: () => <QuranSciencesHub /> },
-                { id: 'lib', label: 'المكتبة العلمية', icon: '🏛️', hint: 'عقيدة • حديث • أصول • لغة', render: () => <IslamicLibrary /> },
-                { id: 'fiqh', label: 'المذاهب الأربعة', icon: '⚖️', hint: 'الفقه المقارن: إجماع الأئمة وخلافهم', render: () => <FiqhMadhahib /> },
+                { id: 'asma', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
               ]}
             />
           )}
@@ -2149,6 +2150,9 @@ export function PrayerExperience() {
             <FloatTarget />
           </section>
                 ) },
+                { id: 'remind', label: 'التذكيرات', icon: '🔔', hint: 'الصلاة والأذكار', hidden: !remSupported, render: () => (
+                <SectionGrid
+                  secs={[
                 { id: 'adhkar-rem', label: 'تذكير الأذكار', icon: '🔔', hidden: !remSupported, render: () => (
           <section className="content-card" id="s-adhkar-rem">
             <h2 className="section-title">تذكير الأذكار</h2>
@@ -2296,11 +2300,21 @@ export function PrayerExperience() {
             </button>
           </section>
                 ) },
+                  ]}
+                />
+                ) },
                 { id: 'volume', label: 'أزرار الصوت', icon: '🔊', render: () => <VolumeKeys /> },
+                { id: 'look', label: 'المظهر', icon: '🎨', hint: 'اللغة وحجم الخط ونوعه', render: () => (
+                <SectionGrid
+                  secs={[
                 { id: 'lang', label: 'اللغة', icon: '🌐', render: () => <LangSwitch /> },
                 { id: 'font', label: 'حجم الخط', icon: '🔠', render: () => <FontSize /> },
                 { id: 'fontfam', label: 'نوع الخط', icon: '✒️', hint: 'اختار الأريح لعينك', render: () => <FontFamily /> },
+                  ]}
+                />
+                ) },
                 { id: 'backup', label: 'نسخة احتياطية', icon: '💾', render: () => <Backup /> },
+                { id: 'credits', label: 'المصادر والتراخيص', icon: '📜', hint: 'من أين أخذنا كل نص', render: () => <CreditsPage /> },
                 { id: 'about', label: 'عن التطبيق', icon: 'ℹ️', render: () => (
           <section className="content-card" id="s-about">
             <h2 className="section-title">عن التطبيق</h2>
