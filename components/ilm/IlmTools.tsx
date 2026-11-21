@@ -55,7 +55,7 @@ const css = `
   .it mark { background: rgba(232,194,90,.35); color: inherit; border-radius: 3px; }
 `;
 
-function Card({ src, t, q, onOpen, extra }: { src: string; t: string; q?: string[]; onOpen: () => void; extra?: React.ReactNode }) {
+function Card({ src, t, q, onOpen, extra }: { src: string; t: string; q?: string[]; onOpen?: () => void; extra?: React.ReactNode }) {
   const [m, setM] = useState('');
   async function copy() {
     try {
@@ -71,7 +71,7 @@ function Card({ src, t, q, onOpen, extra }: { src: string; t: string; q?: string
       <div className="it-n">{src}</div>
       <p>{t}</p>
       <div className="it-a">
-        <button type="button" onClick={onOpen}>فتح في الكتاب</button>
+        {onOpen && <button type="button" onClick={onOpen}>فتح في الكتاب</button>}
         <button type="button" onClick={copy}>{m || 'نسخ'}</button>
         {extra}
       </div>
@@ -79,10 +79,32 @@ function Card({ src, t, q, onOpen, extra }: { src: string; t: string; q?: string
   );
 }
 
+type HBook = { id: string; title: string; chapters: { id: number; t: string }[] };
+let hIdx: Promise<HBook[]> | null = null;
+function loadHIdx() {
+  if (!hIdx) {
+    hIdx = fetch('/hadith/index.json').then((r) => (r.ok ? r.json() : Promise.reject()));
+    hIdx.catch(() => (hIdx = null));
+  }
+  return hIdx;
+}
+const hc = new Map<string, Promise<[string, string][]>>();
+function loadH(book: string, id: number) {
+  const k = `${book}/${id}`;
+  let p = hc.get(k);
+  if (!p) {
+    p = fetch(`/hadith/${k}.json`).then((r) => (r.ok ? r.json() : Promise.reject()));
+    p.catch(() => hc.delete(k));
+    hc.set(k, p);
+  }
+  return p;
+}
+const HSEL: [string, string][] = [['h:bukhari', 'صحيح البخاري'], ['h:muslim', 'صحيح مسلم'], ['h:nawawi', 'الأربعون النووية']];
+
 function SearchAll({ books, onOpen }: { books: BookMeta[]; onOpen: (o: Open) => void }) {
   const [q, setQ] = useState('');
   const [sel, setSel] = useState('all');
-  const [res, setRes] = useState<{ b: BookMeta; ki: number; bi: number; src: string; p: string }[] | null>(null);
+  const [res, setRes] = useState<{ b?: BookMeta; ki: number; bi: number; src: string; p: string }[] | null>(null);
   const [prog, setProg] = useState<number | null>(null);
   const stop = useRef(0);
   useEffect(() => () => void stop.current++, []);
@@ -91,7 +113,7 @@ function SearchAll({ books, onOpen }: { books: BookMeta[]; onOpen: (o: Open) => 
     const w = norm(q).split(' ').filter(Boolean);
     if (!w.length) return;
     const my = ++stop.current;
-    const out: { b: BookMeta; ki: number; bi: number; src: string; p: string }[] = [];
+    const out: { b?: BookMeta; ki: number; bi: number; src: string; p: string }[] = [];
     setRes([]);
     setProg(0);
     const pool = books.filter((b) => sel === 'all' || b.id === sel);
@@ -116,15 +138,38 @@ function SearchAll({ books, onOpen }: { books: BookMeta[]; onOpen: (o: Open) => 
         setRes([...out]);
       }
     }
+    // الحديث: البخاري ومسلم والأربعون النووية (نصوص sunnah.com)
+    if (sel === 'all' || sel.startsWith('h:')) {
+      try {
+        const hb = (await loadHIdx()).filter((b) => sel === 'all' || sel === `h:${b.id}`);
+        const hj: { b: HBook; c: { id: number; t: string } }[] = [];
+        hb.forEach((b) => b.chapters.forEach((c) => hj.push({ b, c })));
+        for (let j = 0; j < hj.length && out.length < 80; j += 6) {
+          const part = hj.slice(j, j + 6);
+          const data = await Promise.all(part.map((x) => loadH(x.b.id, x.c.id).catch(() => [] as [string, string][])));
+          if (stop.current !== my) return;
+          data.forEach((arr, k) => {
+            for (const [n, t] of arr)
+              if (out.length < 80 && w.every((x) => norm(t).includes(x)))
+                out.push({ ki: 0, bi: 0, src: `${part[k].b.title} ‹ ${part[k].c.t} ‹ حديث ${n}`, p: t });
+          });
+          setProg(Math.round(((j + part.length) / hj.length) * 100));
+          setRes([...out]);
+        }
+      } catch {}
+    }
     setProg(null);
     setRes([...out]);
   }
   return (
     <div className="it">
       <select value={sel} onChange={(e) => setSel(e.target.value)} aria-label="الكتاب">
-        <option value="all">كل الكتب ({toAr(books.length)})</option>
+        <option value="all">كل الكتب والأحاديث</option>
         {books.map((b) => (
           <option key={b.id} value={b.id}>{b.title}</option>
+        ))}
+        {HSEL.map(([v, l]) => (
+          <option key={v} value={v}>{l} (حديث)</option>
         ))}
       </select>
       <div className="it-s">
@@ -136,11 +181,11 @@ function SearchAll({ books, onOpen }: { books: BookMeta[]; onOpen: (o: Open) => 
         <>
           <div className="it-p">{res.length === 0 && prog == null ? 'لا نتائج.' : `${toAr(res.length)} نتيجة${res.length >= 80 ? ' (أول ٨٠)' : ''}`}</div>
           {res.map((r, i) => (
-            <Card key={i} src={r.src} t={r.p} onOpen={() => onOpen({ b: r.b, ki: r.ki, bi: r.bi })} />
+            <Card key={i} src={r.src} t={r.p} onOpen={r.b ? () => r.b && onOpen({ b: r.b, ki: r.ki, bi: r.bi }) : undefined} />
           ))}
         </>
       )}
-      {!res && <p className="it-m">يبحث في الفقه المقارن والمكتبة العلمية كلها بلا نت.</p>}
+      {!res && <p className="it-m">يبحث في الفقه المقارن والمكتبة العلمية والأحاديث (البخاري ومسلم والأربعون) بلا نت.</p>}
     </div>
   );
 }

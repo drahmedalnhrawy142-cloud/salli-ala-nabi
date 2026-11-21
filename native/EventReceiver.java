@@ -15,7 +15,7 @@ import org.json.JSONObject;
 public class EventReceiver extends BroadcastReceiver {
 
     static final String ACTION = "com.sallialanabi.app.EVENT";
-    static final String[] GROUPS = {"virtue", "adhan"};
+    static final String[] GROUPS = {"virtue", "adhan", "hadith", "track"};
     private static final int BASE = 9000;
     private static final int MAX = 60;
 
