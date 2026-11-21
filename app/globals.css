@@ -19,7 +19,7 @@ body {
   min-width: 320px;
   background: #090817;
   color: var(--ink);
-  font-family: Tahoma, Arial, "Noto Sans Arabic", sans-serif;
+  font-family: var(--font-ruqaa), var(--f-amiri), Amiri, Tahoma, Arial, "Noto Sans Arabic", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -188,3 +188,6 @@ a { color: inherit; text-decoration: none; }
   src: url('/fonts/qumbul.7.woff2') format('woff2');
   font-display: swap;
 }
+
+/* آيفون: عند التثبيت على الشاشة الرئيسية يمتد المحتوى تحت شريط الحالة */
+html.ios-pwa body { padding-top: env(safe-area-inset-top, 0px); }

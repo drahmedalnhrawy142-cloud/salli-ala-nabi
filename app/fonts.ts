@@ -22,7 +22,7 @@ const kufi = Reem_Kufi({ subsets: ['arabic'], weight: ['400', '500', '700'], var
 const ruqaa = Aref_Ruqaa({ subsets: ['arabic'], weight: ['400', '700'], variable: '--font-ruqaa', display: 'swap' });
 
 // ملاحظة: next/font يشترط قيمًا مكتوبة حرفيًا داخل كل استدعاء (لا spread ولا متغيرات).
-const amiri = Amiri({ subsets: ['arabic'], display: 'swap', preload: false, weight: ['400', '700'], variable: '--f-amiri' });
+const amiri = Amiri({ subsets: ['arabic'], display: 'swap', preload: true, weight: ['400', '700'], variable: '--f-amiri' });
 const amiriQ = Amiri_Quran({ subsets: ['arabic'], display: 'swap', preload: false, weight: '400', variable: '--f-amiriq' });
 const naskh = Noto_Naskh_Arabic({ subsets: ['arabic'], display: 'swap', preload: false, variable: '--f-naskh' });
 const notoKufi = Noto_Kufi_Arabic({ subsets: ['arabic'], display: 'swap', preload: false, variable: '--f-notokufi' });

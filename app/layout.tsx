@@ -1,11 +1,14 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { FONT_CLASSES } from './fonts';
+import { PwaSetup } from '@/components/PwaSetup';
 
 export const metadata: Metadata = {
   title: 'صلي على النبي ﷺ | تبادل مفاتيح نسك',
   description: 'منصة عربية بسيطة لمشاركة مفاتيح تحدي نسك بين الزوار، دون حسابات أو بيانات شخصية.',
   applicationName: 'صلي على النبي ﷺ',
+  manifest: '/manifest.webmanifest',
+  icons: { icon: '/icons/icon-192.png', apple: '/icons/apple-touch-icon.png' },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -28,7 +31,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script dangerouslySetInnerHTML={{ __html: FONT_BOOT }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <PwaSetup />
+      </body>
     </html>
   );
 }
