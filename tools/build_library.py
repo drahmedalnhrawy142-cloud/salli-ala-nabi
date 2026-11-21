@@ -27,6 +27,18 @@ BOOKS = [
   dict(id='icrab', cat='علوم القرآن', title='إعراب القرآن', author='أبو جعفر النحاس (ت ٣٣٨هـ)',
        sub='إعراب كل سورة وقراءاتها', src='0350AH/data/0338AbuJacfarNahhas/0338AbuJacfarNahhas.IcrabQuran/*JK001417-ara1', via='المكتبة الشاملة (مشروع جامع الكتب)',
        hm='# | ', kre=r'سورة', nonum=True),
+  dict(id='tibyan', cat='علوم القرآن', title='التبيان في آداب حملة القرآن', author='الإمام النووي (ت ٦٧٦هـ)',
+       sub='آداب تلاوة القرآن وتعليمه وحفظه', src='0700AH/data/0676Nawawi/0676Nawawi.Tibyan/*Shamela0001969-ara1', via='المكتبة الشاملة',
+       kre=r'^الباب', nonum=True),
+  dict(id='muwafaqat', cat='أصول الفقه', title='الموافقات', author='أبو إسحاق الشاطبي (ت ٧٩٠هـ)',
+       sub='مقاصد الشريعة وأصول الاجتهاد', src='0800AH/data/0790IbnMusaGharnatiShatibi/0790IbnMusaGharnatiShatibi.Muwafaqat/*Shamela0011435-ara1', via='المكتبة الشاملة'),
+  dict(id='alfiyya', cat='اللغة العربية', title='ألفية ابن مالك', author='ابن مالك (ت ٦٧٢هـ)',
+       sub='ألف بيت في النحو والصرف', nokitab=True, src='0675AH/data/0672IbnMalik/0672IbnMalik.Alfiyya/*Shamela0008522-ara1', via='المكتبة الشاملة'),
+  dict(id='ashbah', cat='القواعد الفقهية', title='الأشباه والنظائر', author='جلال الدين السيوطي (ت ٩١١هـ)',
+       sub='القواعد الفقهية الكبرى وما يتفرع عنها', src='0925AH/data/0911Suyuti/0911Suyuti.Ashbah/*JK000425-ara1', via='المكتبة الشاملة (مشروع جامع الكتب)',
+       pre=r'^القاعدة (الأولى|الثانية|الثالثة|الرابعة|الخامسة|السادسة|السابعة|الثامنة|التاسعة|العاشرة)\b', kre=r'^\0'),
+  dict(id='tadhkira', cat='العلم وآدابه', title='تذكرة السامع والمتكلم في أدب العالم والمتعلم', author='ابن جماعة (ت ٧٣٣هـ)',
+       sub='آداب العالم والمتعلم وطالب العلم', src='0750AH/data/0733IbnJamacaBadrDinHamawi/0733IbnJamacaBadrDinHamawi.TadhkiratSamic/*ShamAY0034810-ara1', via='المكتبة الشاملة'),
   dict(id='waqf', cat='علوم القرآن', title='المكتفى في الوقف والابتدا', author='أبو عمرو الداني (ت ٤٤٤هـ)',
        sub='مواضع الوقف التام والكافي في كل سورة', src='0450AH/data/0444AbuCamrDani/0444AbuCamrDani.MuktafiFiWaqf/*Shamela0026461-ara1', via='المكتبة الشاملة',
        kre=r'سورة', nonum=True),
@@ -57,7 +69,7 @@ def build(b):
         HM = b.get('hm', '### | ')
         m = re.match('^' + re.escape(HM) + r'(.+)$', l)
         if m and not l.startswith(HM + '-'):
-            h = clean(m.group(1)).strip(' .')
+            h = re.sub(r'^AUTO\s+', '', clean(m.group(1))).strip(' .')
             if h.startswith('[') and not h.endswith(']'): continue
             h = h.strip('[]')
             if re.match(r'^ص\s*:', h) or not h: continue
@@ -86,7 +98,10 @@ def build(b):
         if l.startswith('### |') and HM == '### | ':
             flush(); para = re.sub(r'^### \|\s*(-:?\s*)?', '', l); num = pending; pending = None; continue
         if l.startswith('# '):
-            flush(); para = l[2:]; num = pending; pending = None; continue
+            flush()
+            if b.get('pre') and re.match(b['pre'], l[2:]) and len(l) < 120:
+                newkit(' '.join(l[2:].split()[:9]))
+            para = l[2:]; num = pending; pending = None; continue
     flush()
     # تقطيع الأبواب الطويلة
     for k in kit:
@@ -109,5 +124,12 @@ def build(b):
     json.dump(idx, open(f'{d}/index.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print(b['id'], len(kit), sum(x['n'] for x in idx), sum(os.path.getsize(f'{d}/k{n}.json') for n in range(len(kit)))//1024, 'KB')
 os.makedirs(OUT, exist_ok=True)
-for b in BOOKS: build(b)
-json.dump([{k: b[k] for k in ('id', 'cat', 'title', 'author', 'sub', 'via')} for b in BOOKS], open(f'{OUT}/index.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+ONLY = sys.argv[1:]
+for b in BOOKS:
+    if not ONLY or b['id'] in ONLY: build(b)
+# دمج الفهرس: نحفظ ما أضافته سكربتات أخرى (build_siyar_parts) ونحدّث/نضيف ما في BOOKS
+ip = f'{OUT}/index.json'
+old = json.load(open(ip, encoding='utf-8')) if os.path.exists(ip) else []
+new = {b['id']: {k: b[k] for k in ('id', 'cat', 'title', 'author', 'sub', 'via')} for b in BOOKS}
+out = [new.pop(x['id'], x) for x in old] + list(new.values())
+json.dump(out, open(ip, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
