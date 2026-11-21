@@ -1,11 +1,12 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import styles from './ContactSection.module.css';
 
 const displayPhone = '01001483073';
 const whatsappPhone = '201001483073';
 
-export function ContactSection() {
+function ContactSection() {
   return (
     <section className={styles.section} id="contact" aria-labelledby="contact-heading">
       <div className={styles.panel}>
@@ -34,3 +35,6 @@ export function ContactSection() {
     </section>
   );
 }
+
+const ContactSectionMemo = __memo(ContactSection);
+export { ContactSectionMemo as ContactSection };

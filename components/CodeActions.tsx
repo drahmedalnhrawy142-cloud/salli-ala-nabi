@@ -1,6 +1,7 @@
 
 'use client';
 
+import { memo as __memo } from 'react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
@@ -24,7 +25,7 @@ function getErrorMessage(error: unknown): string {
   return 'Unknown error';
 }
 
-export function CodeActions() {
+function CodeActions() {
   const [message, setMessage] = useState('');
   const [code, setCode] = useState('');
   const [receivedCode, setReceivedCode] = useState('');
@@ -322,3 +323,6 @@ export function CodeActions() {
     </div>
   );
 }
+
+const CodeActionsMemo = __memo(CodeActions);
+export { CodeActionsMemo as CodeActions };

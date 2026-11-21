@@ -1,5 +1,6 @@
 'use client';
 
+import { memo as __memo } from 'react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
@@ -9,7 +10,7 @@ type Stats = {
   total_deliveries: number;
 };
 
-export function StatsSection() {
+function StatsSection() {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
@@ -60,3 +61,6 @@ export function StatsSection() {
     </section>
   );
 }
+
+const StatsSectionMemo = __memo(StatsSection);
+export { StatsSectionMemo as StatsSection };
