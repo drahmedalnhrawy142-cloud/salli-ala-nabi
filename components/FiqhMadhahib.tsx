@@ -12,16 +12,17 @@ type K = { t: string; b: number; n: number };
 type Bab = { t: string; e: string[] };
 type Kit = { t: string; b: Bab[] };
 
-const cache = new Map<number, Promise<Kit>>();
-function loadK(n: number): Promise<Kit> {
-  let p = cache.get(n);
+const cache = new Map<string, Promise<Kit>>();
+function loadK(dir: string, n: number): Promise<Kit> {
+  const key = `${dir}/${n}`;
+  let p = cache.get(key);
   if (!p) {
-    p = fetch(`/fiqh/k${n}.json`).then((r) => {
+    p = fetch(`/fiqh/${dir}k${n}.json`).then((r) => {
       if (!r.ok) throw new Error('fiqh');
       return r.json() as Promise<Kit>;
     });
-    p.catch(() => cache.delete(n));
-    cache.set(n, p);
+    p.catch(() => cache.delete(key));
+    cache.set(key, p);
   }
   return p;
 }
@@ -53,7 +54,7 @@ function Para({ t }: { t: string }) {
 
 const isKhilaf = (t: string) => /اختلف|وقال|وعن |رواية|روايتان|خالف|وقالت/.test(t);
 
-export function FiqhMadhahib() {
+function FiqhBook({ dir, credit, onBack }: { dir: string; credit: string; onBack: () => void }) {
   const [idx, setIdx] = useState<K[] | null>(null);
   const [err, setErr] = useState(false);
   const [ki, setKi] = useState<number | null>(null);
@@ -67,16 +68,16 @@ export function FiqhMadhahib() {
   const stop = useRef(0);
 
   useEffect(() => {
-    fetch('/fiqh/index.json')
+    fetch(`/fiqh/${dir}index.json`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then(setIdx)
       .catch(() => setErr(true));
-  }, []);
+  }, [dir]);
   useEffect(() => {
     setKit(null);
     if (ki == null) return;
     let live = true;
-    loadK(ki).then((d) => live && setKit(d)).catch(() => live && setErr(true));
+    loadK(dir, ki).then((d) => live && setKit(d)).catch(() => live && setErr(true));
     return () => {
       live = false;
     };
@@ -93,7 +94,7 @@ export function FiqhMadhahib() {
     for (let i = 0; i < idx.length; i++) {
       let d: Kit;
       try {
-        d = await loadK(i);
+        d = await loadK(dir, i);
       } catch {
         break;
       }
@@ -129,11 +130,7 @@ export function FiqhMadhahib() {
   if (err) return <p style={{ textAlign: 'center', color: '#ffd9a0' }}>تعذّر تحميل الكتاب.</p>;
   if (!idx) return <p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p>;
 
-  const credit = (
-    <p className="fq-src">
-      الكتاب: «اختلاف الأئمة العلماء» للوزير ابن هبيرة الحنبلي (ت ٥٦٠هـ)، يجمع إجماع الأئمة الأربعة (أبي حنيفة ومالك والشافعي وأحمد) ومواضع اختلافهم في أبواب الفقه. النص من المكتبة الشاملة (تحقيق السيد يوسف أحمد) عبر مشروع OpenITI بترخيص CC BY-NC-SA 4.0. هذه أقوال علماء للدراسة والاطّلاع، وليست فتوى؛ وللعمل بمسألة تخصّك اسأل عالمًا ثقة. وما يرد من أحاديث فيها فليُرجع إلى درجتها في مظانّها.
-    </p>
-  );
+  const creditEl = <p className="fq-src">{credit}</p>;
   const key = (
     <div className="fq-key">
       <span style={{ color: COL.h }}>● أبو حنيفة</span>
@@ -147,6 +144,7 @@ export function FiqhMadhahib() {
     return (
       <div className="fq">
         {style}
+        <button type="button" className="fq-back" onClick={onBack}>← الكتب الفقهية</button>
         {key}
         <div className="fq-s">
           <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && search()} placeholder="ابحث في المسائل (مثال: الوتر، المسح على الخفين)" />
@@ -172,7 +170,7 @@ export function FiqhMadhahib() {
             </button>
           ))
         )}
-        {credit}
+        {creditEl}
       </div>
     );
   }
@@ -191,7 +189,7 @@ export function FiqhMadhahib() {
             <small>{toAr(b.e.length)} فقرة</small>
           </button>
         ))}
-        {credit}
+        {creditEl}
       </div>
     );
   }
@@ -216,7 +214,46 @@ export function FiqhMadhahib() {
           عرض المزيد ({toAr(list.length - show)})
         </button>
       )}
-      {credit}
+      {creditEl}
+    </div>
+  );
+}
+
+const BOOKS = [
+  {
+    id: 'ikhtilaf',
+    dir: '',
+    title: 'اختلاف الأئمة العلماء',
+    sub: 'ابن هبيرة • إجماع الأئمة الأربعة وخلافهم مسألةً مسألة',
+    credit:
+      'الكتاب: «اختلاف الأئمة العلماء» للوزير ابن هبيرة الحنبلي (ت ٥٦٠هـ)، يجمع إجماع الأئمة الأربعة (أبي حنيفة ومالك والشافعي وأحمد) ومواضع اختلافهم في أبواب الفقه. النص من المكتبة الشاملة (تحقيق السيد يوسف أحمد) عبر مشروع OpenITI بترخيص CC BY-NC-SA 4.0. هذه أقوال علماء للدراسة والاطّلاع، وليست فتوى؛ وللعمل بمسألة تخصّك اسأل عالمًا ثقة. وما يرد من أحاديث فيها فليُرجع إلى درجتها في مظانّها.',
+  },
+  {
+    id: 'bidaya',
+    dir: 'bidaya/',
+    title: 'بداية المجتهد ونهاية المقتصد',
+    sub: 'ابن رشد الحفيد • المسائل وأقوال الفقهاء وسبب اختلافهم',
+    credit:
+      'الكتاب: «بداية المجتهد ونهاية المقتصد» لأبي الوليد ابن رشد الحفيد المالكي (ت ٥٩٥هـ)، يعرض مسائل الفقه المتفق عليها والمختلف فيها بين فقهاء الأمصار، مع أدلتهم وسبب اختلافهم. النص من المكتبة الشاملة (دار الحديث، القاهرة) عبر مشروع OpenITI بترخيص CC BY-NC-SA 4.0. هذه أقوال علماء للدراسة والاطّلاع، وليست فتوى؛ وللعمل بمسألة تخصّك اسأل عالمًا ثقة. وما يرد من أحاديث فيها فليُرجع إلى درجتها في مظانّها.',
+  },
+];
+
+export function FiqhMadhahib() {
+  const [bk, setBk] = useState<(typeof BOOKS)[number] | null>(null);
+  if (bk) return <FiqhBook key={bk.id} dir={bk.dir} credit={bk.credit} onBack={() => setBk(null)} />;
+  return (
+    <div style={{ fontFamily: 'var(--font-kufi), sans-serif', color: '#fff1c4' }}>
+      {BOOKS.map((b) => (
+        <button
+          key={b.id}
+          type="button"
+          onClick={() => setBk(b)}
+          style={{ width: '100%', display: 'block', textAlign: 'right', padding: 14, marginBottom: 10, borderRadius: 16, border: '1px solid rgba(232,194,90,.35)', background: 'rgba(18,15,8,.82)', color: '#fff1c4', fontFamily: 'inherit', fontSize: 15 }}
+        >
+          {b.title}
+          <small style={{ display: 'block', color: '#7fe0c0', fontSize: 12, marginTop: 2 }}>{b.sub}</small>
+        </button>
+      ))}
     </div>
   );
 }
