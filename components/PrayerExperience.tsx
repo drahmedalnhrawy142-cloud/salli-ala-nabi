@@ -1104,23 +1104,17 @@ export function PrayerExperience() {
         }
 
         .poem-verse {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          align-items: baseline;
-          column-gap: 10px;
-          margin: 4px 0 10px;
+          display: block;
+          width: fit-content;
+          max-width: 100%;
+          margin: 4px auto 14px;
           direction: rtl;
+          text-align: right;
         }
         .poem-verse .poem-sadr,
-        .poem-verse .poem-ajz {
-          flex: 1 1 42%;
-          min-width: 140px;
-        }
-        .poem-verse .poem-sadr { text-align: right; }
-        .poem-verse .poem-ajz { text-align: left; }
-        .poem-verse .poem-one { flex: 1 1 100%; text-align: center; }
-        .poem-sep { color: #e8c25a; font-size: 12px; opacity: 0.8; }
+        .poem-verse .poem-ajz,
+        .poem-verse .poem-one { display: block; }
+        .poem-verse .poem-ajz { padding-inline-start: 2.6em; }
         .poem-line {
           margin: 0;
           color: #fff7e8;
@@ -1935,7 +1929,6 @@ export function PrayerExperience() {
               {verse.length === 2 ? (
                 <>
                   <span className="poem-line poem-sadr">{verse[0]}</span>
-                  <span className="poem-sep" aria-hidden="true">✦</span>
                   <span className="poem-line poem-ajz">{verse[1]}</span>
                 </>
               ) : (
