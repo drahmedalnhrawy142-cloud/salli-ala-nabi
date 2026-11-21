@@ -25,14 +25,16 @@ public class EventReceiver extends BroadcastReceiver {
         String title = intent.getStringExtra("title");
         String text = intent.getStringExtra("text");
         int id = intent.getIntExtra("nid", 4300);
-        if (title != null && text != null) ReminderReceiver.show(ctx, title, text, id);
+        String tone = intent.getStringExtra("tone");
+        if (title != null && text != null) ReminderReceiver.show(ctx, title, text, id, tone == null ? "voice" : tone);
     }
 
-    private static PendingIntent pending(Context ctx, int code, String title, String text, int nid) {
+    private static PendingIntent pending(Context ctx, int code, String title, String text, int nid, String tone) {
         Intent i = new Intent(ctx, EventReceiver.class).setAction(ACTION);
         i.putExtra("title", title);
         i.putExtra("text", text);
         i.putExtra("nid", nid);
+        i.putExtra("tone", tone);
         return PendingIntent.getBroadcast(ctx, code, i, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -53,7 +55,7 @@ public class EventReceiver extends BroadcastReceiver {
         int gi = 0;
         for (int k = 0; k < GROUPS.length; k++) if (GROUPS[k].equals(group)) gi = k;
         int base = BASE + gi * 100;
-        for (int k = 0; k < MAX; k++) am.cancel(pending(ctx, base + k, "", "", 0));
+        for (int k = 0; k < MAX; k++) am.cancel(pending(ctx, base + k, "", "", 0, "voice"));
         SharedPreferences p = ctx.getSharedPreferences(ReminderReceiver.PREFS, Context.MODE_PRIVATE);
         long now = System.currentTimeMillis() + 3_000L;
         boolean exact = Build.VERSION.SDK_INT < 31 || am.canScheduleExactAlarms();
@@ -63,7 +65,7 @@ public class EventReceiver extends BroadcastReceiver {
                 JSONObject o = a.getJSONObject(k);
                 long at = o.getLong("at");
                 if (at <= now) continue;
-                PendingIntent pi = pending(ctx, base + k, o.optString("title", ""), o.optString("text", ""), 4300 + gi * 100 + k);
+                PendingIntent pi = pending(ctx, base + k, o.optString("title", ""), o.optString("text", ""), 4300 + gi * 100 + k, o.optString("tone", "voice"));
                 try {
                     if (exact) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
                     else am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);

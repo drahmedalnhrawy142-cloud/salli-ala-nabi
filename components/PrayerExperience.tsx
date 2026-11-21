@@ -20,6 +20,8 @@ import { HadithQudsi } from '@/components/HadithQudsi';
 import { HadithLibrary } from '@/components/HadithLibrary';
 import { DailyHadith } from '@/components/DailyHadith';
 import { GhazawatMap } from '@/components/GhazawatMap';
+import { WorshipTracker } from '@/components/WorshipTracker';
+import { FriendsKhatma } from '@/components/FriendsKhatma';
 import { QuranSciencesHub } from '@/components/QuranSciencesHub';
 import { IlmTools } from '@/components/ilm/IlmTools';
 import { POEMS } from '@/components/poemsData';
@@ -2008,6 +2010,8 @@ export function PrayerExperience() {
                   ]}
                 />
               ) },
+              { id: 'tracker', label: 'جدول عباداتك', icon: '✅', hint: 'صلواتك وأذكارك وصيامك + تذكير', render: () => <WorshipTracker /> },
+              { id: 'fkhatma', label: 'ختمة مع الأصحاب', icon: '👥', hint: 'وزّع الأجزاء الثلاثين', render: () => <FriendsKhatma /> },
               { id: 'wird', label: 'وردك', icon: '📜', render: () => <DailyWird onPray={addPrayer} /> },
               { id: 'fadl', label: 'فضل الصلاة', icon: '📖', render: () => <HadithFadl /> },
               { id: 'dq', label: 'سؤال اليوم', icon: '💡', render: () => (

@@ -51,23 +51,45 @@ public class ReminderReceiver extends BroadcastReceiver {
     }
 
     public static void show(Context ctx, String title, String text, int notifId) {
+        show(ctx, title, text, notifId, "voice");
+    }
+
+    /**
+     * tone: "voice" = صوت الصلاة على النبي ﷺ بصوت بشري (بلا موسيقى)، "vibrate" = اهتزاز فقط، "silent" = إشعار صامت.
+     * لا توجد نغمات موسيقية في أي خيار.
+     */
+    public static void show(Context ctx, String title, String text, int notifId, String tone) {
         SharedPreferences sp = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         boolean full = "full".equals(sp.getString("sound", "full"));
+        boolean voice = !"vibrate".equals(tone) && !"silent".equals(tone);
+        boolean silent = "silent".equals(tone);
         String res = full ? "salli_full" : "salli_short";
-        String channelId = full ? "salli_reminder_full_v1" : "salli_reminder_short_v1";
+        String channelId = silent ? "salli_reminder_silent_v1" : voice ? (full ? "salli_reminder_full_v1" : "salli_reminder_short_v1") : "salli_reminder_vibrate_v1";
         NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
         Uri sound = Uri.parse("android.resource://" + ctx.getPackageName() + "/raw/" + res);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm != null) {
-            NotificationChannel ch = new NotificationChannel(
-                    channelId,
-                    full ? "تذكير الصلاة على النبي ﷺ (الصوت الكامل)" : "تذكير الصلاة على النبي ﷺ (صلى الله عليه وسلم)",
-                    NotificationManager.IMPORTANCE_HIGH);
-            ch.setSound(sound, new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build());
-            ch.enableVibration(true);
-            nm.createNotificationChannel(ch);
+            if (voice) {
+                NotificationChannel ch = new NotificationChannel(
+                        channelId,
+                        full ? "تذكير الصلاة على النبي ﷺ (الصوت الكامل)" : "تذكير الصلاة على النبي ﷺ (صلى الله عليه وسلم)",
+                        NotificationManager.IMPORTANCE_HIGH);
+                ch.setSound(sound, new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build());
+                ch.enableVibration(true);
+                nm.createNotificationChannel(ch);
+            } else if (silent) {
+                NotificationChannel ch = new NotificationChannel(channelId, "تذكيرات صامتة", NotificationManager.IMPORTANCE_LOW);
+                ch.setSound(null, null);
+                ch.enableVibration(false);
+                nm.createNotificationChannel(ch);
+            } else {
+                NotificationChannel ch = new NotificationChannel(channelId, "تذكيرات باهتزاز فقط", NotificationManager.IMPORTANCE_DEFAULT);
+                ch.setSound(null, null);
+                ch.enableVibration(true);
+                nm.createNotificationChannel(ch);
+            }
         }
         Intent launch = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
         PendingIntent open = PendingIntent.getActivity(
@@ -81,7 +103,10 @@ public class ReminderReceiver extends BroadcastReceiver {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setAutoCancel(true)
                 .setContentIntent(open);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) b.setSound(sound);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            if (voice) b.setSound(sound);
+            else if (!silent) b.setVibrate(new long[] {0, 250, 150, 250});
+        }
         try {
             NotificationManagerCompat.from(ctx).notify(notifId, b.build());
         } catch (SecurityException ignored) {
