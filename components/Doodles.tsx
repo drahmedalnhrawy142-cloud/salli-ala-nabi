@@ -113,3 +113,68 @@ export function CompassDoodle() {
     </Wrap>
   );
 }
+
+/** أيقونات الأركان الخمسة (ذهبي على أسود، بحركة خفيفة). */
+export function PillarIcon({ id, size = 64 }: { id: string; size?: number }) {
+  return (
+    <span className="pi" style={{ width: size, height: size }} aria-hidden="true">
+      <svg viewBox="0 0 64 64">
+        {id === 'shahada' && (
+          <g>
+            <circle cx="32" cy="32" r="26" fill="none" stroke={GOLD} strokeWidth="2" opacity=".5" />
+            <g className="spin" style={{ transformOrigin: '32px 32px', animationDuration: '30s' }}>
+              <rect x="16" y="16" width="32" height="32" fill="none" stroke={GOLD} strokeWidth="2.5" />
+              <rect x="16" y="16" width="32" height="32" fill="none" stroke={GOLD} strokeWidth="2.5" transform="rotate(45 32 32)" />
+            </g>
+            <circle className="tw" cx="32" cy="32" r="6" fill={MINT} />
+          </g>
+        )}
+        {id === 'salah' && (
+          <g>
+            <path d="M12 56 V30 a20 20 0 0 1 40 0 V56 Z" fill="#14110a" stroke={GOLD} strokeWidth="2.5" strokeLinejoin="round" />
+            <path d="M20 56 V32 a12 12 0 0 1 24 0 V56" fill="none" stroke={GOLD} strokeWidth="1.8" opacity=".7" />
+            <path className="fl" d="M32 24 l2.2 5 5.3.5 -4 3.6 1.2 5.2 -4.7 -2.8 -4.7 2.8 1.2 -5.2 -4 -3.6 5.3 -.5z" fill={MINT} />
+            <path d="M8 56 H56" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" />
+          </g>
+        )}
+        {id === 'zakat' && (
+          <g>
+            {[0, 1, 2].map((i) => (
+              <ellipse key={i} cx="32" cy={46 - i * 9} rx="16" ry="5.5" fill="#14110a" stroke={GOLD} strokeWidth="2.2" />
+            ))}
+            <g className="fl">
+              <circle cx="32" cy="14" r="8" fill={GOLD} />
+              <path d="M32 9 v10 M28 12 h6 a2.5 2.5 0 0 1 0 5 h-6" fill="none" stroke="#14110a" strokeWidth="1.6" strokeLinecap="round" />
+            </g>
+          </g>
+        )}
+        {id === 'siyam' && (
+          <g>
+            <g className="fl">
+              <path d="M38 8 a22 22 0 1 0 14 38 a18 18 0 1 1 -14 -38z" fill={GOLD} />
+            </g>
+            <path className="tw" d="M20 18 l1.8 4 4.2.4 -3.2 2.8 1 4.2 -3.8 -2.2 -3.8 2.2 1 -4.2 -3.2 -2.8 4.2 -.4z" fill={MINT} />
+            <path d="M10 54 H54" stroke={GOLD} strokeWidth="2" strokeLinecap="round" opacity=".6" strokeDasharray="2 6" />
+          </g>
+        )}
+        {id === 'hajj' && (
+          <g>
+            <path d="M12 24 L32 16 L52 24 V52 L32 58 L12 52 Z" fill="#0a0805" stroke={GOLD} strokeWidth="2.5" strokeLinejoin="round" />
+            <path d="M12 24 L32 31 L52 24" fill="none" stroke={GOLD} strokeWidth="2" strokeLinejoin="round" />
+            <path d="M32 31 V58" stroke={GOLD} strokeWidth="2" />
+            <path d="M12 34 L32 41 L52 34" fill="none" stroke={GOLD} strokeWidth="3" opacity=".85" />
+            <circle className="tw" cx="32" cy="8" r="3" fill={MINT} />
+          </g>
+        )}
+      </svg>
+      <style>{`
+        .pi { display: inline-flex; }
+        .pi svg { width: 100%; height: 100%; overflow: visible; }
+        .pi .tw { animation: dd-tw 2.6s ease-in-out infinite; }
+        .pi .fl { animation: dd-fl 4s ease-in-out infinite; }
+        .pi .spin { animation: dd-spin 30s linear infinite; }
+        @media (prefers-reduced-motion: reduce) { .pi * { animation: none !important; } }
+      `}</style>
+    </span>
+  );
+}
