@@ -21,6 +21,15 @@ BOOKS = [
        sub='في فضل العلم النافع وأدب طالبه', src='0800AH/data/0795IbnRajabHanbali/0795IbnRajabHanbali.FadlCilmSalaf/*Shamela0000132-ara1', via='المكتبة الشاملة'),
   dict(id='ajrumiyya', cat='اللغة العربية', title='متن الآجرومية', author='ابن آجروم (ت ٧٢٣هـ)',
        sub='مبادئ النحو للمبتدئين', src='0725AH/data/0723IbnAjrum/0723IbnAjrum.Ajrumiyya/*Shamela0011371-ara1', via='المكتبة الشاملة'),
+  dict(id='gharib', cat='علوم القرآن', title='تفسير غريب القرآن', author='ابن قتيبة الدينوري (ت ٢٧٦هـ)',
+       sub='معاني الكلمات الغريبة سورةً سورة', src='0300AH/data/0276IbnQutaybaDinawari/0276IbnQutaybaDinawari.GharibQuran/*Shamela0023621-ara1', via='المكتبة الشاملة',
+       kre=r'^سورة [^\[:]+$', nonum=True),
+  dict(id='icrab', cat='علوم القرآن', title='إعراب القرآن', author='أبو جعفر النحاس (ت ٣٣٨هـ)',
+       sub='إعراب كل سورة وقراءاتها', src='0350AH/data/0338AbuJacfarNahhas/0338AbuJacfarNahhas.IcrabQuran/*JK001417-ara1', via='المكتبة الشاملة (مشروع جامع الكتب)',
+       hm='# | ', kre=r'سورة', nonum=True),
+  dict(id='waqf', cat='علوم القرآن', title='المكتفى في الوقف والابتدا', author='أبو عمرو الداني (ت ٤٤٤هـ)',
+       sub='مواضع الوقف التام والكافي في كل سورة', src='0450AH/data/0444AbuCamrDani/0444AbuCamrDani.MuktafiFiWaqf/*Shamela0026461-ara1', via='المكتبة الشاملة',
+       kre=r'سورة', nonum=True),
 ]
 def clean(t):
     t = re.sub(r'PageV\d+P\d+', '', t); t = re.sub(r'\s*ms\d+\b', '', t)
@@ -45,16 +54,27 @@ def build(b):
     for l in lines[i:]:
         l = l.rstrip()
         if not l or re.match(r'^# PageV', l) or l.startswith('#META'): continue
-        m = re.match(r'^### \| (.+)$', l)
-        if m and not l.startswith('### | -'):
-            h = clean(m.group(1)).strip('[] .')
+        HM = b.get('hm', '### | ')
+        m = re.match('^' + re.escape(HM) + r'(.+)$', l)
+        if m and not l.startswith(HM + '-'):
+            h = clean(m.group(1)).strip(' .')
+            if h.startswith('[') and not h.endswith(']'): continue
+            h = h.strip('[]')
             if re.match(r'^ص\s*:', h) or not h: continue
             mn = re.match(r'^(\d+)\s*-?$', h)
             if mn:
-                flush(); pending = mn.group(1); continue
+                if not b.get('nonum'): flush(); pending = mn.group(1)
+                continue
+            kre = b.get('kre')
+            if kre and re.search(kre, h) and len(h) < 70:
+                flush()
+                h = re.sub(r'^\(\d+\)\s*', '', h).strip('() ')
+                if ' سورة ' in h: h = 'سورة ' + h.split(' سورة ', 1)[1]
+                h = re.sub(r'^شرح إعراب ', '', h)
+                newkit(h); continue
             flush()
             if not kit: newkit(b['title'])
-            if h.startswith('كتاب ') and len(h) < 60 and not b.get('nokitab'):
+            if not b.get('kre') and h.startswith('كتاب ') and len(h) < 60 and not b.get('nokitab'):
                 newkit(h)
             else:
                 sec = {'t': h, 'e': []}; kit[-1]['b'].append(sec)
@@ -63,7 +83,7 @@ def build(b):
         if l.startswith('~~'):
             if para is not None: para += ' ' + l[2:]
             continue
-        if l.startswith('### |'):
+        if l.startswith('### |') and HM == '### | ':
             flush(); para = re.sub(r'^### \|\s*(-:?\s*)?', '', l); num = pending; pending = None; continue
         if l.startswith('# '):
             flush(); para = l[2:]; num = pending; pending = None; continue

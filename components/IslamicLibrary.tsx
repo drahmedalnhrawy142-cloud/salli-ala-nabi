@@ -9,7 +9,7 @@ import { FiqhBook } from '@/components/FiqhMadhahib';
  * لإضافة كتاب: أضفه إلى BOOKS في tools/build_library.py وأعد التوليد. تعمل بلا نت داخل التطبيق.
  */
 type B = { id: string; cat: string; title: string; author: string; sub: string; via: string };
-const CATS = ['العقيدة', 'الحديث وعلومه', 'أصول الفقه', 'العلم وآدابه', 'اللغة العربية'];
+const CATS = ['العقيدة', 'علوم القرآن', 'الحديث وعلومه', 'أصول الفقه', 'العلم وآدابه', 'اللغة العربية'];
 
 export function IslamicLibrary() {
   const [list, setList] = useState<B[] | null>(null);
