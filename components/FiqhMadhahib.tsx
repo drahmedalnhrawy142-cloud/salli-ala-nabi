@@ -57,7 +57,7 @@ function Para({ t, fiqh }: { t: string; fiqh: boolean }) {
 
 const isKhilaf = (t: string) => /اختلف|وقال|وعن |رواية|روايتان|خالف|وقالت/.test(t);
 
-export function FiqhBook({ dir, title, credit, onBack, fiqh = true, backLabel = '← الكتب الفقهية', start }: { dir: string; title: string; credit: string; onBack: () => void; fiqh?: boolean; backLabel?: string; start?: { ki: number; bi: number } }) {
+export function FiqhBook({ dir, title, credit, onBack, fiqh = true, backLabel = '← الكتب الفقهية', start }: { dir: string; title: string; credit: string; onBack: () => void; fiqh?: boolean; backLabel?: string; start?: { ki: number; bi: number | null } }) {
   const [idx, setIdx] = useState<K[] | null>(null);
   const [err, setErr] = useState(false);
   const [ki, setKi] = useState<number | null>(start ? start.ki : null);

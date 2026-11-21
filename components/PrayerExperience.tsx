@@ -20,6 +20,7 @@ import { HadithQudsi } from '@/components/HadithQudsi';
 import { HadithLibrary } from '@/components/HadithLibrary';
 import { DailyHadith } from '@/components/DailyHadith';
 import { GhazawatMap } from '@/components/GhazawatMap';
+import { ArkanIslam } from '@/components/arkan/ArkanIslam';
 import { WorshipTracker } from '@/components/WorshipTracker';
 import { FriendsKhatma } from '@/components/FriendsKhatma';
 import { QuranSciencesHub } from '@/components/QuranSciencesHub';
@@ -2043,6 +2044,7 @@ export function PrayerExperience() {
                 { id: 'last', label: 'أكمل القراءة', icon: '🔖', hint: 'من حيث توقفت', render: () => <IlmTools mode="last" /> },
                 { id: 'isearch', label: 'بحث شامل', icon: '🔎', hint: 'في الفقه والمكتبة والحديث', render: () => <IlmTools mode="search" /> },
                 { id: 'ifav', label: 'المفضلة', icon: '⭐', hint: 'فقراتك المحفوظة', render: () => <IlmTools mode="fav" /> },
+                { id: 'arkan', label: 'أركان الإسلام الخمسة', icon: '🕌', hint: 'لكل ركن: أحاديث وكتب وفهرس وبحث', render: () => <ArkanIslam /> },
                 { id: 'lib', label: 'المكتبة العلمية', icon: '🏛️', hint: 'عقيدة • حديث • أصول • لغة • آداب', render: () => <IslamicLibrary /> },
                 { id: 'uloom', label: 'علوم القرآن', icon: '🔬', hint: 'موسوعة ومكي ومدني وأسباب النزول', render: () => <QuranSciencesHub /> },
                 { id: 'books', label: 'كتب الحديث', icon: '📚', hint: 'البخاري ومسلم والأربعون', render: () => <HadithLibrary /> },
