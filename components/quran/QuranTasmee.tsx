@@ -285,8 +285,10 @@ function Style() {
       .qt-link { background: none; border: none; color: rgba(241,215,122,.6); font-family: var(--font-ruqaa), serif; font-size: 15px; padding: 6px; }
       .qt-field { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; flex: 1; }
       .qt-field span { font-family: var(--font-ruqaa), serif; font-size: 15px; color: rgba(255,241,196,.7); }
-      .qt-field select, .qt-field input { padding: 11px 12px; border-radius: 12px; border: 1px solid rgba(232,194,90,.35); background: rgba(0,0,0,.45); color: #fff1c4; font-family: var(--font-kufi), sans-serif; font-size: 15px; }
-      .qt-two { display: flex; gap: 10px; }
+      .qt-field { min-width: 0; }
+      .qt-field select, .qt-field input { width: 100%; min-width: 0; box-sizing: border-box; padding: 11px 12px; border-radius: 12px; border: 1px solid rgba(232,194,90,.35); background: rgba(0,0,0,.45); color: #fff1c4; font-family: var(--font-kufi), sans-serif; font-size: 15px; }
+      .qt-two { display: flex; gap: 10px; width: 100%; }
+      .qt-two > * { min-width: 0; }
       .qt-modes { display: flex; flex-direction: column; gap: 8px; }
       .qt-mode { display: flex; flex-direction: column; gap: 2px; text-align: right; padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(232,194,90,.25); background: transparent; color: rgba(241,215,122,.85); font-family: var(--font-kufi), sans-serif; }
       .qt-mode small { font-family: var(--font-ruqaa), serif; font-size: 13px; color: rgba(255,241,196,.55); }

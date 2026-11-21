@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toAr } from '@/components/quran/data';
+import { SunriseDoodle } from '@/components/Doodles';
 
 /**
  * حديث اليوم: من الأربعين النووية (نصوصها من sunnah.com عبر hadith-json، بلا تعديل).
@@ -93,6 +94,7 @@ export function DailyHadith() {
 
   return (
     <div className="dh">
+      <SunriseDoodle />
       <article className="dh-c">
         <div className="dh-n">{off === 0 ? 'حديث اليوم' : 'حديث آخر'} — {src} • الحديث {toAr(Number(n) || 0)}</div>
         <p>{t}</p>

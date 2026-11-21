@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { toAr } from '@/components/quran/data';
+import { CrescentDoodle } from '@/components/Doodles';
 
 /**
  * جدول العبادات اليومية: صفوف عبادات، وأعمدة آخر ٧ أيام، تعلّم فيها ما فعلته وتصحّح ما فاتك.
@@ -146,9 +147,10 @@ export function WorshipTracker() {
   const noteKey = today;
   return (
     <div className="wt">
+      <CrescentDoodle />
       <div className="wt-sum">
         <b>{toAr(doneToday)} من {toAr(st.rows.length)}</b>
-        <span>أتممتَ اليوم</span>
+        <span>{pct === 100 ? 'ما شاء الله، أتممتَ جدولك اليوم 🌟' : 'أتممتَ اليوم'}</span>
         <div className="wt-bar"><i style={{ width: `${pct}%` }} /></div>
       </div>
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toAr } from '@/components/quran/data';
+import { QuranDoodle } from '@/components/Doodles';
 
 /**
  * ختمة مع الأصحاب: تقسيم المصحف ٣٠ جزءًا على المشاركين، ومشاركة التوزيع نصًّا، ومتابعة من أتمّ جزأه.
@@ -81,6 +82,7 @@ export function FriendsKhatma() {
     return (
       <div className="gk">
         <button type="button" className="gk-back" onClick={() => setCur(null)}>← الختمات</button>
+        <QuranDoodle />
         <h3 className="gk-h">{k.title}</h3>
         <div className="gk-bar"><i style={{ width: `${pct}%` }} /></div>
         <p className="gk-p">{k.done.length === 30 ? 'تمّت الختمة، تقبّل الله منكم 🤍' : `أُتمّ ${toAr(k.done.length)} من ٣٠ جزءًا`}</p>
@@ -134,6 +136,7 @@ export function FriendsKhatma() {
 
   return (
     <div className="gk">
+      <QuranDoodle />
       <p className="gk-p">وزّع المصحف على أصحابك أو أهلك: اكتب أسماءهم سطرًا سطرًا، فتُوزَّع الأجزاء الثلاثون عليهم بالتساوي، ثم شارك التوزيع في مجموعتكم.</p>
       <input className="gk-i" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="اسم الختمة (مثال: ختمة العائلة)" maxLength={50} />
       <textarea className="gk-i" value={names} onChange={(e) => setNames(e.target.value)} placeholder={'الأسماء، اسم في كل سطر (حتى ٣٠)\nأحمد\nمحمد\nفاطمة'} rows={6} />
