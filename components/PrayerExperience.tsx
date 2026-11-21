@@ -18,6 +18,7 @@ import { SectionGrid } from '@/components/SectionGrid';
 import { FloatTarget } from '@/components/FloatTarget';
 import { HadithQudsi } from '@/components/HadithQudsi';
 import { HadithLibrary } from '@/components/HadithLibrary';
+import { FiqhMadhahib } from '@/components/FiqhMadhahib';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 import { WeeklyStats } from '@/components/WeeklyStats';
 import { FridayBanner } from '@/components/FridayBanner';
@@ -2073,6 +2074,7 @@ export function PrayerExperience() {
                 { id: 'asma', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
                 { id: 'qudsi', label: 'الأحاديث القدسية', icon: '📜', hint: 'من الصحيحين', render: () => <HadithQudsi /> },
                 { id: 'books', label: 'كتب الحديث', icon: '📚', hint: 'البخاري ومسلم والأربعون', render: () => <HadithLibrary /> },
+                { id: 'fiqh', label: 'المذاهب الأربعة', icon: '⚖️', hint: 'الفقه المقارن: إجماع الأئمة وخلافهم', render: () => <FiqhMadhahib /> },
               ]}
             />
           )}

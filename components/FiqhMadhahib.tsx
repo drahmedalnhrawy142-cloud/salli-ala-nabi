@@ -1,0 +1,222 @@
+'use client';
+
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { norm, toAr } from '@/components/quran/data';
+
+/**
+ * الفقه المقارن بين المذاهب الأربعة: «اختلاف الأئمة العلماء» لابن هبيرة الوزير (ت ٥٦٠هـ).
+ * النص من المكتبة الشاملة (تحقيق السيد يوسف أحمد، دار الكتب العلمية) عبر مشروع OpenITI (CC BY-NC-SA 4.0)،
+ * مقسّم بـ tools/build_fiqh.py إلى كتب وأبواب وفقرات دون تعديل ألفاظ المؤلف. يعمل بلا نت داخل التطبيق.
+ */
+type K = { t: string; b: number; n: number };
+type Bab = { t: string; e: string[] };
+type Kit = { t: string; b: Bab[] };
+
+const cache = new Map<number, Promise<Kit>>();
+function loadK(n: number): Promise<Kit> {
+  let p = cache.get(n);
+  if (!p) {
+    p = fetch(`/fiqh/k${n}.json`).then((r) => {
+      if (!r.ok) throw new Error('fiqh');
+      return r.json() as Promise<Kit>;
+    });
+    p.catch(() => cache.delete(n));
+    cache.set(n, p);
+  }
+  return p;
+}
+
+const NAMES: [RegExp, string][] = [
+  [/(أبو حنيفة|أبي حنيفة|الحنفية)/g, 'h'],
+  [/(مالك|المالكية)/g, 'm'],
+  [/(الشافعي|الشافعية)/g, 's'],
+  [/(أحمد|الحنابلة)/g, 'b'],
+];
+const COL: Record<string, string> = { h: '#7fe0c0', m: '#ffb36b', s: '#8ec5ff', b: '#e8a0ff' };
+
+function Para({ t }: { t: string }) {
+  const re = /(أبو حنيفة|أبي حنيفة|الحنفية|مالك|المالكية|الشافعي|الشافعية|أحمد|الحنابلة)/g;
+  const parts = t.split(re);
+  return (
+    <p>
+      {parts.map((s, i) => {
+        const hit = NAMES.find(([r]) => ((r.lastIndex = 0), r.test(s)));
+        return hit ? (
+          <b key={i} style={{ color: COL[hit[1]] }}>{s}</b>
+        ) : (
+          <Fragment key={i}>{s}</Fragment>
+        );
+      })}
+    </p>
+  );
+}
+
+const isKhilaf = (t: string) => /اختلف|وقال|وعن |رواية|روايتان|خالف|وقالت/.test(t);
+
+export function FiqhMadhahib() {
+  const [idx, setIdx] = useState<K[] | null>(null);
+  const [err, setErr] = useState(false);
+  const [ki, setKi] = useState<number | null>(null);
+  const [kit, setKit] = useState<Kit | null>(null);
+  const [bi, setBi] = useState<number | null>(null);
+  const [only, setOnly] = useState(false);
+  const [show, setShow] = useState(30);
+  const [q, setQ] = useState('');
+  const [res, setRes] = useState<{ k: string; b: string; p: string }[] | null>(null);
+  const [prog, setProg] = useState<number | null>(null);
+  const stop = useRef(0);
+
+  useEffect(() => {
+    fetch('/fiqh/index.json')
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(setIdx)
+      .catch(() => setErr(true));
+  }, []);
+  useEffect(() => {
+    setKit(null);
+    if (ki == null) return;
+    let live = true;
+    loadK(ki).then((d) => live && setKit(d)).catch(() => live && setErr(true));
+    return () => {
+      live = false;
+    };
+  }, [ki]);
+
+  async function search() {
+    if (!idx) return;
+    const w = norm(q).split(' ').filter(Boolean);
+    if (!w.length) return;
+    const my = ++stop.current;
+    const out: { k: string; b: string; p: string }[] = [];
+    setRes([]);
+    setProg(0);
+    for (let i = 0; i < idx.length; i++) {
+      let d: Kit;
+      try {
+        d = await loadK(i);
+      } catch {
+        break;
+      }
+      if (stop.current !== my) return;
+      for (const b of d.b)
+        for (const p of b.e)
+          if (out.length < 60 && w.every((x) => norm(p).includes(x))) out.push({ k: d.t, b: b.t, p });
+      setProg(Math.round(((i + 1) / idx.length) * 100));
+      setRes([...out]);
+    }
+    setProg(null);
+  }
+
+  const style = (
+    <style>{`
+      .fq { font-family: var(--font-kufi), sans-serif; color: #fff1c4; }
+      .fq button.fq-b { width: 100%; display: block; text-align: right; padding: 14px; margin-bottom: 10px; border-radius: 16px; border: 1px solid rgba(232,194,90,.35); background: rgba(18,15,8,.82); color: #fff1c4; font-family: inherit; font-size: 15px; }
+      .fq button.fq-b small { display: block; color: #7fe0c0; font-size: 12px; margin-top: 2px; }
+      .fq-back { background: none; border: 0; color: #f1d77a; font-family: inherit; font-size: 14px; padding: 6px 0 10px; }
+      .fq-s { display: flex; gap: 6px; margin-bottom: 10px; }
+      .fq-s input { flex: 1; min-width: 0; padding: 10px; border-radius: 12px; border: 1px solid rgba(232,194,90,.4); background: #1a1409; color: #fff1c4; font-family: inherit; font-size: 14px; }
+      .fq-s button { padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(232,194,90,.4); background: rgba(232,194,90,.15); color: #f1d77a; font-family: inherit; }
+      .fq-c { padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(232,194,90,.28); background: rgba(18,15,8,.82); margin-bottom: 10px; }
+      .fq-c p { margin: 0; font-family: var(--font-ruqaa), serif; font-size: 18.5px; line-height: 2.1; text-align: justify; }
+      .fq-n { font-size: 12px; color: #e8c25a; margin-bottom: 2px; }
+      .fq-more { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid rgba(232,194,90,.4); background: transparent; color: #f1d77a; font-family: inherit; }
+      .fq-src { text-align: center; font-size: 11.5px; color: rgba(255,241,196,.5); margin-top: 14px; line-height: 1.8; }
+      .fq-p { font-size: 12px; text-align: center; color: #7fe0c0; margin: 6px 0; }
+      .fq-key { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; font-size: 12.5px; margin: 4px 0 12px; }
+      .fq-tg { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 0 0 10px; }
+    `}</style>
+  );
+  if (err) return <p style={{ textAlign: 'center', color: '#ffd9a0' }}>تعذّر تحميل الكتاب.</p>;
+  if (!idx) return <p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p>;
+
+  const credit = (
+    <p className="fq-src">
+      الكتاب: «اختلاف الأئمة العلماء» للوزير ابن هبيرة الحنبلي (ت ٥٦٠هـ)، يجمع إجماع الأئمة الأربعة (أبي حنيفة ومالك والشافعي وأحمد) ومواضع اختلافهم في أبواب الفقه. النص من المكتبة الشاملة (تحقيق السيد يوسف أحمد) عبر مشروع OpenITI بترخيص CC BY-NC-SA 4.0. هذه أقوال علماء للدراسة والاطّلاع، وليست فتوى؛ وللعمل بمسألة تخصّك اسأل عالمًا ثقة. وما يرد من أحاديث فيها فليُرجع إلى درجتها في مظانّها.
+    </p>
+  );
+  const key = (
+    <div className="fq-key">
+      <span style={{ color: COL.h }}>● أبو حنيفة</span>
+      <span style={{ color: COL.m }}>● مالك</span>
+      <span style={{ color: COL.s }}>● الشافعي</span>
+      <span style={{ color: COL.b }}>● أحمد</span>
+    </div>
+  );
+
+  if (ki == null) {
+    return (
+      <div className="fq">
+        {style}
+        {key}
+        <div className="fq-s">
+          <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && search()} placeholder="ابحث في المسائل (مثال: الوتر، المسح على الخفين)" />
+          <button type="button" onClick={search}>بحث</button>
+        </div>
+        {prog != null && <div className="fq-p">جارٍ البحث… {toAr(prog)}٪</div>}
+        {res ? (
+          <>
+            <div className="fq-p">{res.length === 0 && prog == null ? 'لا نتائج.' : `${toAr(res.length)} نتيجة${res.length >= 60 ? ' (أول ٦٠)' : ''}`}</div>
+            {res.map((r, i) => (
+              <div key={i} className="fq-c">
+                <div className="fq-n">{r.k} ‹ {r.b}</div>
+                <Para t={r.p} />
+              </div>
+            ))}
+            <button type="button" className="fq-more" onClick={() => (stop.current++, setRes(null), setProg(null))}>إغلاق النتائج</button>
+          </>
+        ) : (
+          idx.map((k, i) => (
+            <button key={i} type="button" className="fq-b" onClick={() => (setKi(i), setBi(null))}>
+              {k.t}
+              <small>{toAr(k.b)} باب · {toAr(k.n)} فقرة</small>
+            </button>
+          ))
+        )}
+        {credit}
+      </div>
+    );
+  }
+
+  if (!kit) return <div className="fq">{style}<button type="button" className="fq-back" onClick={() => setKi(null)}>← الكتب</button><p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p></div>;
+
+  if (bi == null) {
+    return (
+      <div className="fq">
+        {style}
+        <button type="button" className="fq-back" onClick={() => setKi(null)}>← الكتب</button>
+        <h3 style={{ margin: '0 0 10px', color: '#e8c25a', fontSize: 16 }}>{kit.t}</h3>
+        {kit.b.map((b, i) => (
+          <button key={i} type="button" className="fq-b" onClick={() => (setBi(i), setShow(30))}>
+            {b.t}
+            <small>{toAr(b.e.length)} فقرة</small>
+          </button>
+        ))}
+        {credit}
+      </div>
+    );
+  }
+
+  const b = kit.b[bi];
+  const list = only ? b.e.filter(isKhilaf) : b.e;
+  return (
+    <div className="fq">
+      {style}
+      <button type="button" className="fq-back" onClick={() => setBi(null)}>← {kit.t}</button>
+      <h3 style={{ margin: '0 0 6px', color: '#e8c25a', fontSize: 16 }}>{b.t}</h3>
+      {key}
+      <label className="fq-tg">
+        <input type="checkbox" checked={only} onChange={(e) => (setOnly(e.target.checked), setShow(30))} />
+        إظهار مواضع الخلاف وأقوال الأئمة فقط
+      </label>
+      {list.slice(0, show).map((p, i) => (
+        <div key={i} className="fq-c"><Para t={p} /></div>
+      ))}
+      {list.length > show && (
+        <button type="button" className="fq-more" onClick={() => setShow((s) => s + 30)}>
+          عرض المزيد ({toAr(list.length - show)})
+        </button>
+      )}
+      {credit}
+    </div>
+  );
+}
