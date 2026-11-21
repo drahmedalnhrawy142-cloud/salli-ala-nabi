@@ -19,6 +19,7 @@ import { FloatTarget } from '@/components/FloatTarget';
 import { HadithQudsi } from '@/components/HadithQudsi';
 import { HadithLibrary } from '@/components/HadithLibrary';
 import { QuranSciencesHub } from '@/components/QuranSciencesHub';
+import { IlmTools } from '@/components/ilm/IlmTools';
 import { CreditsPage } from '@/components/CreditsPage';
 import { IslamicLibrary } from '@/components/IslamicLibrary';
 import { FiqhMadhahib } from '@/components/FiqhMadhahib';
@@ -2074,6 +2075,9 @@ export function PrayerExperience() {
           {seen.names && (
             <SectionGrid
               secs={[
+                { id: 'last', label: 'أكمل القراءة', icon: '🔖', hint: 'من حيث توقفت', render: () => <IlmTools mode="last" /> },
+                { id: 'isearch', label: 'بحث شامل', icon: '🔎', hint: 'في الفقه والمكتبة', render: () => <IlmTools mode="search" /> },
+                { id: 'ifav', label: 'المفضلة', icon: '⭐', hint: 'فقراتك المحفوظة', render: () => <IlmTools mode="fav" /> },
                 { id: 'lib', label: 'المكتبة العلمية', icon: '🏛️', hint: 'عقيدة • حديث • أصول • لغة • آداب', render: () => <IslamicLibrary /> },
                 { id: 'uloom', label: 'علوم القرآن', icon: '🔬', hint: 'موسوعة ومكي ومدني وأسباب النزول', render: () => <QuranSciencesHub /> },
                 { id: 'books', label: 'كتب الحديث', icon: '📚', hint: 'البخاري ومسلم والأربعون', render: () => <HadithLibrary /> },

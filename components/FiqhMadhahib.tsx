@@ -2,6 +2,8 @@
 
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { norm, toAr } from '@/components/quran/data';
+import { setLast, toggleFav, useFavs } from '@/components/ilm/ilmStore';
+import { FIQH_BOOKS } from '@/components/ilm/books';
 
 /**
  * الفقه المقارن بين المذاهب الأربعة: «اختلاف الأئمة العلماء» لابن هبيرة الوزير (ت ٥٦٠هـ).
@@ -55,12 +57,12 @@ function Para({ t, fiqh }: { t: string; fiqh: boolean }) {
 
 const isKhilaf = (t: string) => /اختلف|وقال|وعن |رواية|روايتان|خالف|وقالت/.test(t);
 
-export function FiqhBook({ dir, credit, onBack, fiqh = true, backLabel = '← الكتب الفقهية' }: { dir: string; credit: string; onBack: () => void; fiqh?: boolean; backLabel?: string }) {
+export function FiqhBook({ dir, title, credit, onBack, fiqh = true, backLabel = '← الكتب الفقهية', start }: { dir: string; title: string; credit: string; onBack: () => void; fiqh?: boolean; backLabel?: string; start?: { ki: number; bi: number } }) {
   const [idx, setIdx] = useState<K[] | null>(null);
   const [err, setErr] = useState(false);
-  const [ki, setKi] = useState<number | null>(null);
+  const [ki, setKi] = useState<number | null>(start ? start.ki : null);
   const [kit, setKit] = useState<Kit | null>(null);
-  const [bi, setBi] = useState<number | null>(null);
+  const [bi, setBi] = useState<number | null>(start ? start.bi : null);
   const [only, setOnly] = useState(false);
   const [show, setShow] = useState(30);
   const [q, setQ] = useState('');
@@ -83,6 +85,11 @@ export function FiqhBook({ dir, credit, onBack, fiqh = true, backLabel = '← ا
       live = false;
     };
   }, [ki]);
+
+  useEffect(() => {
+    if (kit && ki != null && bi != null && kit.b[bi]) setLast({ dir, ki, bi, label: `${title} ‹ ${kit.t === title ? '' : kit.t + ' ‹ '}${kit.b[bi].t}` });
+  }, [kit, ki, bi, dir, title]);
+  const favs = useFavs();
 
   async function search() {
     if (!idx) return;
@@ -121,6 +128,8 @@ export function FiqhBook({ dir, credit, onBack, fiqh = true, backLabel = '← ا
       .fq-c { padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(232,194,90,.28); background: rgba(18,15,8,.82); margin-bottom: 10px; }
       .fq-c p { margin: 0; font-family: var(--font-ruqaa), serif; font-size: 18.5px; line-height: 2.1; text-align: justify; }
       .fq-n { font-size: 12px; color: #e8c25a; margin-bottom: 2px; }
+      .fq-c { position: relative; padding-left: 34px; }
+      .fq-star { position: absolute; top: 4px; left: 8px; background: none; border: 0; color: #e8c25a; font-size: 20px; padding: 4px 6px; }
       .fq-more { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid rgba(232,194,90,.4); background: transparent; color: #f1d77a; font-family: inherit; }
       .fq-src { text-align: center; font-size: 11.5px; color: rgba(255,241,196,.5); margin-top: 14px; line-height: 1.8; }
       .fq-p { font-size: 12px; text-align: center; color: #7fe0c0; margin: 6px 0; }
@@ -196,7 +205,7 @@ export function FiqhBook({ dir, credit, onBack, fiqh = true, backLabel = '← ا
   }
 
   const b = kit.b[bi];
-  const list = fiqh && only ? b.e.filter(isKhilaf) : b.e;
+  const list = b.e.map((p, i) => [p, i] as const).filter(([p]) => !(fiqh && only) || isKhilaf(p));
   return (
     <div className="fq">
       {style}
@@ -209,9 +218,18 @@ export function FiqhBook({ dir, credit, onBack, fiqh = true, backLabel = '← ا
           إظهار مواضع الخلاف وأقوال الأئمة فقط
         </label>
       )}
-      {list.slice(0, show).map((p, i) => (
-        <div key={i} className="fq-c"><Para t={p} fiqh={fiqh} /></div>
-      ))}
+      {list.slice(0, show).map(([p, oi]) => {
+        const id = `${dir}|${ki}|${bi}|${oi}`;
+        const on = favs.some((x) => x.id === id);
+        return (
+          <div key={oi} className="fq-c">
+            <button type="button" className="fq-star" aria-label={on ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'} onClick={() => toggleFav({ id, dir, ki: ki as number, bi: bi as number, book: title, where: `${kit.t === title ? '' : kit.t + ' ‹ '}${b.t}`, t: p })}>
+              {on ? '★' : '☆'}
+            </button>
+            <Para t={p} fiqh={fiqh} />
+          </div>
+        );
+      })}
       {list.length > show && (
         <button type="button" className="fq-more" onClick={() => setShow((s) => s + 30)}>
           عرض المزيد ({toAr(list.length - show)})
@@ -222,31 +240,12 @@ export function FiqhBook({ dir, credit, onBack, fiqh = true, backLabel = '← ا
   );
 }
 
-const BOOKS = [
-  {
-    id: 'ikhtilaf',
-    dir: '/fiqh/',
-    title: 'اختلاف الأئمة العلماء',
-    sub: 'ابن هبيرة • إجماع الأئمة الأربعة وخلافهم مسألةً مسألة',
-    credit:
-      'الكتاب: «اختلاف الأئمة العلماء» للوزير ابن هبيرة الحنبلي (ت ٥٦٠هـ)، يجمع إجماع الأئمة الأربعة (أبي حنيفة ومالك والشافعي وأحمد) ومواضع اختلافهم في أبواب الفقه. النص من المكتبة الشاملة (تحقيق السيد يوسف أحمد) عبر مشروع OpenITI بترخيص CC BY-NC-SA 4.0. هذه أقوال علماء للدراسة والاطّلاع، وليست فتوى؛ وللعمل بمسألة تخصّك اسأل عالمًا ثقة. وما يرد من أحاديث فيها فليُرجع إلى درجتها في مظانّها.',
-  },
-  {
-    id: 'bidaya',
-    dir: '/fiqh/bidaya/',
-    title: 'بداية المجتهد ونهاية المقتصد',
-    sub: 'ابن رشد الحفيد • المسائل وأقوال الفقهاء وسبب اختلافهم',
-    credit:
-      'الكتاب: «بداية المجتهد ونهاية المقتصد» لأبي الوليد ابن رشد الحفيد المالكي (ت ٥٩٥هـ)، يعرض مسائل الفقه المتفق عليها والمختلف فيها بين فقهاء الأمصار، مع أدلتهم وسبب اختلافهم. النص من المكتبة الشاملة (دار الحديث، القاهرة) عبر مشروع OpenITI بترخيص CC BY-NC-SA 4.0. هذه أقوال علماء للدراسة والاطّلاع، وليست فتوى؛ وللعمل بمسألة تخصّك اسأل عالمًا ثقة. وما يرد من أحاديث فيها فليُرجع إلى درجتها في مظانّها.',
-  },
-];
-
 export function FiqhMadhahib() {
-  const [bk, setBk] = useState<(typeof BOOKS)[number] | null>(null);
-  if (bk) return <FiqhBook key={bk.id} dir={bk.dir} credit={bk.credit} onBack={() => setBk(null)} />;
+  const [bk, setBk] = useState<(typeof FIQH_BOOKS)[number] | null>(null);
+  if (bk) return <FiqhBook key={bk.id} dir={bk.dir} title={bk.title} credit={bk.credit} onBack={() => setBk(null)} />;
   return (
     <div style={{ fontFamily: 'var(--font-kufi), sans-serif', color: '#fff1c4' }}>
-      {BOOKS.map((b) => (
+      {FIQH_BOOKS.map((b) => (
         <button
           key={b.id}
           type="button"

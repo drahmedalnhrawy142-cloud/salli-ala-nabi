@@ -28,6 +28,7 @@ export function IslamicLibrary() {
       <FiqhBook
         key={bk.id}
         dir={`/library/${bk.id}/`}
+        title={bk.title}
         fiqh={false}
         backLabel="← المكتبة"
         onBack={() => setBk(null)}
