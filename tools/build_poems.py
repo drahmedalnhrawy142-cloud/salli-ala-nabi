@@ -20,10 +20,20 @@ sets = [
   ('حسان بن ثابت ﵁', HS, H, range(314, 317)),
   ('كعب بن زهير ﵁', KS, K, [374, 377, 378, 386]),
 ]
+SF = glob.glob(f'{R}/1375AH/data/1359AhmadShawqi/*/*Hindawi070706142-ara1')[0]
+SL = open(SF, encoding='utf-8').read().split('\n')
+def hem(n): return re.sub(r'\s+', ' ', SL[n - 1][2:]).strip()
+SH = 'الشوقيات — الهمزية النبوية (مؤسسة هنداوي عبر OpenITI)'
+shawqi = [
+  [(2266, 2268), (2270, 2272), (2276, 2278), (2282, 2284)],
+  [(2305, 2307), (2309, 2311)],
+  [(2294, 2296), (2300, 2302)],
+]
 out = []
 for poet, src, V, idx in sets:
     lines = [v for i in idx for v in [V[i]] if len(v) == 2]
     out.append({'poet': poet, 'src': src, 'v': lines})
+for g in shawqi: out.append({'poet': 'أحمد شوقي', 'src': SH, 'v': [[hem(a), hem(b)] for a, b in g]})
 out.insert(0, {'poet': 'أبو طالب (ممّا تمثّل به ابن عمر ﵄ ورواه البخاري)', 'src': 'صحيح البخاري، كتاب الاستسقاء',
                'v': [['وَأَبْيَضَ يُسْتَسْقَى الْغَمَامُ بِوَجْهِهِ', 'ثِمَالُ الْيَتَامَى عِصْمَةٌ لِلأَرَامِلِ']]})
 ts = '// مولَّد بـ tools/build_poems.py — لا يُعدَّل يدويًا\nexport type Poem = { poet: string; src: string; v: string[][] };\nexport const POEMS: Poem[] = ' + json.dumps(out, ensure_ascii=False, indent=1) + ';\n'
