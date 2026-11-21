@@ -19,6 +19,7 @@ import { FloatTarget } from '@/components/FloatTarget';
 import { HadithQudsi } from '@/components/HadithQudsi';
 import { HadithLibrary } from '@/components/HadithLibrary';
 import { DailyHadith } from '@/components/DailyHadith';
+import { GhazawatMap } from '@/components/GhazawatMap';
 import { QuranSciencesHub } from '@/components/QuranSciencesHub';
 import { IlmTools } from '@/components/ilm/IlmTools';
 import { POEMS } from '@/components/poemsData';
@@ -2048,6 +2049,7 @@ export function PrayerExperience() {
                     <SiraCorner />
                   </Suspense>
                 ) },
+                { id: 'gmap', label: 'الغزوات على الخريطة', icon: '🗺️', hint: 'بسنواتها من سير الذهبي', render: () => <GhazawatMap /> },
                 { id: 'asma', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
               ]}
             />
