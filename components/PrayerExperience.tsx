@@ -19,6 +19,7 @@ import { FloatTarget } from '@/components/FloatTarget';
 import { HadithQudsi } from '@/components/HadithQudsi';
 import { HadithLibrary } from '@/components/HadithLibrary';
 import { QuranSciencesHub } from '@/components/QuranSciencesHub';
+import { IslamicLibrary } from '@/components/IslamicLibrary';
 import { FiqhMadhahib } from '@/components/FiqhMadhahib';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 import { WeeklyStats } from '@/components/WeeklyStats';
@@ -2081,6 +2082,7 @@ export function PrayerExperience() {
                   </Suspense>
                 ) },
                 { id: 'uloom', label: 'علوم القرآن', icon: '🔬', hint: 'موسوعة ومكي ومدني وأسباب النزول', render: () => <QuranSciencesHub /> },
+                { id: 'lib', label: 'المكتبة العلمية', icon: '🏛️', hint: 'عقيدة • حديث • أصول • لغة', render: () => <IslamicLibrary /> },
                 { id: 'fiqh', label: 'المذاهب الأربعة', icon: '⚖️', hint: 'الفقه المقارن: إجماع الأئمة وخلافهم', render: () => <FiqhMadhahib /> },
               ]}
             />

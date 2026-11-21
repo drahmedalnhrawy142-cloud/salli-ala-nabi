@@ -17,7 +17,7 @@ function loadK(dir: string, n: number): Promise<Kit> {
   const key = `${dir}/${n}`;
   let p = cache.get(key);
   if (!p) {
-    p = fetch(`/fiqh/${dir}k${n}.json`).then((r) => {
+    p = fetch(`${dir}k${n}.json`).then((r) => {
       if (!r.ok) throw new Error('fiqh');
       return r.json() as Promise<Kit>;
     });
@@ -35,7 +35,8 @@ const NAMES: [RegExp, string][] = [
 ];
 const COL: Record<string, string> = { h: '#7fe0c0', m: '#ffb36b', s: '#8ec5ff', b: '#e8a0ff' };
 
-function Para({ t }: { t: string }) {
+function Para({ t, fiqh }: { t: string; fiqh: boolean }) {
+  if (!fiqh) return <p>{t}</p>;
   const re = /(أبو حنيفة|أبي حنيفة|الحنفية|مالك|المالكية|الشافعي|الشافعية|أحمد|الحنابلة)/g;
   const parts = t.split(re);
   return (
@@ -54,7 +55,7 @@ function Para({ t }: { t: string }) {
 
 const isKhilaf = (t: string) => /اختلف|وقال|وعن |رواية|روايتان|خالف|وقالت/.test(t);
 
-function FiqhBook({ dir, credit, onBack }: { dir: string; credit: string; onBack: () => void }) {
+export function FiqhBook({ dir, credit, onBack, fiqh = true, backLabel = '← الكتب الفقهية' }: { dir: string; credit: string; onBack: () => void; fiqh?: boolean; backLabel?: string }) {
   const [idx, setIdx] = useState<K[] | null>(null);
   const [err, setErr] = useState(false);
   const [ki, setKi] = useState<number | null>(null);
@@ -68,9 +69,9 @@ function FiqhBook({ dir, credit, onBack }: { dir: string; credit: string; onBack
   const stop = useRef(0);
 
   useEffect(() => {
-    fetch(`/fiqh/${dir}index.json`)
+    fetch(`${dir}index.json`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then(setIdx)
+      .then((d: K[]) => (setIdx(d), d.length === 1 && setKi(0)))
       .catch(() => setErr(true));
   }, [dir]);
   useEffect(() => {
@@ -131,7 +132,7 @@ function FiqhBook({ dir, credit, onBack }: { dir: string; credit: string; onBack
   if (!idx) return <p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p>;
 
   const creditEl = <p className="fq-src">{credit}</p>;
-  const key = (
+  const key = !fiqh ? null : (
     <div className="fq-key">
       <span style={{ color: COL.h }}>● أبو حنيفة</span>
       <span style={{ color: COL.m }}>● مالك</span>
@@ -144,10 +145,10 @@ function FiqhBook({ dir, credit, onBack }: { dir: string; credit: string; onBack
     return (
       <div className="fq">
         {style}
-        <button type="button" className="fq-back" onClick={onBack}>← الكتب الفقهية</button>
+        <button type="button" className="fq-back" onClick={onBack}>{backLabel}</button>
         {key}
         <div className="fq-s">
-          <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && search()} placeholder="ابحث في المسائل (مثال: الوتر، المسح على الخفين)" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && search()} placeholder={fiqh ? 'ابحث في المسائل (مثال: الوتر، المسح على الخفين)' : 'ابحث في الكتاب'} />
           <button type="button" onClick={search}>بحث</button>
         </div>
         {prog != null && <div className="fq-p">جارٍ البحث… {toAr(prog)}٪</div>}
@@ -157,7 +158,7 @@ function FiqhBook({ dir, credit, onBack }: { dir: string; credit: string; onBack
             {res.map((r, i) => (
               <div key={i} className="fq-c">
                 <div className="fq-n">{r.k} ‹ {r.b}</div>
-                <Para t={r.p} />
+                <Para t={r.p} fiqh={fiqh} />
               </div>
             ))}
             <button type="button" className="fq-more" onClick={() => (stop.current++, setRes(null), setProg(null))}>إغلاق النتائج</button>
@@ -175,13 +176,13 @@ function FiqhBook({ dir, credit, onBack }: { dir: string; credit: string; onBack
     );
   }
 
-  if (!kit) return <div className="fq">{style}<button type="button" className="fq-back" onClick={() => setKi(null)}>← الكتب</button><p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p></div>;
+  if (!kit) return <div className="fq">{style}<button type="button" className="fq-back" onClick={() => (idx.length === 1 ? onBack() : setKi(null))}>← الكتب</button><p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p></div>;
 
   if (bi == null) {
     return (
       <div className="fq">
         {style}
-        <button type="button" className="fq-back" onClick={() => setKi(null)}>← الكتب</button>
+        <button type="button" className="fq-back" onClick={() => (idx.length === 1 ? onBack() : setKi(null))}>{idx.length === 1 ? backLabel : '← الكتب'}</button>
         <h3 style={{ margin: '0 0 10px', color: '#e8c25a', fontSize: 16 }}>{kit.t}</h3>
         {kit.b.map((b, i) => (
           <button key={i} type="button" className="fq-b" onClick={() => (setBi(i), setShow(30))}>
@@ -195,19 +196,21 @@ function FiqhBook({ dir, credit, onBack }: { dir: string; credit: string; onBack
   }
 
   const b = kit.b[bi];
-  const list = only ? b.e.filter(isKhilaf) : b.e;
+  const list = fiqh && only ? b.e.filter(isKhilaf) : b.e;
   return (
     <div className="fq">
       {style}
       <button type="button" className="fq-back" onClick={() => setBi(null)}>← {kit.t}</button>
       <h3 style={{ margin: '0 0 6px', color: '#e8c25a', fontSize: 16 }}>{b.t}</h3>
       {key}
-      <label className="fq-tg">
-        <input type="checkbox" checked={only} onChange={(e) => (setOnly(e.target.checked), setShow(30))} />
-        إظهار مواضع الخلاف وأقوال الأئمة فقط
-      </label>
+      {fiqh && (
+        <label className="fq-tg">
+          <input type="checkbox" checked={only} onChange={(e) => (setOnly(e.target.checked), setShow(30))} />
+          إظهار مواضع الخلاف وأقوال الأئمة فقط
+        </label>
+      )}
       {list.slice(0, show).map((p, i) => (
-        <div key={i} className="fq-c"><Para t={p} /></div>
+        <div key={i} className="fq-c"><Para t={p} fiqh={fiqh} /></div>
       ))}
       {list.length > show && (
         <button type="button" className="fq-more" onClick={() => setShow((s) => s + 30)}>
@@ -222,7 +225,7 @@ function FiqhBook({ dir, credit, onBack }: { dir: string; credit: string; onBack
 const BOOKS = [
   {
     id: 'ikhtilaf',
-    dir: '',
+    dir: '/fiqh/',
     title: 'اختلاف الأئمة العلماء',
     sub: 'ابن هبيرة • إجماع الأئمة الأربعة وخلافهم مسألةً مسألة',
     credit:
@@ -230,7 +233,7 @@ const BOOKS = [
   },
   {
     id: 'bidaya',
-    dir: 'bidaya/',
+    dir: '/fiqh/bidaya/',
     title: 'بداية المجتهد ونهاية المقتصد',
     sub: 'ابن رشد الحفيد • المسائل وأقوال الفقهاء وسبب اختلافهم',
     credit:
