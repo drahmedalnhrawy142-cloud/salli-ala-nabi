@@ -7,7 +7,6 @@ import { QuranIndex } from './QuranIndex';
 import { QuranSearch } from './QuranSearch';
 import { QuranWird } from './QuranWird';
 import { QuranTasmee } from './QuranTasmee';
-import { QuranSciences } from './QuranSciences';
 import { AyahOnOpenSettings } from './AyahOnOpen';
 import { TasmeeSheikh } from './TasmeeSheikh';
 import { TajweedRules } from './TajweedRules';
@@ -81,7 +80,6 @@ export function QuranCorner() {
               )),
           },
           { id: 'wird', label: 'ورد القرآن', icon: '🗓️', hint: 'خطة الختمة', render: () => need((d) => <QuranWird data={d} currentPage={page} onOpenAt={openAt} />) },
-          { id: 'uloom', label: 'علوم القرآن', icon: '🔬', hint: 'مكي ومدني وأسباب النزول', render: () => need((d) => <QuranSciences data={d} />) },
           { id: 'aoo', label: 'آية عند الفتح', icon: '🌟', hint: 'كل مرة تفتح التطبيق', render: () => <AyahOnOpenSettings /> },
           { id: 'sheikh', label: 'التسميع على الشيخ', icon: '🎙️', hint: 'بالصوت', render: () => need((d) => <TasmeeSheikh data={d} />) },
           { id: 'tasmee', label: 'التسميع الذاتي', icon: '📝', hint: 'اختبر حفظك', render: () => need((d) => <QuranTasmee data={d} currentPage={page} />) },

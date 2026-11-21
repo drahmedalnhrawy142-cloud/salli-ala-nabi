@@ -18,6 +18,7 @@ import { SectionGrid } from '@/components/SectionGrid';
 import { FloatTarget } from '@/components/FloatTarget';
 import { HadithQudsi } from '@/components/HadithQudsi';
 import { HadithLibrary } from '@/components/HadithLibrary';
+import { QuranSciencesHub } from '@/components/QuranSciencesHub';
 import { FiqhMadhahib } from '@/components/FiqhMadhahib';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 import { WeeklyStats } from '@/components/WeeklyStats';
@@ -2066,7 +2067,7 @@ export function PrayerExperience() {
         <div className="tab-pane" hidden={tab !== 'names'}>
           <header className="tab-head">
             <h1>العلوم الشرعية</h1>
-            <p>أسماء الله الحسنى والحديث والفقه المقارن</p>
+            <p>كل علوم الدين في مكان واحد: العقيدة والقرآن والحديث والفقه والسيرة</p>
           </header>
           {seen.names && (
             <SectionGrid
@@ -2074,6 +2075,12 @@ export function PrayerExperience() {
                 { id: 'asma', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
                 { id: 'qudsi', label: 'الأحاديث القدسية', icon: '📜', hint: 'من الصحيحين', render: () => <HadithQudsi /> },
                 { id: 'books', label: 'كتب الحديث', icon: '📚', hint: 'البخاري ومسلم والأربعون', render: () => <HadithLibrary /> },
+                { id: 'sira', label: 'السيرة الكاملة', icon: '📚', hint: 'ابن هشام • بفهرس', render: () => (
+                  <Suspense fallback={null}>
+                    <SiraCorner />
+                  </Suspense>
+                ) },
+                { id: 'uloom', label: 'علوم القرآن', icon: '🔬', hint: 'موسوعة ومكي ومدني وأسباب النزول', render: () => <QuranSciencesHub /> },
                 { id: 'fiqh', label: 'المذاهب الأربعة', icon: '⚖️', hint: 'الفقه المقارن: إجماع الأئمة وخلافهم', render: () => <FiqhMadhahib /> },
               ]}
             />
@@ -2094,11 +2101,6 @@ export function PrayerExperience() {
                 { id: 'timeline', label: 'السيرة', icon: '⏳', render: () => <ProphetTimeline /> },
                 { id: 'moments', label: 'مواقف', icon: '🕌', render: () => <ProphetMoments /> },
                 { id: 'names', label: 'الأسماء', icon: '🏷️', render: () => <ProphetNames /> },
-                { id: 'sira', label: 'السيرة الكاملة', icon: '📚', hint: 'ابن هشام • بفهرس', render: () => (
-                  <Suspense fallback={null}>
-                    <SiraCorner />
-                  </Suspense>
-                ) },
                 { id: 'quiz', label: 'اختبر نفسك', icon: '❓', render: () => (
                   <Suspense fallback={null}>
                     <ProphetQuiz />
