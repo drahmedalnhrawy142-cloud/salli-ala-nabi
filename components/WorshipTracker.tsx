@@ -145,6 +145,43 @@ export function WorshipTracker() {
   }
 
   const noteKey = today;
+
+  // إحصائيات: نسبة الالتزام = المنجَز ÷ (عدد البنود × عدد الأيام). اليوم «ناجح» إن أُنجز نصف بنوده فأكثر.
+  function dayPct(k: string) {
+    if (!st!.rows.length) return 0;
+    const n = (st!.days[k] || []).filter((id) => st!.rows.some((r) => r.id === id)).length;
+    return n / st!.rows.length;
+  }
+  function span(nd: number) {
+    let sum = 0;
+    const b = new Date();
+    b.setHours(12, 0, 0, 0);
+    for (let i = 0; i < nd; i++) {
+      const d = new Date(b);
+      d.setDate(b.getDate() - i);
+      sum += dayPct(dkey(d));
+    }
+    return Math.round((sum / nd) * 100);
+  }
+  const wk = span(7);
+  const mo = span(30);
+  let streak = 0;
+  {
+    const b = new Date();
+    b.setHours(12, 0, 0, 0);
+    for (let i = 0; i < 400; i++) {
+      const d = new Date(b);
+      d.setDate(b.getDate() - i);
+      if (dayPct(dkey(d)) >= 0.5) streak++;
+      else if (i === 0) continue; // اليوم لم ينتهِ بعد
+      else break;
+    }
+  }
+  const cheer =
+    streak >= 30 ? 'ثبّتك الله، شهرٌ من المداومة! وأحبّ العمل إلى الله أدومه وإن قلّ.'
+    : streak >= 7 ? 'أسبوعٌ فأكثر من المداومة، بارك الله فيك. «أحبّ الأعمال إلى الله أدومها وإن قلّ».'
+    : streak >= 1 ? 'بداية طيبة، واصل ولو بالقليل؛ فإن القليل الدائم خير من كثير منقطع.'
+    : 'ابدأ اليوم بما تيسّر، فالمداومة تبدأ بخطوة. «وأن أحبّ الأعمال أدومها وإن قلّ».';
   return (
     <div className="wt">
       <CrescentDoodle />
@@ -152,6 +189,14 @@ export function WorshipTracker() {
         <b>{toAr(doneToday)} من {toAr(st.rows.length)}</b>
         <span>{pct === 100 ? 'ما شاء الله، أتممتَ جدولك اليوم 🌟' : 'أتممتَ اليوم'}</span>
         <div className="wt-bar"><i style={{ width: `${pct}%` }} /></div>
+      </div>
+
+      <div className="wt-stats">
+        <div><b>{toAr(wk)}٪</b><span>آخر ٧ أيام</span></div>
+        <div><b>{toAr(mo)}٪</b><span>آخر ٣٠ يومًا</span></div>
+        <div><b>{toAr(streak)}</b><span>يوم متتابع</span></div>
+        <p>{cheer}</p>
+        <small>اليوم المحسوب: ما أُنجز فيه نصف البنود فأكثر. الحديث بمعناه في الصحيحين.</small>
       </div>
 
       <div className="wt-nav">
@@ -265,6 +310,12 @@ export function WorshipTracker() {
         .wt-sum { padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(232,194,90,.35); background: rgba(18,15,8,.85); margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
         .wt-sum b { font-size: 18px; color: #f1d77a; }
         .wt-sum span { font-size: 13px; opacity: .8; }
+        .wt-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+        .wt-stats > div { padding: 10px 6px; border-radius: 14px; border: 1px solid rgba(232,194,90,.3); background: rgba(18,15,8,.8); text-align: center; display: flex; flex-direction: column; gap: 2px; }
+        .wt-stats b { font-size: 22px; color: #f1d77a; }
+        .wt-stats span { font-size: 11.5px; color: rgba(255,241,196,.65); }
+        .wt-stats p { grid-column: 1 / -1; margin: 2px 0 0; font-size: 13px; line-height: 1.9; text-align: center; color: #fff1c4; }
+        .wt-stats small { grid-column: 1 / -1; text-align: center; font-size: 10.5px; color: rgba(255,241,196,.45); }
         .wt-bar { flex: 1 1 100%; height: 8px; border-radius: 8px; background: rgba(232,194,90,.15); overflow: hidden; }
         .wt-bar i { display: block; height: 100%; background: linear-gradient(90deg, #e8c25a, #7fe0c0); }
         .wt-nav { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 8px; }
