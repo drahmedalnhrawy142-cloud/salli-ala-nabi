@@ -21,6 +21,7 @@ import { HadithLibrary } from '@/components/HadithLibrary';
 import { DailyHadith } from '@/components/DailyHadith';
 import { GhazawatMap } from '@/components/GhazawatMap';
 import { ArkanIslam } from '@/components/arkan/ArkanIslam';
+import { WordDictionary } from '@/components/lugha/WordDictionary';
 import { WorshipTracker } from '@/components/WorshipTracker';
 import { FriendsKhatma } from '@/components/FriendsKhatma';
 import { QuranSciencesHub } from '@/components/QuranSciencesHub';
@@ -2056,6 +2057,7 @@ export function PrayerExperience() {
                   </Suspense>
                 ) },
                 { id: 'gmap', label: 'الغزوات على الخريطة', icon: '🗺️', hint: 'بسنواتها من سير الذهبي', render: () => <GhazawatMap /> },
+                { id: 'wdict', label: 'معجم غريب القرآن', icon: '📖', hint: 'ابحث عن معنى كلمة — نزهة القلوب', render: () => <WordDictionary /> },
                 { id: 'asma', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
               ]}
             />

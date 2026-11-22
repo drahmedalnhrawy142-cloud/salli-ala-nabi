@@ -23,7 +23,7 @@ const KEY = 'dh_on';
 const HOUR = 'dh_hour';
 
 export function DailyHadith() {
-  const [list, setList] = useState<[string, string][] | null>(null);
+  const [list, setList] = useState<[string, string, string][] | null>(null);
   const [err, setErr] = useState(false);
   const [off, setOff] = useState(0);
   const [on, setOn] = useState(false);
@@ -32,9 +32,21 @@ export function DailyHadith() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    fetch('/hadith/nawawi/0.json')
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then(setList)
+    const get = (u: string) => fetch(u).then((r) => (r.ok ? r.json() : Promise.reject())) as Promise<[string, string][]>;
+    get('/hadith/nawawi/0.json')
+      .then(async (nw) => {
+        // رياض الصالحين (المتفق عليه فقط) مع الأربعين مبثوثة بينها؛ إن تعذّر تحميله نكتفي بالأربعين
+        let ry: [string, string][] = [];
+        try { ry = await get('/hadith/riyad/0.json'); } catch {}
+        const out: [string, string, string][] = [];
+        let k = 0;
+        ry.forEach((h, j) => {
+          out.push([h[0], h[1], 'رياض الصالحين']);
+          if ((j + 1) % 13 === 0 && k < nw.length) { out.push([nw[k][0], nw[k][1], 'الأربعون النووية']); k++; }
+        });
+        for (; k < nw.length; k++) out.push([nw[k][0], nw[k][1], 'الأربعون النووية']);
+        setList(out);
+      })
       .catch(() => setErr(true));
     try {
       setOn(localStorage.getItem(KEY) === '1');
@@ -80,8 +92,7 @@ export function DailyHadith() {
   if (!list) return <p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p>;
 
   const i = (((dayIndex(new Date()) + off) % list.length) + list.length) % list.length;
-  const [n, t] = list[i];
-  const src = 'الأربعون النووية';
+  const [n, t, src] = list[i];
   async function copy() {
     try {
       await navigator.clipboard.writeText(`${t}\n— ${src} (حديث ${n})`);
@@ -126,7 +137,7 @@ export function DailyHadith() {
       ) : (
         <p className="dh-note">الإشعار اليومي متاح داخل تطبيق الأندرويد.</p>
       )}
-      <p className="dh-note">النص من موقع sunnah.com (مشروع hadith-json). لم نضف شرحًا من عندنا؛ للشرح راجع شروح الأربعين لأهل العلم.</p>
+      <p className="dh-note">الأربعون النووية من sunnah.com (hadith-json)، وأحاديث رياض الصالحين المتفق عليها من المكتبة الشاملة (OpenITI). لم نضف شرحًا من عندنا؛ للشرح راجع كتب الشروح.</p>
       <style>{`
         .dh { font-family: var(--font-kufi), sans-serif; color: #fff1c4; }
         .dh-c { padding: 16px; border-radius: 18px; border: 1px solid rgba(232,194,90,.4); background: rgba(18,15,8,.85); margin-bottom: 12px; }
