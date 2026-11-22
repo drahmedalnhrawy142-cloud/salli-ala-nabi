@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent as RMouseEvent, type ReactNode, type TouchEvent as RTouchEvent } from 'react';
 import { AyahPlayer } from './AyahPlayer';
-import { BASMALA, RIWAYAT, loadRiwaya, loadAudioMap, loadAsbab, type AsbabData, loadQiraat, loadTajweed, loadTafsir, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
+import { BASMALA, RIWAYAT, loadRiwaya, loadAudioMap, loadAsbab, type AsbabData, loadQiraat, loadTajweed, loadTafsir, loadGharib, loadGharibIndex, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
 import { VerseShare } from './VerseShare';
 
 type Theme = 'night' | 'paper';
@@ -72,6 +72,16 @@ export function MushafReader({
   const [tafOpen, setTafOpen] = useState(false);
   const [asb, setAsb] = useState<AsbabData | null>(null);
   const [asbOpen, setAsbOpen] = useState(false);
+  const [ghIdx, setGhIdx] = useState<Record<string, number[]> | null>(null);
+  const [ghOpen, setGhOpen] = useState(false);
+  const [gh, setGh] = useState<string[] | null>(null);
+  useEffect(() => {
+    let live = true;
+    loadGharibIndex().then((d) => live && setGhIdx(d)).catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
   useEffect(() => {
     if (sel == null || asb) return;
     let live = true;
@@ -81,6 +91,7 @@ export function MushafReader({
     };
   }, [sel, asb]);
   useEffect(() => setAsbOpen(false), [sel]);
+  useEffect(() => setGhOpen(false), [sel]);
   const [mfont, setMfont] = useState<string>(() => String(lsGet('quran_mfont', 'hafs')));
   const [fontsOpen, setFontsOpen] = useState(false);
   const [playIdx, setPlayIdx] = useState<number | null>(null);
@@ -147,6 +158,19 @@ export function MushafReader({
       live = false;
     };
   }, [tafOpen, sel, data]);
+
+  useEffect(() => {
+    setGh(null);
+    if (!ghOpen || sel == null) return;
+    const a = hdata.ayas[sel];
+    let live = true;
+    loadGharib(a[0])
+      .then((d) => live && setGh(d[String(a[1])] || []))
+      .catch(() => live && setGh([]));
+    return () => {
+      live = false;
+    };
+  }, [ghOpen, sel, hdata]);
 
   // آية -> مواضع الاختلاف
   const qmap = useMemo(() => {
@@ -494,6 +518,17 @@ export function MushafReader({
               <div className="mr-q-n">أحاديث من البخاري ومسلم ذُكر فيها نزول الآية، رُبطت بها بمطابقة نص الآية. قد يكون المذكور سببًا أو وقتَ نزول، فاقرأ الحديث كاملًا.</div>
             </div>
           )}
+          {isH && ghOpen && (
+            <div className="mr-taf">
+              <div className="mr-taf-t">غريب القرآن</div>
+              <div className="mr-taf-b">
+                {gh == null ? 'جارٍ التحميل…' : gh.map((t, i) => (
+                  <p key={i} style={{ margin: '0 0 8px' }}>{t}</p>
+                ))}
+              </div>
+              <div className="mr-q-n">من «تفسير غريب القرآن» لابن قتيبة الدينوري (ت ٢٧٦هـ)، كما ورد مرتبًا على الآيات. المكتبة الشاملة عبر OpenITI (CC BY-NC-SA 4.0).</div>
+            </div>
+          )}
           {isH && tafOpen && (
             <div className="mr-taf">
               <div className="mr-taf-t">التفسير الميسّر</div>
@@ -510,6 +545,11 @@ export function MushafReader({
                 <button type="button" className={tafOpen ? 'mr-on' : ''} onClick={() => setTafOpen((o) => !o)}>
                   تفسير
                 </button>
+                {sel != null && ghIdx?.[String(data.ayas[sel][0])]?.includes(data.ayas[sel][1]) && (
+                  <button type="button" className={ghOpen ? 'mr-on' : ''} onClick={() => setGhOpen((o) => !o)}>
+                    غريب
+                  </button>
+                )}
                 {sel != null && asb?.a[`${data.ayas[sel][0]}:${data.ayas[sel][1]}`] && (
                   <button type="button" className={asbOpen ? 'mr-on' : ''} onClick={() => setAsbOpen((o) => !o)}>
                     سبب النزول

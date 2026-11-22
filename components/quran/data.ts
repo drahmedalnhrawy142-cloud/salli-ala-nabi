@@ -80,6 +80,32 @@ export function loadTajweed(): Promise<TJ> {
 
 const tfCache = new Map<number, Promise<string[]>>();
 /** التفسير الميسّر لسورة كاملة: مصفوفة نصوص بترتيب الآيات */
+const ghCache = new Map<number, Promise<Record<string, string[]>>>();
+export function loadGharib(surah: number): Promise<Record<string, string[]>> {
+  let p = ghCache.get(surah);
+  if (!p) {
+    p = fetch(`/gharib/${surah}.json`).then((r) => {
+      if (!r.ok) throw new Error('gharib');
+      return r.json() as Promise<Record<string, string[]>>;
+    });
+    p.catch(() => ghCache.delete(surah));
+    ghCache.set(surah, p);
+  }
+  return p;
+}
+let ghIdx: Promise<Record<string, number[]>> | null = null;
+/** السور ← أرقام الآيات التي فيها شرح غريب عند ابن قتيبة */
+export function loadGharibIndex(): Promise<Record<string, number[]>> {
+  if (!ghIdx) {
+    ghIdx = fetch('/gharib/index.json').then((r) => {
+      if (!r.ok) throw new Error('gharib');
+      return r.json() as Promise<Record<string, number[]>>;
+    });
+    ghIdx.catch(() => (ghIdx = null));
+  }
+  return ghIdx;
+}
+
 export function loadTafsir(surah: number): Promise<string[]> {
   let p = tfCache.get(surah);
   if (!p) {
