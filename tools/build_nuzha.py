@@ -33,7 +33,7 @@ out = []
 for lt, txt in secs:
     if lt == 'مقدمة': continue
     txt = re.sub(r'\s+', ' ', txt).strip()
-    parts = re.split(r'(?<=[.؟!]) +(?=[^\s:.؟!(]+(?: [^\s:.؟!(]+){0,3}:)', txt)
+    parts = re.split(r'(?<=[.؟!)]) +(?=[^\s:.؟!(]+(?: [^\s:.؟!(]+){0,3}:)', txt)
     for p in parts:
         m = re.match(r'^([^:]{1,40}?):\s*(.*)$', p)
         if m and not BAD.match(m.group(1)) and len(m.group(2)) > 0:
