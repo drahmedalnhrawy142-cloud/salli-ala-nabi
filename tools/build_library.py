@@ -45,6 +45,12 @@ BOOKS = [
   dict(id='manasik', cat='الفقه والعبادات', title='الإيضاح في مناسك الحج والعمرة', author='الإمام النووي (ت ٦٧٦هـ)',
        sub='مناسك الحج والعمرة وآدابها وأحكامها', src='0700AH/data/0676Nawawi/0676Nawawi.IdahFiManasikHajj/*Shamela0096232-ara1', via='المكتبة الشاملة',
        kre=r'^الباب', nonum=True),
+  dict(id='riyad', cat='الحديث وعلومه', title='رياض الصالحين', author='الإمام النووي (ت ٦٧٦هـ)',
+       sub='من كلام سيد المرسلين ﷺ — أبواب الأدب والرقائق والأذكار', src='0700AH/data/0676Nawawi/0676Nawawi.RiyadSalihin/*Shamela0012014-ara1.mARkdown', via='المكتبة الشاملة',
+       kre=r'^كتاب', deep=True),
+  dict(id='shamail', cat='السيرة والتراجم', title='الشمائل المحمدية', author='الإمام الترمذي (ت ٢٧٩هـ)',
+       sub='صفة النبي ﷺ وخَلْقه وأخلاقه وعيشه', src='0300AH/data/0279Tirmidhi/0279Tirmidhi.ShamailMuhammadiyya/*Shamela0013037-ara1', via='المكتبة الشاملة',
+       kre=r'^باب', nonum=True),
   dict(id='waqf', cat='علوم القرآن', title='المكتفى في الوقف والابتدا', author='أبو عمرو الداني (ت ٤٤٤هـ)',
        sub='مواضع الوقف التام والكافي في كل سورة', src='0450AH/data/0444AbuCamrDani/0444AbuCamrDani.MuktafiFiWaqf/*Shamela0026461-ara1', via='المكتبة الشاملة',
        kre=r'سورة', nonum=True),
@@ -72,6 +78,9 @@ def build(b):
     for l in lines[i:]:
         l = l.rstrip()
         if not l or re.match(r'^# PageV', l) or l.startswith('#META'): continue
+        if b.get('deep'):
+            l = re.sub(r'^### \|\|\| \d+/(\d+)\s*-?\s*$', r'### | \1-', l)
+            l = re.sub(r'^### \|\| (?:\d+\s*-\s*)?', '### | ', l)
         HM = b.get('hm', '### | ')
         m = re.match('^' + re.escape(HM) + r'(.+)$', l)
         if m and not l.startswith(HM + '-'):
