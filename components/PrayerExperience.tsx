@@ -22,6 +22,7 @@ import { DailyHadith } from '@/components/DailyHadith';
 import { GhazawatMap } from '@/components/GhazawatMap';
 import { ArkanIslam } from '@/components/arkan/ArkanIslam';
 import { SurahInfo } from '@/components/quran/SurahInfo';
+import { HajjGuide } from '@/components/arkan/HajjGuide';
 import { WordDictionary } from '@/components/lugha/WordDictionary';
 import { WorshipTracker } from '@/components/WorshipTracker';
 import { FriendsKhatma } from '@/components/FriendsKhatma';
@@ -1994,15 +1995,16 @@ export function PrayerExperience() {
             <p>السبحة والأذكار وورد اليوم وإنجازاتك</p>
           </header>
           <SectionGrid
+            groupOrder={['أذكارك وورد يومك', 'متابعة وإنجاز', 'مع الأحباب']}
             onOpenChange={setWirdSec}
             secs={[
-              { id: 'garden', label: 'بستانك', icon: '🌴', hint: 'يكبر مع كل ذكر', render: () => (
+              { id: 'garden', group: 'متابعة وإنجاز', label: 'بستانك', icon: '🌴', hint: 'يكبر مع كل ذكر', render: () => (
                 <Suspense fallback={null}>
                   <GardenCorner />
                 </Suspense>
               ) },
-              { id: 'virtue', label: 'أيام الفضل', icon: '🌙', hint: 'عرفة وعاشوراء والبيض…', render: () => <VirtueDays /> },
-              { id: 'corner', label: 'السبحة والأذكار', icon: '📿', render: () => (
+              { id: 'virtue', group: 'أذكارك وورد يومك', label: 'أيام الفضل', icon: '🌙', hint: 'عرفة وعاشوراء والبيض…', render: () => <VirtueDays /> },
+              { id: 'corner', group: 'أذكارك وورد يومك', label: 'السبحة والأذكار', icon: '📿', render: () => (
                 <SectionGrid
                   onOpenChange={setCornerSec}
                   secs={[
@@ -2013,22 +2015,22 @@ export function PrayerExperience() {
                   ]}
                 />
               ) },
-              { id: 'tracker', label: 'جدول عباداتك', icon: '✅', hint: 'صلواتك وأذكارك وصيامك + تذكير', render: () => <WorshipTracker /> },
-              { id: 'fkhatma', label: 'ختمة مع الأصحاب', icon: '👥', hint: 'وزّع الأجزاء الثلاثين', render: () => <FriendsKhatma /> },
-              { id: 'wird', label: 'وردك', icon: '📜', render: () => <DailyWird onPray={addPrayer} /> },
-              { id: 'fadl', label: 'فضل الصلاة', icon: '📖', render: () => <HadithFadl /> },
-              { id: 'dq', label: 'سؤال اليوم', icon: '💡', render: () => (
+              { id: 'tracker', group: 'متابعة وإنجاز', label: 'جدول عباداتك', icon: '✅', hint: 'صلواتك وأذكارك وصيامك + تذكير', render: () => <WorshipTracker /> },
+              { id: 'fkhatma', group: 'مع الأحباب', label: 'ختمة مع الأصحاب', icon: '👥', hint: 'وزّع الأجزاء الثلاثين', render: () => <FriendsKhatma /> },
+              { id: 'wird', group: 'أذكارك وورد يومك', label: 'وردك', icon: '📜', render: () => <DailyWird onPray={addPrayer} /> },
+              { id: 'fadl', group: 'أذكارك وورد يومك', label: 'فضل الصلاة', icon: '📖', render: () => <HadithFadl /> },
+              { id: 'dq', group: 'أذكارك وورد يومك', label: 'سؤال اليوم', icon: '💡', render: () => (
                 <Suspense fallback={null}>
                   <DailyQuestion />
                 </Suspense>
               ) },
-              { id: 'stats', label: 'إحصائياتك', icon: '📊', render: () => (
+              { id: 'stats', group: 'متابعة وإنجاز', label: 'إحصائياتك', icon: '📊', render: () => (
                 <>
                   <WeeklyStats />
                   <ProphetStats count={count} todayCount={todayCount} streak={streak} />
                 </>
               ) },
-              { id: 'share', label: 'بطاقتك', icon: '🎴', render: () => <ShareCard count={count} /> },
+              { id: 'share', group: 'متابعة وإنجاز', label: 'بطاقتك', icon: '🎴', render: () => <ShareCard count={count} /> },
             ]}
           />
         </div>
@@ -2041,26 +2043,28 @@ export function PrayerExperience() {
           </header>
           {seen.names && (
             <SectionGrid
+              groupOrder={['يومك مع العلم', 'القرآن وعلومه', 'الحديث الشريف', 'العقيدة والفقه والعبادة', 'السيرة والتاريخ', 'المكتبة العلمية']}
               secs={[
-                { id: 'dhadith', label: 'حديث اليوم', icon: '🌅', hint: 'حديث جديد كل يوم', render: () => <DailyHadith /> },
-                { id: 'last', label: 'أكمل القراءة', icon: '🔖', hint: 'من حيث توقفت', render: () => <IlmTools mode="last" /> },
-                { id: 'isearch', label: 'بحث شامل', icon: '🔎', hint: 'في الفقه والمكتبة والحديث', render: () => <IlmTools mode="search" /> },
-                { id: 'ifav', label: 'المفضلة', icon: '⭐', hint: 'فقراتك المحفوظة', render: () => <IlmTools mode="fav" /> },
-                { id: 'arkan', label: 'أركان الإسلام الخمسة', icon: '🕌', hint: 'لكل ركن: أحاديث وكتب وفهرس وبحث', render: () => <ArkanIslam /> },
-                { id: 'lib', label: 'المكتبة العلمية', icon: '🏛️', hint: 'عقيدة • حديث • أصول • لغة • آداب', render: () => <IslamicLibrary /> },
-                { id: 'uloom', label: 'علوم القرآن', icon: '🔬', hint: 'موسوعة ومكي ومدني وأسباب النزول', render: () => <QuranSciencesHub /> },
-                { id: 'books', label: 'كتب الحديث', icon: '📚', hint: 'البخاري ومسلم والأربعون', render: () => <HadithLibrary /> },
-                { id: 'qudsi', label: 'الأحاديث القدسية', icon: '📜', hint: 'من الصحيحين', render: () => <HadithQudsi /> },
-                { id: 'fiqh', label: 'المذاهب الأربعة', icon: '⚖️', hint: 'الفقه المقارن: إجماع الأئمة وخلافهم', render: () => <FiqhMadhahib /> },
-                { id: 'sira', label: 'السيرة الكاملة', icon: '📚', hint: 'ابن هشام • بفهرس', render: () => (
+                { id: 'dhadith', group: 'يومك مع العلم', label: 'حديث اليوم', icon: '🌅', hint: 'حديث جديد كل يوم', render: () => <DailyHadith /> },
+                { id: 'last', group: 'يومك مع العلم', label: 'أكمل القراءة', icon: '🔖', hint: 'من حيث توقفت', render: () => <IlmTools mode="last" /> },
+                { id: 'isearch', group: 'يومك مع العلم', label: 'بحث شامل', icon: '🔎', hint: 'في الفقه والمكتبة والحديث', render: () => <IlmTools mode="search" /> },
+                { id: 'ifav', group: 'يومك مع العلم', label: 'المفضلة', icon: '⭐', hint: 'فقراتك المحفوظة', render: () => <IlmTools mode="fav" /> },
+                { id: 'arkan', group: 'العقيدة والفقه والعبادة', label: 'أركان الإسلام الخمسة', icon: '🕌', hint: 'لكل ركن: أحاديث وكتب وفهرس وبحث', render: () => <ArkanIslam /> },
+                { id: 'lib', group: 'المكتبة العلمية', label: 'المكتبة العلمية', icon: '🏛️', hint: 'عقيدة • حديث • أصول • لغة • آداب', render: () => <IslamicLibrary /> },
+                { id: 'uloom', group: 'القرآن وعلومه', label: 'علوم القرآن', icon: '🔬', hint: 'موسوعة ومكي ومدني وأسباب النزول', render: () => <QuranSciencesHub /> },
+                { id: 'books', group: 'الحديث الشريف', label: 'كتب الحديث', icon: '📚', hint: 'البخاري ومسلم والأربعون', render: () => <HadithLibrary /> },
+                { id: 'qudsi', group: 'الحديث الشريف', label: 'الأحاديث القدسية', icon: '📜', hint: 'من الصحيحين', render: () => <HadithQudsi /> },
+                { id: 'hajj', group: 'العقيدة والفقه والعبادة', label: 'دليل الحاج والمعتمر', icon: '🕋', hint: 'مناسك النووي مرتّبة مع متابعة قراءتك', render: () => <HajjGuide /> },
+                { id: 'fiqh', group: 'العقيدة والفقه والعبادة', label: 'المذاهب الأربعة', icon: '⚖️', hint: 'الفقه المقارن: إجماع الأئمة وخلافهم', render: () => <FiqhMadhahib /> },
+                { id: 'sira', group: 'السيرة والتاريخ', label: 'السيرة الكاملة', icon: '📚', hint: 'ابن هشام • بفهرس', render: () => (
                   <Suspense fallback={null}>
                     <SiraCorner />
                   </Suspense>
                 ) },
-                { id: 'gmap', label: 'الغزوات على الخريطة', icon: '🗺️', hint: 'بسنواتها من سير الذهبي', render: () => <GhazawatMap /> },
-                { id: 'sinfo', label: 'بطاقة السورة', icon: '📑', hint: 'مكية/مدنية وفضلها وأسباب نزولها', render: () => <SurahInfo /> },
-                { id: 'wdict', label: 'معجم غريب القرآن', icon: '📖', hint: 'ابحث عن معنى كلمة — نزهة القلوب', render: () => <WordDictionary /> },
-                { id: 'asma', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
+                { id: 'gmap', group: 'السيرة والتاريخ', label: 'الغزوات على الخريطة', icon: '🗺️', hint: 'بسنواتها من سير الذهبي', render: () => <GhazawatMap /> },
+                { id: 'sinfo', group: 'القرآن وعلومه', label: 'بطاقة السورة', icon: '📑', hint: 'مكية/مدنية وفضلها وأسباب نزولها', render: () => <SurahInfo /> },
+                { id: 'wdict', group: 'القرآن وعلومه', label: 'معجم غريب القرآن', icon: '📖', hint: 'ابحث عن معنى كلمة — نزهة القلوب', render: () => <WordDictionary /> },
+                { id: 'asma', group: 'العقيدة والفقه والعبادة', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
               ]}
             />
           )}
@@ -2098,8 +2102,9 @@ export function PrayerExperience() {
           </header>
           {seen.more && (
             <SectionGrid
+              groupOrder={['التنبيهات والتحكم', 'التخصيص', 'التطبيق']}
               secs={[
-                { id: 'float', label: 'الأيقونة العايمة', icon: '🫧', hidden: !floatSupported, render: () => (
+                { id: 'float', group: 'التنبيهات والتحكم', label: 'الأيقونة العايمة', icon: '🫧', hidden: !floatSupported, render: () => (
           <section className="content-card" id="s-float">
             <h2 className="section-title">الأيقونة العايمة</h2>
             <p className="float-note">
@@ -2126,7 +2131,7 @@ export function PrayerExperience() {
             <FloatTarget />
           </section>
                 ) },
-                { id: 'remind', label: 'التذكيرات', icon: '🔔', hint: 'الصلاة والأذكار', hidden: !remSupported, render: () => (
+                { id: 'remind', group: 'التنبيهات والتحكم', label: 'التذكيرات', icon: '🔔', hint: 'الصلاة والأذكار', hidden: !remSupported, render: () => (
                 <SectionGrid
                   secs={[
                 { id: 'adhkar-rem', label: 'تذكير الأذكار', icon: '🔔', hidden: !remSupported, render: () => (
@@ -2279,8 +2284,8 @@ export function PrayerExperience() {
                   ]}
                 />
                 ) },
-                { id: 'volume', label: 'أزرار الصوت', icon: '🔊', render: () => <VolumeKeys /> },
-                { id: 'look', label: 'المظهر', icon: '🎨', hint: 'اللغة وحجم الخط ونوعه', render: () => (
+                { id: 'volume', group: 'التنبيهات والتحكم', label: 'أزرار الصوت', icon: '🔊', render: () => <VolumeKeys /> },
+                { id: 'look', group: 'التخصيص', label: 'المظهر', icon: '🎨', hint: 'اللغة وحجم الخط ونوعه', render: () => (
                 <SectionGrid
                   secs={[
                 { id: 'lang', label: 'اللغة', icon: '🌐', render: () => <LangSwitch /> },
@@ -2289,9 +2294,9 @@ export function PrayerExperience() {
                   ]}
                 />
                 ) },
-                { id: 'backup', label: 'نسخة احتياطية', icon: '💾', render: () => <Backup /> },
-                { id: 'credits', label: 'المصادر والتراخيص', icon: '📜', hint: 'من أين أخذنا كل نص', render: () => <CreditsPage /> },
-                { id: 'about', label: 'عن التطبيق', icon: 'ℹ️', render: () => (
+                { id: 'backup', group: 'التطبيق', label: 'نسخة احتياطية', icon: '💾', render: () => <Backup /> },
+                { id: 'credits', group: 'التطبيق', label: 'المصادر والتراخيص', icon: '📜', hint: 'من أين أخذنا كل نص', render: () => <CreditsPage /> },
+                { id: 'about', group: 'التطبيق', label: 'عن التطبيق', icon: 'ℹ️', render: () => (
           <section className="content-card" id="s-about">
             <h2 className="section-title">عن التطبيق</h2>
             <p className="about-text">
