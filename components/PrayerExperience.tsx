@@ -23,6 +23,8 @@ import { GhazawatMap } from '@/components/GhazawatMap';
 import { ArkanIslam } from '@/components/arkan/ArkanIslam';
 import { SurahInfo } from '@/components/quran/SurahInfo';
 import { HajjGuide } from '@/components/arkan/HajjGuide';
+import { KidsGames } from '@/components/kids/KidsGames';
+import { KidsHome, KidsTasbih } from '@/components/kids/KidsHome';
 import { UsageStats, pingUsage } from '@/components/UsageStats';
 import { WordDictionary } from '@/components/lugha/WordDictionary';
 import { WorshipTracker } from '@/components/WorshipTracker';
@@ -140,7 +142,7 @@ function getFloating(): FloatingPlugin | null {
 }
 
 // 0 = بلا حد (∞)
-type Tab = 'home' | 'quran' | 'wird' | 'names' | 'seera' | 'more';
+type Tab = 'home' | 'quran' | 'wird' | 'names' | 'kids' | 'more';
 
 const goalOptions = [10, 33, 100, 300, 1000, 0];
 
@@ -1930,6 +1932,22 @@ export function PrayerExperience() {
         </section>
               </>
             ) },
+            { id: 'seera', label: 'السيرة النبوية', icon: '🌙', hint: 'النسب والصفات والمواقف والاختبار', render: () => (
+              <SectionGrid
+                secs={[
+                  { id: 'lineage', label: 'النسب', icon: '🌿', render: () => <ProphetLineage /> },
+                  { id: 'desc', label: 'الصفات', icon: '✨', render: () => <ProphetDescription /> },
+                  { id: 'timeline', label: 'السيرة', icon: '⏳', render: () => <ProphetTimeline /> },
+                  { id: 'moments', label: 'مواقف', icon: '🕌', render: () => <ProphetMoments /> },
+                  { id: 'names', label: 'الأسماء', icon: '🏷️', render: () => <ProphetNames /> },
+                  { id: 'quiz', label: 'اختبر نفسك', icon: '❓', render: () => (
+                  <Suspense fallback={null}>
+                    <ProphetQuiz />
+                  </Suspense>
+                ) },
+                ]}
+              />
+            ) },
             { id: 'poems', label: 'أبيات', icon: '✨', render: () => (
         <section className="content-card" id="s-poems">
           <h2 className="section-title">من مدح رسول الله ﷺ</h2>
@@ -2072,25 +2090,20 @@ export function PrayerExperience() {
           )}
         </div>
 
-        {/* ===== السيرة ===== */}
-        <div className="tab-pane" hidden={tab !== 'seera'}>
+        {/* ===== الأطفال ===== */}
+        <div className="tab-pane" hidden={tab !== 'kids'}>
           <header className="tab-head">
-            <h1>السيرة</h1>
-            <p>نسبه وصفاته وأسماؤه ومراحل حياته ﷺ</p>
+            <h1>الأطفال</h1>
+            <p>العب وتعلّم واجمع النجوم 🌟</p>
           </header>
-          {seen.seera && (
+          {seen.kids && (
             <SectionGrid
+              groupOrder={['العب وتعلّم', 'رحلتك']}
               secs={[
-                { id: 'lineage', label: 'النسب', icon: '🌿', render: () => <ProphetLineage /> },
-                { id: 'desc', label: 'الصفات', icon: '✨', render: () => <ProphetDescription /> },
-                { id: 'timeline', label: 'السيرة', icon: '⏳', render: () => <ProphetTimeline /> },
-                { id: 'moments', label: 'مواقف', icon: '🕌', render: () => <ProphetMoments /> },
-                { id: 'names', label: 'الأسماء', icon: '🏷️', render: () => <ProphetNames /> },
-                { id: 'quiz', label: 'اختبر نفسك', icon: '❓', render: () => (
-                  <Suspense fallback={null}>
-                    <ProphetQuiz />
-                  </Suspense>
-                ) },
+                { id: 'games', group: 'العب وتعلّم', label: 'ألعاب الحفظ', icon: '🧩', hint: 'رتّب وأكمل الآيات والأذكار', render: () => <KidsGames /> },
+                { id: 'kasma', group: 'العب وتعلّم', label: 'أسماء الله الحسنى', icon: '🌙', hint: 'العب واحفظ', render: () => <AsmaAllah /> },
+                { id: 'ktasbih', group: 'رحلتك', label: 'سبحة الصغار', icon: '📿', hint: 'سبّح واجمع النجوم', render: () => <KidsTasbih /> },
+                { id: 'kjourney', group: 'رحلتك', label: 'رحلتي', icon: '🏆', hint: 'مهام اليوم وبستانك وأوسمتك', render: () => <KidsHome /> },
               ]}
             />
           )}
@@ -2321,7 +2334,7 @@ export function PrayerExperience() {
             ['quran', 'القرآن', <g key="q"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5V19c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z" /><path d="M12 6v13.5" /><path d="M7 9.5h2.2M14.8 9.5H17" /></g>],
             ['wird', 'وردي', <g key="t"><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="2.2" fill="currentColor" /><path d="M12 3.5V6" /></g>],
             ['names', 'العلوم', <g key="m"><path d="M12 3l2.4 5.6L20 9.3l-4.3 3.8L17 19l-5-3-5 3 1.3-5.9L4 9.3l5.6-.7z" /></g>],
-            ['seera', 'السيرة', <g key="c"><circle cx="6" cy="6" r="2" /><circle cx="6" cy="18" r="2" /><path d="M6 8v8M11 6h9M11 12h9M11 18h9" /></g>],
+            ['kids', 'الأطفال', <g key="c"><circle cx="12" cy="8" r="3.2" /><path d="M5.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" /><path d="M4 6l1.2 1.2M20 6l-1.2 1.2" /></g>],
             ['more', 'المزيد', <g key="d" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></g>],
           ] as [Tab, string, ReactNode][]
         ).map(([id, label, icon]) => (
