@@ -84,7 +84,7 @@ export function HajjGuide() {
           ))}
         </section>
       ))}
-      <p className="hj-n">الإيضاح في مناسك الحج والعمرة — الإمام النووي (ت ٦٧٦هـ). النص من المكتبة الشاملة (OpenITI). للفتوى في حالتك الخاصة راجع أهل العلم.</p>
+      <p className="hj-n">للفتوى في حالتك الخاصة راجع أهل العلم.</p>
       <style>{`
         .hj { font-family: var(--font-kufi), sans-serif; color: #fff1c4; display: flex; flex-direction: column; gap: 10px; }
         .hj-sum { padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(232,194,90,.35); background: rgba(18,15,8,.85); display: flex; flex-direction: column; gap: 8px; }

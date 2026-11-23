@@ -554,11 +554,6 @@ export function MushafReader({
                 <div className="mr-q-n">تفسير مجموعة الآيات {toAr(tafRange[0])}–{toAr(tafRange[1])} معًا كما في الكتاب.</div>
               )}
               <div className="mr-taf-b">{taf ?? 'جارٍ التحميل…'}</div>
-              <div className="mr-q-n">
-                {tafSrc === 'sa'
-                  ? 'تيسير الكريم الرحمن — العلّامة عبد الرحمن بن ناصر السعدي (ت ١٣٧٦هـ).'
-                  : 'التفسير الميسّر — مجمع الملك فهد لطباعة المصحف الشريف.'}
-              </div>
             </div>
           )}
           <div className="mr-sheet-btns">

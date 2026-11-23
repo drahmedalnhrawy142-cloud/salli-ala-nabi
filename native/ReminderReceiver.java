@@ -47,7 +47,7 @@ public class ReminderReceiver extends BroadcastReceiver {
 
     /** إشعار فوري للتجربة. الصوت حسب اختيار المستخدم: كامل أو "صلى الله عليه وسلم" فقط. */
     public static void show(Context ctx, String text) {
-        show(ctx, "صلّي على النبي ﷺ", text, 4101);
+        show(ctx, "صل على النبي ﷺ", text, 4101);
     }
 
     public static void show(Context ctx, String title, String text, int notifId) {

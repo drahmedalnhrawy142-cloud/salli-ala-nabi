@@ -83,7 +83,6 @@ export function WordDictionary() {
       {res.length > max && (
         <button type="button" className="wd-m" onClick={() => setMax(max + 60)}>عرض المزيد</button>
       )}
-      <p className="wd-n">نزهة القلوب في تفسير غريب القرآن — أبو بكر محمد بن عزيز السجستاني (ت ٣٣٠هـ). النص من المكتبة الشاملة (OpenITI، CC BY-NC-SA 4.0).</p>
       <style>{`
         .wd { font-family: var(--font-kufi), sans-serif; color: #fff1c4; display: flex; flex-direction: column; gap: 10px; }
         .wd-q { width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(232,194,90,.45); background: rgba(18,15,8,.9); color: #fff1c4; font-family: inherit; font-size: 15px; }

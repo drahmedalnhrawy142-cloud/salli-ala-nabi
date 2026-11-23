@@ -1,6 +1,6 @@
 {
   "appId": "com.sallialanabi.app",
-  "appName": "صلّي على النبي",
+  "appName": "صل على النبي",
   "webDir": "out",
   "plugins": {
     "SplashScreen": {

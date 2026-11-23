@@ -11,7 +11,7 @@
         android:id="@+id/w_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="صلّي على النبي ﷺ"
+        android:text="صل على النبي ﷺ"
         android:textColor="#F1D77A"
         android:textSize="14sp"
         android:textStyle="bold" />

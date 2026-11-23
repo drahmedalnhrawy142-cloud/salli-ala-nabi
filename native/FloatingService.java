@@ -155,7 +155,7 @@ public class FloatingService extends Service {
 
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(getApplicationInfo().icon)
-                .setContentTitle("صلّي على النبي ﷺ")
+                .setContentTitle("صل على النبي ﷺ")
                 .setContentText("الزرار العايم شغّال")
                 .setContentIntent(openIntent)
                 .addAction(0, "إيقاف", stopIntent)

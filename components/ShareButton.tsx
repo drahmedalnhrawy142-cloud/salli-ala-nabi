@@ -2,7 +2,7 @@
 
 export function ShareButton() {
   function shareOnWhatsApp() {
-    const text = encodeURIComponent('صلي على النبي ﷺ — منصة عربية لتبادل مفاتيح تحدي نسك');
+    const text = encodeURIComponent('صل على النبي ﷺ — منصة عربية لتبادل مفاتيح تحدي نسك');
     const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
     const shareUrl = `https://wa.me/?text=${encodeURIComponent(`${decodeURIComponent(text)} ${pageUrl}`.trim())}`;
     window.open(shareUrl, '_blank', 'noopener,noreferrer');
