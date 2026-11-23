@@ -24,6 +24,7 @@ import { ArkanIslam } from '@/components/arkan/ArkanIslam';
 import { SurahInfo } from '@/components/quran/SurahInfo';
 import { HajjGuide } from '@/components/arkan/HajjGuide';
 import { KidsGames } from '@/components/kids/KidsGames';
+import { TalabIlm } from '@/components/talab/TalabIlm';
 import { KidsQuiz } from '@/components/kids/KidsQuiz';
 import { KidsHome, KidsTasbih } from '@/components/kids/KidsHome';
 import { UsageStats, pingUsage } from '@/components/UsageStats';
@@ -2066,19 +2067,20 @@ export function PrayerExperience() {
         {/* ===== أسماء الله والأحاديث القدسية ===== */}
         <div className="tab-pane" hidden={tab !== 'names'}>
           <header className="tab-head">
-            <h1>العلوم الشرعية</h1>
+            <h1>طلب العلم</h1>
             <p>كل علوم الدين في مكان واحد: العقيدة والقرآن والحديث والفقه والسيرة</p>
           </header>
           {seen.names && (
             <SectionGrid
-              groupOrder={['يومك مع العلم', 'القرآن وعلومه', 'الحديث الشريف', 'العقيدة والفقه والعبادة', 'السيرة والتاريخ', 'المكتبة العلمية']}
+              groupOrder={['مسارك في الطلب', 'يومك مع العلم', 'القرآن وعلومه', 'الحديث الشريف', 'العقيدة والفقه والعبادة', 'السيرة والتاريخ', 'المكتبة العامة']}
               secs={[
+                { id: 'levels', group: 'مسارك في الطلب', label: 'مستويات طلب العلم', icon: '🪜', hint: 'مسار متدرّج بكتب وشروح مرئية', render: () => <TalabIlm /> },
                 { id: 'dhadith', group: 'يومك مع العلم', label: 'حديث اليوم', icon: '🌅', hint: 'حديث جديد كل يوم', render: () => <DailyHadith /> },
                 { id: 'last', group: 'يومك مع العلم', label: 'أكمل القراءة', icon: '🔖', hint: 'من حيث توقفت', render: () => <IlmTools mode="last" /> },
                 { id: 'isearch', group: 'يومك مع العلم', label: 'بحث شامل', icon: '🔎', hint: 'في الفقه والمكتبة والحديث', render: () => <IlmTools mode="search" /> },
                 { id: 'ifav', group: 'يومك مع العلم', label: 'المفضلة', icon: '⭐', hint: 'فقراتك المحفوظة', render: () => <IlmTools mode="fav" /> },
                 { id: 'arkan', group: 'العقيدة والفقه والعبادة', label: 'أركان الإسلام الخمسة', icon: '🕌', hint: 'لكل ركن: أحاديث وكتب وفهرس وبحث', render: () => <ArkanIslam /> },
-                { id: 'lib', group: 'المكتبة العلمية', label: 'المكتبة العلمية', icon: '🏛️', hint: 'عقيدة • حديث • أصول • لغة • آداب', render: () => <IslamicLibrary /> },
+                { id: 'lib', group: 'المكتبة العامة', label: 'المكتبة العامة', icon: '🏛️', hint: 'كل الكتب مرتّبة بالأقسام، بما فيها الكتب خارج المستويات', render: () => <IslamicLibrary /> },
                 { id: 'uloom', group: 'القرآن وعلومه', label: 'علوم القرآن', icon: '🔬', hint: 'موسوعة ومكي ومدني وأسباب النزول', render: () => <QuranSciencesHub /> },
                 { id: 'books', group: 'الحديث الشريف', label: 'كتب الحديث', icon: '📚', hint: 'البخاري ومسلم والأربعون', render: () => <HadithLibrary /> },
                 { id: 'qudsi', group: 'الحديث الشريف', label: 'الأحاديث القدسية', icon: '📜', hint: 'من الصحيحين', render: () => <HadithQudsi /> },
@@ -2342,7 +2344,7 @@ export function PrayerExperience() {
             ['home', 'الصلاة', <path key="a" d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />],
             ['quran', 'القرآن', <g key="q"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5V19c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z" /><path d="M12 6v13.5" /><path d="M7 9.5h2.2M14.8 9.5H17" /></g>],
             ['wird', 'وردي', <g key="t"><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="2.2" fill="currentColor" /><path d="M12 3.5V6" /></g>],
-            ['names', 'العلوم', <g key="m"><path d="M12 3l2.4 5.6L20 9.3l-4.3 3.8L17 19l-5-3-5 3 1.3-5.9L4 9.3l5.6-.7z" /></g>],
+            ['names', 'طلب العلم', <g key="m"><path d="M12 3l2.4 5.6L20 9.3l-4.3 3.8L17 19l-5-3-5 3 1.3-5.9L4 9.3l5.6-.7z" /></g>],
             ['kids', 'الأطفال', <g key="c"><circle cx="12" cy="8" r="3.2" /><path d="M5.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" /><path d="M4 6l1.2 1.2M20 6l-1.2 1.2" /></g>],
             ['more', 'المزيد', <g key="d" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></g>],
           ] as [Tab, string, ReactNode][]
