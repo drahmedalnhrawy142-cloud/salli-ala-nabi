@@ -24,6 +24,7 @@ import { ArkanIslam } from '@/components/arkan/ArkanIslam';
 import { SurahInfo } from '@/components/quran/SurahInfo';
 import { HajjGuide } from '@/components/arkan/HajjGuide';
 import { KidsGames } from '@/components/kids/KidsGames';
+import { HijriCalendar } from '@/components/HijriCalendar';
 import { TalabIlm } from '@/components/talab/TalabIlm';
 import { KidsQuiz } from '@/components/kids/KidsQuiz';
 import { KidsHome, KidsTasbih } from '@/components/kids/KidsHome';
@@ -2044,6 +2045,7 @@ export function PrayerExperience() {
                   ]}
                 />
               ) },
+              { id: 'hijri', group: 'أذكارك وورد يومك', label: 'التقويم الهجري ورمضان', icon: '🗓️', hint: 'المناسبات وإمساكية رمضان', render: () => <HijriCalendar /> },
               { id: 'tracker', group: 'متابعة وإنجاز', label: 'جدول عباداتك', icon: '✅', hint: 'صلواتك وأذكارك وصيامك + تذكير', render: () => <WorshipTracker /> },
               { id: 'fkhatma', group: 'مع الأحباب', label: 'ختمة مع الأصحاب', icon: '👥', hint: 'وزّع الأجزاء الثلاثين', render: () => <FriendsKhatma /> },
               { id: 'wird', group: 'أذكارك وورد يومك', label: 'وردك', icon: '📜', render: () => <DailyWird onPray={addPrayer} /> },
