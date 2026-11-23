@@ -135,7 +135,8 @@ export function DailyHadith() {
           )}
         </div>
       ) : (
-        )}
+        <p className="dh-note">الإشعار اليومي متاح داخل تطبيق الأندرويد.</p>
+      )}
       <style>{`
         .dh { font-family: var(--font-kufi), sans-serif; color: #fff1c4; }
         .dh-c { padding: 16px; border-radius: 18px; border: 1px solid rgba(232,194,90,.4); background: rgba(18,15,8,.85); margin-bottom: 12px; }
