@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { shareTextCard } from '@/components/shareCanvas';
 import { toAr } from '@/components/quran/data';
 import { SunriseDoodle } from '@/components/Doodles';
 
@@ -103,6 +104,13 @@ export function DailyHadith() {
     setTimeout(() => setMsg(''), 1300);
   }
 
+  async function card() {
+    setMsg('جارٍ الإعداد…');
+    const r = await shareTextCard({ title: 'حديث النبي ﷺ', text: t, source: `${src} • الحديث ${toAr(Number(n) || 0)}`, fileName: 'hadith.png' });
+    setMsg(r === 'saved' ? 'تم الحفظ' : r === 'shared' ? '' : 'تعذّر إنشاء البطاقة');
+    setTimeout(() => setMsg(''), 1500);
+  }
+
   return (
     <div className="dh">
       <SunriseDoodle />
@@ -113,6 +121,7 @@ export function DailyHadith() {
           <button type="button" onClick={() => setOff(off + 1)}>التالي ›</button>
           <button type="button" onClick={() => setOff(off - 1)}>‹ السابق</button>
           <button type="button" onClick={copy}>{msg || 'نسخ'}</button>
+          <button type="button" onClick={card}>🖼️ بطاقة صورة</button>
           {off !== 0 && (
             <button type="button" onClick={() => setOff(0)}>حديث اليوم</button>
           )}
