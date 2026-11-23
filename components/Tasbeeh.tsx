@@ -81,6 +81,7 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
   const [target, setTarget] = useState(multi ? 10 : 33);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [rounds, setRounds] = useState<Record<string, number>>({});
+  const [auto, setAuto] = useState(true);
 
   useEffect(() => {
     try {
@@ -88,6 +89,7 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
       setRounds(JSON.parse(localStorage.getItem('tasbeeh_rounds') || '{}') || {});
       const t = localStorage.getItem('tasbeeh_target' + sfx);
       if (t !== null) setTarget(Number(t));
+      if (localStorage.getItem('tasbeeh_auto') === '0') setAuto(false);
       if (multi) {
         const saved = localStorage.getItem('tasbeeh_msel');
         const all = GROUPS.flatMap((g) => g.items);
@@ -131,6 +133,25 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
       if (navigator.vibrate) navigator.vibrate(done ? [40, 50, 80] : 15);
     } catch {}
     save({ ...counts, [key]: next }, { ...rounds, [key]: nr });
+    // الذكر المضاعف: عند إتمام العدد ننتقل تلقائيًّا للصيغة التالية في نفس المجموعة (عدد ما خلق ← ملء ما خلق …)
+    if (done && multi && auto && sel) {
+      const g = GROUPS.find((x) => x.items.some((i) => i.text === sel.text && i.label === sel.label));
+      const idx = g ? g.items.findIndex((i) => i.text === sel.text && i.label === sel.label) : -1;
+      const nx = g && idx >= 0 ? g.items[idx + 1] : undefined;
+      if (nx) {
+        setSel(nx);
+        try {
+          localStorage.setItem('tasbeeh_msel', nx.text + '|' + nx.label);
+        } catch {}
+      }
+    }
+  }
+
+  function toggleAuto(v: boolean) {
+    setAuto(v);
+    try {
+      localStorage.setItem('tasbeeh_auto', v ? '1' : '0');
+    } catch {}
   }
 
   // زر الصوت: الواجهة الظاهرة بس هي اللي تعدّ
@@ -244,6 +265,11 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
             تصفير
           </button>
         </div>
+        {multi && (
+          <label className="tb-auto">
+            <input type="checkbox" checked={auto} onChange={(e) => toggleAuto(e.target.checked)} /> الانتقال تلقائيًّا للصيغة التالية عند إتمام العدد
+          </label>
+        )}
       </section>
 
       {multi &&
@@ -274,6 +300,7 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
         ))}
 
       <style>{`
+        .tb-auto { display: block; margin-top: 12px; text-align: center; font-size: 13px; color: rgba(255,241,196,.8); }
         .tb-chips, .tb-targets { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
         .tb-chip { font-family: var(--font-ruqaa), serif; font-size: 1rem; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(232,194,90,.4); background: transparent; color: #e8c25a; cursor: pointer; }
         .tb-targets .tb-chip { font-family: var(--font-kufi), sans-serif; font-weight: 700; }

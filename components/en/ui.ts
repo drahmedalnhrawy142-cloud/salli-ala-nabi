@@ -1799,4 +1799,5 @@ export const UI_EN: Record<string, string> = {
  "متصفح": "Browser",
  "شارك إحصائية استخدام مجهولة من جهازي": "Share anonymous usage statistics from my device",
  "تُرسَل مرة في اليوم: رقم عشوائي للجهاز ونوع المنصة فقط، بلا اسم ولا موقع ولا أي بيانات شخصية، لنعرف تقريبًا كم جهازًا يستعمل التطبيق. العدد بالأجهزة لا بالأشخاص.": "Sent once a day: only a random device number and platform type — no name, location or personal data — so we know roughly how many devices use the app. The count is of devices, not people.",
+ "الانتقال تلقائيًّا للصيغة التالية عند إتمام العدد": "Automatically move to the next phrase when the count is complete",
 };
