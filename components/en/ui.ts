@@ -1835,4 +1835,13 @@ export const UI_EN: Record<string, string> = {
  "⬇ تحميل": "⬇ Download",
  "✓ حدّث": "✓ Update",
  "إمساكية رمضان": "Ramadan Timetable",
+ "تحفة الأطفال": "Tuhfat al-Atfal",
+ "منظومة التجويد للصغار": "Tajweed poem for kids",
+ "فصحى": "Standard Arabic",
+ "بالمصري": "Egyptian Arabic",
+ "بالخليجي": "Gulf Arabic",
+ "📖 قراءة": "📖 Read",
+ "🧠 احفظ": "🧠 Memorize",
+ "← الأبواب": "← Chapters",
+ "✔ أتممت حفظ هذا الباب": "✔ I memorized this chapter",
 };

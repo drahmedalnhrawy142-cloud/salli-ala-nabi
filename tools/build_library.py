@@ -24,6 +24,8 @@ BOOKS = [
   dict(id='gharib', cat='علوم القرآن', title='تفسير غريب القرآن', author='ابن قتيبة الدينوري (ت ٢٧٦هـ)',
        sub='معاني الكلمات الغريبة سورةً سورة', src='0300AH/data/0276IbnQutaybaDinawari/0276IbnQutaybaDinawari.GharibQuran/*Shamela0023621-ara1', via='المكتبة الشاملة',
        kre=r'^سورة [^\[:]+$', nonum=True),
+  dict(id='tamhid', cat='علوم القرآن', title='التمهيد في علم التجويد', author='ابن الجزري (ت ٨٣٣هـ)',
+       sub='المخارج والصفات وأحكام النون والمد والوقف واللحن', src='0850AH/data/0833IbnJazari/0833IbnJazari.TamhidFiCulumTajwid/*Shamela0008194-ara1', via='المكتبة الشاملة'),
   dict(id='icrab', cat='علوم القرآن', title='إعراب القرآن', author='أبو جعفر النحاس (ت ٣٣٨هـ)',
        sub='إعراب كل سورة وقراءاتها', src='0350AH/data/0338AbuJacfarNahhas/0338AbuJacfarNahhas.IcrabQuran/*JK001417-ara1', via='المكتبة الشاملة (مشروع جامع الكتب)',
        hm='# | ', kre=r'سورة', nonum=True),
