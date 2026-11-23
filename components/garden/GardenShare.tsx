@@ -72,7 +72,7 @@ export function GardenShare({ scene, total, palms, onClose }: { scene: HTMLCanva
     ctx.direction = 'rtl';
     ctx.fillStyle = '#e8c25a';
     ctx.font = `700 50px ${kufi}`;
-    ctx.fillText(mode === 'mine' ? 'بستاني في صلّي على النبي ﷺ' : 'أُهديك نخلة من بستاني', W / 2, 120);
+    ctx.fillText(mode === 'mine' ? 'بستاني في صل على النبي ﷺ' : 'أُهديك نخلة من بستاني', W / 2, 120);
     if (mode === 'gift' && to.trim()) {
       ctx.fillStyle = '#f7ebc1';
       ctx.font = `600 40px ${kufi}`;
@@ -125,7 +125,7 @@ export function GardenShare({ scene, total, palms, onClose }: { scene: HTMLCanva
     }
     ctx.fillStyle = 'rgba(232,194,90,.6)';
     ctx.font = `400 26px ${kufi}`;
-    ctx.fillText('صلّي على النبي ﷺ', W / 2, H - 70);
+    ctx.fillText('صل على النبي ﷺ', W / 2, H - 70);
   }, [mode, to, scene, total, palms, palm]);
 
   useEffect(() => {

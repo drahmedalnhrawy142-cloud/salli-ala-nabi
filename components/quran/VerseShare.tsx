@@ -207,7 +207,7 @@ export function VerseShare({ data, idx, onClose }: { data: QData; idx: number; o
     ctx.fillText(ref, W / 2, H - 150);
     ctx.fillStyle = th.gold;
     ctx.font = `600 28px ${kufi}`;
-    ctx.fillText('صلّي على النبي ﷺ', W / 2, H - 105);
+    ctx.fillText('صل على النبي ﷺ', W / 2, H - 105);
   }, [data, idx, end, sura, theme, size]);
 
   useEffect(() => {

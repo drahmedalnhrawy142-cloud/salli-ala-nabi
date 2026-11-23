@@ -180,7 +180,7 @@ export function AyahOnOpenSettings() {
       )}
       {nat && on && needOverlay && (
         <p className="aos-n" style={{ color: '#ffd9a0', opacity: 1 }}>
-          لازم تسمح لـ «صلّي على النبي» بالعرض فوق التطبيقات من الإعدادات التي فتحت لك، ثم ارجع وأعد التفعيل.
+          لازم تسمح لـ «صل على النبي» بالعرض فوق التطبيقات من الإعدادات التي فتحت لك، ثم ارجع وأعد التفعيل.
         </p>
       )}
       <p className="aos-n">

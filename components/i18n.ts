@@ -213,7 +213,7 @@ function apply() {
       walk(document.body);
     });
   } else {
-    document.title = 'صلي على النبي ﷺ';
+    document.title = 'صل على النبي ﷺ';
     restore();
   }
   subs.forEach((f) => f());

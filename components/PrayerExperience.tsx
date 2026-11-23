@@ -1066,6 +1066,7 @@ export function PrayerExperience() {
           font-weight: 800;
         }
 
+        .hadith-src { margin: 6px 0 0; text-align: center; font-size: 12.5px; color: rgba(255,241,196,.6); }
         .hadith-text {
           margin: 0;
           color: #fff8e8;
@@ -1930,6 +1931,12 @@ export function PrayerExperience() {
             صَلَّى اللَّهُ عَلَيْهِ بِهَا عَشْرًا»
           </p>
         </section>
+        <section className="content-card" id="s-hadith2">
+          <p className="hadith-text">
+            وَقَالَ ﷺ: «مَا مِنْ أَحَدٍ يُسَلِّمُ عَلَيَّ إِلاَّ رَدَّ اللَّهُ عَلَيَّ رُوحِي حَتَّى أَرُدَّ عَلَيْهِ السَّلاَمَ»
+          </p>
+          <p className="hadith-src">رواه أبو داود بإسناد صحيح</p>
+        </section>
               </>
             ) },
             { id: 'seera', label: 'السيرة النبوية', icon: '🌙', hint: 'النسب والصفات والمواقف والاختبار', render: () => (
@@ -2316,7 +2323,7 @@ export function PrayerExperience() {
           <section className="content-card" id="s-about">
             <h2 className="section-title">عن التطبيق</h2>
             <p className="about-text">
-              «صلّي على النبي ﷺ» تطبيق يذكّرك بالصلاة على النبي ﷺ ويعينك على
+              «صل على النبي ﷺ» تطبيق يذكّرك بالصلاة على النبي ﷺ ويعينك على
               المداومة عليها، بمحتوى مأخوذ من الصحيحين وما صحّ عن أهل العلم.
             </p>
           </section>

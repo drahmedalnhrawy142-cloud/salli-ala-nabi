@@ -81,7 +81,7 @@ export function ShareCard({ count }: { count: number }) {
     const ruqaa = fam('--font-ruqaa', 'serif');
     try {
       await Promise.all([
-        document.fonts.load(`700 40px ${kufi}`, 'صلّي على النبي'),
+        document.fonts.load(`700 40px ${kufi}`, 'صل على النبي'),
         document.fonts.load(`400 40px ${ruqaa}`, 'اللهم صلِّ على محمد'),
       ]);
     } catch {}
@@ -135,7 +135,7 @@ export function ShareCard({ count }: { count: number }) {
     ctx.shadowColor = 'rgba(232,194,90,0.7)';
     ctx.shadowBlur = 24;
     ctx.font = `700 78px ${kufi}`;
-    ctx.fillText('صلّي على النبي ﷺ', W / 2, 200);
+    ctx.fillText('صل على النبي ﷺ', W / 2, 200);
     ctx.shadowBlur = 0;
 
     // فاصل
