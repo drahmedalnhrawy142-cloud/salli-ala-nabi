@@ -23,6 +23,7 @@ import { GhazawatMap } from '@/components/GhazawatMap';
 import { ArkanIslam } from '@/components/arkan/ArkanIslam';
 import { SurahInfo } from '@/components/quran/SurahInfo';
 import { HajjGuide } from '@/components/arkan/HajjGuide';
+import { UsageStats, pingUsage } from '@/components/UsageStats';
 import { WordDictionary } from '@/components/lugha/WordDictionary';
 import { WorshipTracker } from '@/components/WorshipTracker';
 import { FriendsKhatma } from '@/components/FriendsKhatma';
@@ -505,6 +506,7 @@ export function PrayerExperience() {
   const lang = useLang();
   useEffect(() => {
     initI18n();
+    pingUsage();
   }, []);
 
   const volRef = useRef<() => void>(() => {});
@@ -2294,6 +2296,7 @@ export function PrayerExperience() {
                   ]}
                 />
                 ) },
+                { id: 'usage', group: 'التطبيق', label: 'إحصائية الاستخدام', icon: '📈', hint: 'كم جهازًا يستعمل التطبيق', render: () => <UsageStats /> },
                 { id: 'backup', group: 'التطبيق', label: 'نسخة احتياطية', icon: '💾', render: () => <Backup /> },
                 { id: 'credits', group: 'التطبيق', label: 'المصادر والتراخيص', icon: '📜', hint: 'من أين أخذنا كل نص', render: () => <CreditsPage /> },
                 { id: 'about', group: 'التطبيق', label: 'عن التطبيق', icon: 'ℹ️', render: () => (
