@@ -1827,4 +1827,12 @@ export const UI_EN: Record<string, string> = {
  "السيرة النبوية": "The Prophet's Biography",
  "النسب والصفات والمواقف والاختبار": "Lineage, description, moments and quiz",
  "العب واحفظ": "Play and memorize",
+ "التقويم الهجري ورمضان": "Hijri Calendar & Ramadan",
+ "المناسبات وإمساكية رمضان": "Occasions and the Ramadan timetable",
+ "التحميل بدون إنترنت": "Download for Offline Use",
+ "حمّل الكتب والتفاسير مرة واحدة": "Download books and tafsirs once",
+ "🖼️ بطاقة صورة": "🖼️ Image card",
+ "⬇ تحميل": "⬇ Download",
+ "✓ حدّث": "✓ Update",
+ "إمساكية رمضان": "Ramadan Timetable",
 };

@@ -4,7 +4,7 @@ import { memo as __memo } from 'react';
 import { useEffect, useState } from 'react';
 
 // [الاسم, خط العرض, خط الطول]
-const CITIES: [string, number, number][] = [
+export const CITIES: [string, number, number][] = [
   ['القاهرة', 30.0444, 31.2357],
   ['الجيزة', 30.0131, 31.2089],
   ['الإسكندرية', 31.2001, 29.9187],

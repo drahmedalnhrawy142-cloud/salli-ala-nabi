@@ -24,6 +24,8 @@ import { ArkanIslam } from '@/components/arkan/ArkanIslam';
 import { SurahInfo } from '@/components/quran/SurahInfo';
 import { HajjGuide } from '@/components/arkan/HajjGuide';
 import { KidsGames } from '@/components/kids/KidsGames';
+import { OfflineManager } from '@/components/OfflineManager';
+import { HijriCalendar } from '@/components/HijriCalendar';
 import { TalabIlm } from '@/components/talab/TalabIlm';
 import { KidsQuiz } from '@/components/kids/KidsQuiz';
 import { KidsHome, KidsTasbih } from '@/components/kids/KidsHome';
@@ -2044,6 +2046,7 @@ export function PrayerExperience() {
                   ]}
                 />
               ) },
+              { id: 'hijri', group: 'أذكارك وورد يومك', label: 'التقويم الهجري ورمضان', icon: '🗓️', hint: 'المناسبات وإمساكية رمضان', render: () => <HijriCalendar /> },
               { id: 'tracker', group: 'متابعة وإنجاز', label: 'جدول عباداتك', icon: '✅', hint: 'صلواتك وأذكارك وصيامك + تذكير', render: () => <WorshipTracker /> },
               { id: 'fkhatma', group: 'مع الأحباب', label: 'ختمة مع الأصحاب', icon: '👥', hint: 'وزّع الأجزاء الثلاثين', render: () => <FriendsKhatma /> },
               { id: 'wird', group: 'أذكارك وورد يومك', label: 'وردك', icon: '📜', render: () => <DailyWird onPray={addPrayer} /> },
@@ -2321,6 +2324,7 @@ export function PrayerExperience() {
                 />
                 ) },
                 { id: 'usage', group: 'التطبيق', label: 'إحصائية الاستخدام', icon: '📈', hint: 'كم جهازًا يستعمل التطبيق', render: () => <UsageStats /> },
+                { id: 'offline', group: 'التطبيق', label: 'التحميل بدون إنترنت', icon: '⬇️', hint: 'حمّل الكتب والتفاسير مرة واحدة', render: () => <OfflineManager /> },
                 { id: 'backup', group: 'التطبيق', label: 'نسخة احتياطية', icon: '💾', render: () => <Backup /> },
                 { id: 'credits', group: 'التطبيق', label: 'المصادر والتراخيص', icon: '📜', hint: 'من أين أخذنا كل نص', render: () => <CreditsPage /> },
                 { id: 'about', group: 'التطبيق', label: 'عن التطبيق', icon: 'ℹ️', render: () => (
