@@ -24,6 +24,7 @@ import { ArkanIslam } from '@/components/arkan/ArkanIslam';
 import { SurahInfo } from '@/components/quran/SurahInfo';
 import { HajjGuide } from '@/components/arkan/HajjGuide';
 import { KidsGames } from '@/components/kids/KidsGames';
+import { KidsQuiz } from '@/components/kids/KidsQuiz';
 import { KidsHome, KidsTasbih } from '@/components/kids/KidsHome';
 import { UsageStats, pingUsage } from '@/components/UsageStats';
 import { WordDictionary } from '@/components/lugha/WordDictionary';
@@ -2108,6 +2109,7 @@ export function PrayerExperience() {
               groupOrder={['العب وتعلّم', 'رحلتك']}
               secs={[
                 { id: 'games', group: 'العب وتعلّم', label: 'ألعاب الحفظ', icon: '🧩', hint: 'رتّب وأكمل الآيات والأذكار', render: () => <KidsGames /> },
+                { id: 'kquiz', group: 'العب وتعلّم', label: 'مسابقة المصحف', icon: '❓', hint: 'أسئلة عن السور والآيات', render: () => <KidsQuiz /> },
                 { id: 'kasma', group: 'العب وتعلّم', label: 'أسماء الله الحسنى', icon: '🌙', hint: 'العب واحفظ', render: () => <AsmaAllah /> },
                 { id: 'ktasbih', group: 'رحلتك', label: 'سبحة الصغار', icon: '📿', hint: 'سبّح واجمع النجوم', render: () => <KidsTasbih /> },
                 { id: 'kjourney', group: 'رحلتك', label: 'رحلتي', icon: '🏆', hint: 'مهام اليوم وبستانك وأوسمتك', render: () => <KidsHome /> },
