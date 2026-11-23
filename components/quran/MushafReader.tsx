@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent as RMouseEvent, type ReactNode, type TouchEvent as RTouchEvent } from 'react';
 import { AyahPlayer } from './AyahPlayer';
-import { BASMALA, RIWAYAT, loadRiwaya, loadAudioMap, loadAsbab, type AsbabData, loadQiraat, loadTajweed, loadTafsir, loadGharib, loadGharibIndex, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
+import { BASMALA, RIWAYAT, loadRiwaya, loadAudioMap, loadAsbab, type AsbabData, loadQiraat, loadTajweed, loadTafsir, loadSaadi, loadGharib, loadGharibIndex, type TJ, lsGet, lsSet, pageAyas, toAr, type QData, type QV } from './data';
 import { VerseShare } from './VerseShare';
 
 type Theme = 'night' | 'paper';
@@ -96,6 +96,8 @@ export function MushafReader({
   const [fontsOpen, setFontsOpen] = useState(false);
   const [playIdx, setPlayIdx] = useState<number | null>(null);
   const [taf, setTaf] = useState<string | null>(null);
+  const [tafSrc, setTafSrc] = useState<'mu' | 'sa'>(() => lsGet<'mu' | 'sa'>('mr.tafsrc', 'mu'));
+  const [tafRange, setTafRange] = useState<[number, number] | null>(null);
   const [jump, setJump] = useState('');
   // نص الرواية المختارة (حفص هو الأساس، وبقية الروايات تُحمَّل عند الاختيار وتُخزَّن للاستخدام بلا نت)
   const data: QData = rw === 'hafs' || rdata?.id !== rw ? hdata : rdata.d;
@@ -151,13 +153,26 @@ export function MushafReader({
     if (!tafOpen || sel == null) return;
     const a = data.ayas[sel];
     let live = true;
-    loadTafsir(a[0])
-      .then((d) => live && setTaf(d[a[1] - 1] || 'لا يوجد تفسير لهذه الآية في المصدر.'))
-      .catch(() => live && setTaf('تعذّر تحميل التفسير. تأكد من الاتصال وأعد المحاولة.'));
+    setTafRange(null);
+    const fail = () => live && setTaf('تعذّر تحميل التفسير. تأكد من الاتصال وأعد المحاولة.');
+    if (tafSrc === 'sa') {
+      loadSaadi(a[0])
+        .then((d) => {
+          if (!live) return;
+          const g = d.find((x) => a[1] >= x[0] && a[1] <= x[1]);
+          setTaf(g ? g[2] : 'لا يوجد تفسير لهذه الآية في المصدر.');
+          setTafRange(g && g[0] !== g[1] ? [g[0], g[1]] : null);
+        })
+        .catch(fail);
+    } else {
+      loadTafsir(a[0])
+        .then((d) => live && setTaf(d[a[1] - 1] || 'لا يوجد تفسير لهذه الآية في المصدر.'))
+        .catch(fail);
+    }
     return () => {
       live = false;
     };
-  }, [tafOpen, sel, data]);
+  }, [tafOpen, sel, data, tafSrc]);
 
   useEffect(() => {
     setGh(null);
@@ -531,9 +546,19 @@ export function MushafReader({
           )}
           {isH && tafOpen && (
             <div className="mr-taf">
-              <div className="mr-taf-t">التفسير الميسّر</div>
+              <div className="mr-taf-t">
+                <button type="button" className={tafSrc === 'mu' ? 'mr-on' : ''} onClick={() => { setTafSrc('mu'); lsSet('mr.tafsrc', 'mu'); }}>الميسّر</button>
+                <button type="button" className={tafSrc === 'sa' ? 'mr-on' : ''} onClick={() => { setTafSrc('sa'); lsSet('mr.tafsrc', 'sa'); }}>السعدي</button>
+              </div>
+              {tafSrc === 'sa' && tafRange && (
+                <div className="mr-q-n">تفسير مجموعة الآيات {toAr(tafRange[0])}–{toAr(tafRange[1])} معًا كما في الكتاب.</div>
+              )}
               <div className="mr-taf-b">{taf ?? 'جارٍ التحميل…'}</div>
-              <div className="mr-q-n">التفسير الميسّر — مجمع الملك فهد لطباعة المصحف الشريف.</div>
+              <div className="mr-q-n">
+                {tafSrc === 'sa'
+                  ? 'تيسير الكريم الرحمن — العلّامة عبد الرحمن بن ناصر السعدي (ت ١٣٧٦هـ).'
+                  : 'التفسير الميسّر — مجمع الملك فهد لطباعة المصحف الشريف.'}
+              </div>
             </div>
           )}
           <div className="mr-sheet-btns">
@@ -689,7 +714,9 @@ export function MushafReader({
         .mr-sheet-btns { display: flex; flex-wrap: wrap; gap: 6px; }
         .mr-sheet-btns button { flex: 1 1 28%; }
         .mr-taf { margin: 0 0 10px; padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(232,194,90,.35); background: rgba(232,194,90,.06); }
-        .mr-taf-t { text-align: center; color: #f1d77a; font-family: var(--font-kufi), sans-serif; font-size: 13px; margin: 0 0 6px; }
+        .mr-taf-t { display: flex; justify-content: center; gap: 8px; text-align: center; color: #f1d77a; font-family: var(--font-kufi), sans-serif; font-size: 13px; margin: 0 0 6px; }
+        .mr-taf-t button { padding: 4px 14px; border-radius: 999px; border: 1px solid rgba(232,194,90,.4); background: transparent; color: #f1d77a; font-family: inherit; font-size: 13px; }
+        .mr-taf-t button.mr-on { background: #e8c25a; color: #1a1409; }
         .mr-taf-b { max-height: 34vh; overflow-y: auto; white-space: pre-line; direction: rtl; text-align: justify; font-family: var(--font-ruqaa), serif; font-size: 17px; line-height: 2; color: #fff1c4; }
         .mr-sheet-btns button {
           flex: 1; padding: 11px 6px; border-radius: 12px; border: 1px solid rgba(232,194,90,.4);

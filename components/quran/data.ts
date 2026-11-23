@@ -119,6 +119,21 @@ export function loadTafsir(surah: number): Promise<string[]> {
   return p;
 }
 
+/** تفسير السعدي (تيسير الكريم الرحمن): مجموعات آيات مدموجة [من، إلى، نص] — tools في spa5k/tafsir_api (MIT) عن qul.tarteel.ai */
+const sdCache = new Map<number, Promise<[number, number, string][]>>();
+export function loadSaadi(surah: number): Promise<[number, number, string][]> {
+  let p = sdCache.get(surah);
+  if (!p) {
+    p = fetch(`/saadi/${surah}.json`).then((r) => {
+      if (!r.ok) throw new Error('saadi');
+      return r.json();
+    });
+    p.catch(() => sdCache.delete(surah));
+    sdCache.set(surah, p);
+  }
+  return p;
+}
+
 export type QV = { a: number; f: number; t: number; v: string };
 let qvCache: Promise<QV[]> | null = null;
 export function loadQiraat(): Promise<QV[]> {
