@@ -3,12 +3,24 @@
 import { useEffect, useState } from 'react';
 import { toAr } from '@/components/quran/data';
 import { QuranDoodle } from '@/components/Doodles';
+import { supabase } from '@/lib/supabase';
 
 /**
  * ختمة مع الأصحاب: تقسيم المصحف ٣٠ جزءًا على المشاركين، ومشاركة التوزيع نصًّا، ومتابعة من أتمّ جزأه.
- * تعمل على جهازك فقط بلا خادم: كل مشارك يتابع جزأه عنده، وصاحب الختمة يعلّم ما أُتمّ حين يخبره أصحابه.
+ * وضعان: «مباشرة» تتزامن بين هواتف المشاركين برمز الختمة (عبر Supabase ودوال supabase/group_khatma.sql)،
+ * و«محلية» على جهازك فقط. إن لم يكن التزامن مفعّلًا على الخادم نرجع للمحلية تلقائيًّا ونُخبر المستخدم.
  */
-type K = { id: string; title: string; names: string[]; done: number[]; me: number; at: number };
+type K = { id: string; title: string; names: string[]; done: number[]; me: number; at: number; code?: string };
+type Remote = { title: string; names: string[]; done: number[] };
+async function rpc(fn: string, args: Record<string, unknown>): Promise<Remote | string | null> {
+  try {
+    const { data, error } = await supabase.rpc(fn, args);
+    if (error) return null;
+    return data as Remote | string | null;
+  } catch {
+    return null;
+  }
+}
 const KEY = 'gk.v1';
 
 function assign(n: number): number[][] {
@@ -23,6 +35,8 @@ export function FriendsKhatma() {
   const [title, setTitle] = useState('');
   const [names, setNames] = useState('');
   const [msg, setMsg] = useState('');
+  const [live, setLive] = useState(true);
+  const [join, setJoin] = useState('');
 
   useEffect(() => {
     try {
@@ -32,6 +46,34 @@ export function FriendsKhatma() {
       setList([]);
     }
   }, []);
+  // تزامن الختمة المباشرة: جلب كل ٨ ثوانٍ وعند العودة للتطبيق
+  const curCode = list?.find((x) => x.id === cur)?.code;
+  useEffect(() => {
+    if (!curCode) return;
+    let stop = false;
+    async function pull() {
+      const r = await rpc('gk_get', { p_code: curCode });
+      if (stop || !r || typeof r === 'string') return;
+      setList((l) => {
+        if (!l) return l;
+        const n = l.map((x) => (x.code === curCode ? { ...x, done: r.done } : x));
+        try {
+          localStorage.setItem(KEY, JSON.stringify(n));
+        } catch {}
+        return n;
+      });
+    }
+    pull();
+    const t = setInterval(pull, 8000);
+    const vis = () => document.visibilityState === 'visible' && pull();
+    document.addEventListener('visibilitychange', vis);
+    return () => {
+      stop = true;
+      clearInterval(t);
+      document.removeEventListener('visibilitychange', vis);
+    };
+  }, [curCode]);
+
   function save(n: K[]) {
     setList(n);
     try {
@@ -42,16 +84,53 @@ export function FriendsKhatma() {
 
   const k = list.find((x) => x.id === cur) || null;
 
-  function create() {
-    const ns = Array.from(new Set(names.split('\n').map((x) => x.trim()).filter(Boolean))).slice(0, 30);
+  function flash(t: string) {
+    setMsg(t);
+    setTimeout(() => setMsg(''), 2600);
+  }
+  async function create() {
+    const ns = Array.from(new Set(names.split('\n').map((x) => x.trim().slice(0, 40)).filter(Boolean))).slice(0, 30);
     if (ns.length < 1) return;
     const nk: K = { id: `k${Date.now()}`, title: title.trim() || 'ختمة جماعية', names: ns, done: [], me: 0, at: Date.now() };
+    if (live) {
+      const c = await rpc('gk_create', { p_title: nk.title, p_names: ns });
+      if (typeof c === 'string' && c) nk.code = c;
+      else flash('تعذّر إنشاء ختمة مباشرة (التزامن غير مفعّل بعد)، أُنشئت ختمة محلية.');
+    }
     save([nk, ...list!]);
     setCur(nk.id);
     setTitle('');
     setNames('');
   }
   const upd = (nk: K) => save(list.map((x) => (x.id === nk.id ? nk : x)));
+  async function toggleJuz(k: K, j: number) {
+    const on = k.done.includes(j);
+    const local = { ...k, done: on ? k.done.filter((x) => x !== j) : [...k.done, j] };
+    upd(local);
+    if (!k.code) return;
+    const r = await rpc('gk_set', { p_code: k.code, p_juz: j, p_done: !on });
+    if (r && typeof r !== 'string') upd({ ...local, done: r.done });
+    else flash('لم يصل التعديل للمجموعة (لا اتصال). سيُحدَّث عند العودة.');
+  }
+  async function joinKhatma() {
+    const c = join.trim().toLowerCase();
+    if (c.length < 6) return;
+    const existing = list!.find((x) => x.code === c);
+    if (existing) {
+      setCur(existing.id);
+      setJoin('');
+      return;
+    }
+    const r = await rpc('gk_get', { p_code: c });
+    if (!r || typeof r === 'string') {
+      flash('لم نجد ختمة بهذا الرمز، أو لا يوجد اتصال.');
+      return;
+    }
+    const nk: K = { id: `k${Date.now()}`, title: r.title, names: r.names, done: r.done, me: 0, at: Date.now(), code: c };
+    save([nk, ...list!]);
+    setCur(nk.id);
+    setJoin('');
+  }
 
   if (k) {
     const parts = assign(k.names.length);
@@ -59,6 +138,7 @@ export function FriendsKhatma() {
     const pct = Math.round((k.done.length / 30) * 100);
     const text = () =>
       `${k.title}\nتوزيع أجزاء المصحف:\n` +
+      (k.code ? `رمز الختمة المباشرة: ${k.code} (ادخل من: العلوم ← ختمة مع الأصحاب ← انضمام برمز)\n` : '') +
       k.names.map((n, i) => `• ${n}: ${parts[i].map((j) => `الجزء ${toAr(j)}`).join('، ')}`).join('\n') +
       '\nتقبّل الله منا ومنكم.';
     async function share() {
@@ -84,6 +164,7 @@ export function FriendsKhatma() {
         <button type="button" className="gk-back" onClick={() => setCur(null)}>← الختمات</button>
         <QuranDoodle />
         <h3 className="gk-h">{k.title}</h3>
+        {k.code && <p className="gk-code">🔴 ختمة مباشرة — الرمز: <b dir="ltr">{k.code}</b></p>}
         <div className="gk-bar"><i style={{ width: `${pct}%` }} /></div>
         <p className="gk-p">{k.done.length === 30 ? 'تمّت الختمة، تقبّل الله منكم 🤍' : `أُتمّ ${toAr(k.done.length)} من ٣٠ جزءًا`}</p>
         <label className="gk-me">
@@ -103,7 +184,7 @@ export function FriendsKhatma() {
                 key={j}
                 type="button"
                 className={`gk-j${on ? ' on' : ''}${mine ? ' me' : ''}`}
-                onClick={() => upd({ ...k, done: on ? k.done.filter((x) => x !== j) : [...k.done, j] })}
+                onClick={() => toggleJuz(k, j)}
                 aria-pressed={on}
               >
                 <b>{toAr(j)}</b>
@@ -113,7 +194,8 @@ export function FriendsKhatma() {
             );
           })}
         </div>
-        <p className="gk-n">اضغط الجزء لتعليمه إذا أُتمّ. أجزاؤك محدّدة بإطار ذهبي. الأخضر = تم.</p>
+        <p className="gk-n">اضغط الجزء لتعليمه إذا أُتمّ. أجزاؤك محدّدة بإطار ذهبي. الأخضر = تم.{k.code ? ' التقدّم يتزامن مع أصحابك تلقائيًّا.' : ''}</p>
+        {msg && <p className="gk-n">{msg}</p>}
         <div className="gk-a">
           <button type="button" onClick={share}>{msg || 'مشاركة التوزيع مع الأصحاب'}</button>
           <button
@@ -140,8 +222,17 @@ export function FriendsKhatma() {
       <p className="gk-p">وزّع المصحف على أصحابك أو أهلك: اكتب أسماءهم سطرًا سطرًا، فتُوزَّع الأجزاء الثلاثون عليهم بالتساوي، ثم شارك التوزيع في مجموعتكم.</p>
       <input className="gk-i" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="اسم الختمة (مثال: ختمة العائلة)" maxLength={50} />
       <textarea className="gk-i" value={names} onChange={(e) => setNames(e.target.value)} placeholder={'الأسماء، اسم في كل سطر (حتى ٣٠)\nأحمد\nمحمد\nفاطمة'} rows={6} />
+      <label className="gk-l">
+        <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} /> ختمة مباشرة (تتزامن بين هواتف المشاركين برمز)
+      </label>
       <div className="gk-a">
         <button type="button" onClick={create}>تقسيم الأجزاء</button>
+      </div>
+      {msg && <p className="gk-n">{msg}</p>}
+      <h3 className="gk-h">انضمام برمز</h3>
+      <div className="gk-j2">
+        <input className="gk-i" dir="ltr" value={join} onChange={(e) => setJoin(e.target.value)} placeholder="الرمز (٨ خانات)" maxLength={12} />
+        <button type="button" onClick={joinKhatma}>انضمام</button>
       </div>
       {list.length > 0 && (
         <>
@@ -154,7 +245,7 @@ export function FriendsKhatma() {
           ))}
         </>
       )}
-      <p className="gk-n">بياناتك على جهازك فقط، ولا تتزامن تلقائيًّا بين الهواتف: شارك التوزيع نصًّا، وعلّم أنت ما يخبرك به أصحابك أنهم أتمّوه.</p>
+      <p className="gk-n">الختمة المباشرة تتزامن بين المشاركين برمزها، ولا يدخلها إلا من عنده الرمز؛ والمحلية على جهازك فقط (شارك التوزيع نصًّا وعلّم ما يخبرك به أصحابك).</p>
       <Css />
     </div>
   );
@@ -172,6 +263,12 @@ function Css() {
       .gk-h { color: #f1d77a; font-size: 16px; margin: 14px 0 6px; }
       .gk-r { display: flex; justify-content: space-between; width: 100%; padding: 12px 14px; margin-bottom: 8px; border-radius: 14px; border: 1px solid rgba(232,194,90,.3); background: rgba(18,15,8,.8); color: #fff1c4; font-family: inherit; text-align: right; }
       .gk-r small { color: #7fe0c0; font-size: 12px; }
+      .gk-code { font-size: 13px; color: #7fe0c0; margin: 2px 0 8px; }
+      .gk-code b { letter-spacing: 2px; color: #f1d77a; user-select: all; }
+      .gk-l { display: block; font-size: 13.5px; margin: 4px 0; }
+      .gk-j2 { display: flex; gap: 8px; align-items: flex-start; }
+      .gk-j2 .gk-i { margin-bottom: 0; flex: 1; }
+      .gk-j2 button { padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(232,194,90,.45); background: rgba(232,194,90,.15); color: #f1d77a; font-family: inherit; }
       .gk-back { background: none; border: 0; color: #f1d77a; font-family: inherit; font-size: 14px; padding: 4px 0; }
       .gk-bar { height: 10px; border-radius: 10px; background: rgba(232,194,90,.15); overflow: hidden; }
       .gk-bar i { display: block; height: 100%; background: linear-gradient(90deg, #e8c25a, #7fe0c0); }
