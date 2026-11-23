@@ -91,7 +91,7 @@ export function KidsGames() {
           {game === 'dhikr' && <DhikrGame pool={dhikr} onWin={addStar} />}
         </>
       )}
-      <p className="kg-n">النصوص من مصحف المدينة (مجمع الملك فهد) ومن أذكار التطبيق. النجوم محفوظة على جهازك فقط.</p>
+      <p className="kg-n">النجوم محفوظة على جهازك فقط.</p>
       <style>{css}</style>
     </div>
   );

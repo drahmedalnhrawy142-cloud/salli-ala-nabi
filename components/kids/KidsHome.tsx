@@ -125,7 +125,6 @@ export function KidsTasbih() {
         <b>{toAr(c)} / {toAr(p.n)}</b>
       </button>
       <div className="kt-m">{msg || 'اضغط الدائرة مع كل تسبيحة 🤍'}</div>
-      <p className="kt-n">التسبيح ٣٣ والتحميد ٣٣ والتكبير ٣٤ بعد الصلاة كما ثبت في صحيح مسلم.</p>
       <style>{`
         .kt { font-family: var(--font-kufi), sans-serif; color: #fff1c4; display: flex; flex-direction: column; align-items: center; gap: 14px; }
         .kt-s { padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(232,194,90,.4); background: rgba(18,15,8,.85); font-size: 14px; color: #f1d77a; }
