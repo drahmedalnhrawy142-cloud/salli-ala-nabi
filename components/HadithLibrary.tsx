@@ -127,7 +127,7 @@ export function HadithLibrary() {
   if (err) return <p style={{ textAlign: 'center', color: '#ffd9a0' }}>تعذّر تحميل المكتبة.</p>;
   if (!idx) return <p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p>;
 
-  const credit = <p className="hl-src">النصوص من موقع sunnah.com عبر مشروع hadith-json. أرقام الأحاديث بترقيم الموقع وقد تختلف عن ترقيم المطبوعات. اقرأ الحديث بسنده من مصدره عند الاستدلال.</p>;
+  const credit = <p className="hl-src">أرقام الأحاديث بترقيم الموقع وقد تختلف عن ترقيم المطبوعات. اقرأ الحديث بسنده من مصدره عند الاستدلال.</p>;
 
   if (!bk)
     return (

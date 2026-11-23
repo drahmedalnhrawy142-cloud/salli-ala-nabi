@@ -541,7 +541,6 @@ export function MushafReader({
                   <p key={i} style={{ margin: '0 0 8px' }}>{t}</p>
                 ))}
               </div>
-              <div className="mr-q-n">من «تفسير غريب القرآن» لابن قتيبة الدينوري (ت ٢٧٦هـ)، كما ورد مرتبًا على الآيات. المكتبة الشاملة عبر OpenITI (CC BY-NC-SA 4.0).</div>
             </div>
           )}
           {isH && tafOpen && (

@@ -62,7 +62,6 @@ export function SituationAdhkar() {
   return (
     <div>
       <SectionGrid secs={secs} />
-      <p className="sa-src">المصدر: «حصن المسلم» — نصوص الأدعية كما وردت فيه.</p>
       <style>{`
         .sa { display: flex; flex-direction: column; gap: 12px; }
         .sa-card { padding: 14px; border-radius: 18px; border: 1px solid rgba(232,194,90,.3); background: rgba(18,15,8,.82); }

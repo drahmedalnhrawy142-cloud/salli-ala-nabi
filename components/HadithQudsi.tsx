@@ -105,10 +105,6 @@ export function HadithQudsi() {
     <div className="hq">
       <p className="hq-note">{toAr(items.length)} حديثًا قدسيًا صحيحًا. اضغط على أي حديث ليُفتح كاملًا.</p>
       <SectionGrid secs={secs} />
-      <p className="hq-credit">
-        النصوص: «الأربعون القدسية» (جمع عز الدين إبراهيم ودينيس جونسون ديفيز) عن sunnah.com عبر مشروع hadith-json. اقتُصر على ما خُرِّج في
-        الصحيحين أو نُصّ في تخريجه على صحة إسناده أو حسنه (والدرجة ظاهرة تحت كل حديث).
-      </p>
       <style>{`
         .hq-msg { text-align: center; color: #f1d77a; font-family: var(--font-ruqaa), serif; font-size: 18px; padding: 24px 0; }
         .hq-note { margin: 0 0 12px; text-align: center; font-family: var(--font-ruqaa), serif; font-size: 14.5px; color: rgba(255,241,196,.6); }

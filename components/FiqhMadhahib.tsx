@@ -140,7 +140,7 @@ export function FiqhBook({ dir, title, credit, onBack, fiqh = true, backLabel = 
   if (err) return <p style={{ textAlign: 'center', color: '#ffd9a0' }}>تعذّر تحميل الكتاب.</p>;
   if (!idx) return <p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p>;
 
-  const creditEl = <p className="fq-src">{credit}</p>;
+  const creditEl = null;
   const key = !fiqh ? null : (
     <div className="fq-key">
       <span style={{ color: COL.h }}>● أبو حنيفة</span>
