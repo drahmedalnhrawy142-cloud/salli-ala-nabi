@@ -13,6 +13,8 @@ export type Sec = {
   /** يفضل شغّال (مخفي) حتى لو القسم مقفول — للأقسام اللي ليها مهام خلفية */
   keepMounted?: boolean;
   hidden?: boolean;
+  /** عنوان المجموعة التي يظهر تحتها القسم (اختياري). الأقسام بلا مجموعة تظهر أولًا بلا عنوان. */
+  group?: string;
 };
 
 /**
@@ -23,8 +25,11 @@ export function SectionGrid({
   secs,
   onOpenChange,
   command,
+  groupOrder,
 }: {
   secs: Sec[];
+  /** ترتيب عناوين المجموعات؛ ما لم يُذكر يأتي بعد المذكور بترتيب ظهوره */
+  groupOrder?: string[];
   onOpenChange?: (id: string | null) => void;
   /** فتح قسم برمجيًا (مثلًا من الفهرس إلى المصحف). غيّر n لتنفيذ الأمر. */
   command?: { id: string; n: number } | null;
@@ -82,19 +87,39 @@ export function SectionGrid({
 
   const visible = secs.filter((s) => !s.hidden);
   const cur = visible.find((s) => s.id === open) || null;
+  const groups: { t: string; items: Sec[] }[] = [];
+  for (const s of visible) {
+    const t = s.group || '';
+    let g = groups.find((x) => x.t === t);
+    if (!g) groups.push((g = { t, items: [] }));
+    g.items.push(s);
+  }
+  const rank = (t: string) => {
+    if (!t) return -1;
+    const i = (groupOrder || []).indexOf(t);
+    return i < 0 ? 999 : i;
+  };
+  groups.sort((a, b) => rank(a.t) - rank(b.t));
 
   return (
     <div className="sg">
       {!cur && (
-        <nav className="sg-grid" aria-label="الأقسام">
-          {visible.map((s) => (
-            <button key={s.id} type="button" className="sg-tile" onClick={() => openSec(s.id)}>
-              <span className="sg-ico" aria-hidden="true">
-                {s.icon}
-              </span>
-              <span className="sg-lbl">{s.label}</span>
-              {s.hint && <span className="sg-hint">{s.hint}</span>}
-            </button>
+        <nav aria-label="الأقسام">
+          {groups.map((g) => (
+            <section key={g.t} className="sg-sec">
+              {g.t && <h2 className="sg-gh"><span>{g.t}</span></h2>}
+              <div className="sg-grid">
+                {g.items.map((s) => (
+                  <button key={s.id} type="button" className="sg-tile" onClick={() => openSec(s.id)}>
+                    <span className="sg-ico" aria-hidden="true">
+                      {s.icon}
+                    </span>
+                    <span className="sg-lbl">{s.label}</span>
+                    {s.hint && <span className="sg-hint">{s.hint}</span>}
+                  </button>
+                ))}
+              </div>
+            </section>
           ))}
         </nav>
       )}
@@ -128,6 +153,12 @@ export function SectionGrid({
           gap: 12px;
           margin: 0 0 8px;
         }
+        .sg-sec { margin: 0 0 18px; }
+        .sg-gh {
+          display: flex; align-items: center; gap: 10px; margin: 6px 2px 10px;
+          font-family: var(--font-kufi), sans-serif; font-weight: 700; font-size: 15px; color: #e8c25a;
+        }
+        .sg-gh::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(232,194,90,.45), transparent); }
         .sg-tile {
           display: flex;
           flex-direction: column;
