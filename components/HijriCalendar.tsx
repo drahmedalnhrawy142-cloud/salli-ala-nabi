@@ -9,6 +9,7 @@ import { CITIES, computeTimes } from '@/components/PrayerTimes';
  * التواريخ والمواقيت تقريبية؛ العبرة برؤية الهلال في بلدك وبما تعلنه الجهة الرسمية.
  */
 const MONTHS = ['محرم', 'صفر', 'ربيع الأول', 'ربيع الآخر', 'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'];
+const SH = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
 const WD = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
 function hj(d: Date) {
@@ -114,7 +115,7 @@ export function HijriCalendar() {
       </div>
       <div className="hc-g">
         {WD.map((w) => (
-          <span key={w} className="hc-w">{w.slice(0, 3)}</span>
+          <span key={w} className="hc-w">{SH[WD.indexOf(w)]}</span>
         ))}
         {Array.from({ length: lead }, (_, i) => <span key={`e${i}`} />)}
         {days.map((d) => {
@@ -153,7 +154,7 @@ export function HijriCalendar() {
               const tm = computeTimes(d, lat, lng);
               return (
                 <div key={d.toISOString()} className={d.toDateString() === today.toDateString() ? 'td' : ''}>
-                  <span>{toAr(hj(d)!.d)} • {WD[d.getDay()].slice(0, 3)}</span>
+                  <span>{toAr(hj(d)!.d)} • {SH[d.getDay()]}</span>
                   <span>{ft(tm.fajr)}</span>
                   <span>{ft(tm.maghrib)}</span>
                 </div>
