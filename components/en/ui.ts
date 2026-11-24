@@ -1850,4 +1850,7 @@ export const UI_EN: Record<string, string> = {
  "ذاكرة السور": "Surah memory",
  "الحروف الهجائية": "Arabic letters",
  "معنى الكلمة": "Word meaning",
+ "سباق السيارة والقرآن": "Car race with Quran",
+ "تقود فيسمع القرآن": "Drive and listen to Quran",
+ "🚗 ابدأ السباق": "🚗 Start race",
 };
