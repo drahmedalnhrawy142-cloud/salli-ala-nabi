@@ -1855,4 +1855,5 @@ export const UI_EN: Record<string, string> = {
  "🚗 ابدأ السباق": "🚗 Start race",
  "اختبار التجويد": "Tajweed Quiz",
  "حدّد الحكم في موضع من المصحف": "Identify the rule in a Quran passage",
+ "🎯 اختبر حفظك: أكمل البيت": "🎯 Test your memorization: complete the verse",
 };
