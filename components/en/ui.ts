@@ -1844,4 +1844,10 @@ export const UI_EN: Record<string, string> = {
  "🧠 احفظ": "🧠 Memorize",
  "← الأبواب": "← Chapters",
  "✔ أتممت حفظ هذا الباب": "✔ I memorized this chapter",
+ "ألعاب جديدة": "New games",
+ "أي سورة؟ · ذاكرة · حروف · معاني": "Which surah? · Memory · Letters · Meanings",
+ "أي سورة؟": "Which surah?",
+ "ذاكرة السور": "Surah memory",
+ "الحروف الهجائية": "Arabic letters",
+ "معنى الكلمة": "Word meaning",
 };
