@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { RECITERS, ayahUrl, audioSrc, deleteSurah, downloadSurah, surahDownloaded } from './audio';
+import { RECITERS, ayahUrl, audioSrc, prefetchAyah, deleteSurah, downloadSurah, surahDownloaded } from './audio';
 import { toAr, type QData } from './data';
 
 const REPEATS = [1, 3, 5, 10, 0]; // 0 = بلا حد
@@ -68,6 +68,18 @@ export function AyahPlayer({
       const { src, local } = await audioSrc(ayahUrl(rec, a[0], hv));
       if (!live) return;
       el.src = src;
+      // نجلب الآيتين التاليتين مسبقًا حتى لا تكون هناك سكتة عند الانتقال
+      void (() => {
+        const hvNow = hv;
+        const nexts: string[] = [];
+        if (st.current.part < st.current.last) nexts.push(ayahUrl(rec, a[0], hvNow + 1));
+        for (let k = 1; nexts.length < 2 && idx + k < data.ayas.length && k < 3; k++) {
+          const nx = data.ayas[idx + k];
+          const r2 = (amap && amap[`${nx[0]}:${nx[1]}`]) || [nx[1], nx[1]];
+          nexts.push(ayahUrl(rec, nx[0], r2[0]));
+        }
+        nexts.slice(0, 2).forEach((u) => void prefetchAyah(u));
+      })();
       try {
         await el.play();
         setPlaying(true);
