@@ -9,6 +9,10 @@ import { align, emptyRes, unitsForAyah, type Res, type Unit } from './tasmeeMatc
  * التسميع الصوتي «كأنك أمام شيخ»: تقرأ من حفظك، فيكتب التطبيق الآية بعد أن تُتمّها،
  * وينتظر الآية التالية، ويعلّم الكلمة الخاطئة (حمراء) والكلمة التي فاتتك (برتقالية).
  */
+function loadWeak(): Record<string, number> {
+  try { return JSON.parse(localStorage.getItem('ts.weak') || '{}') || {}; } catch { return {}; }
+}
+
 export function TasmeeSheikh({ data }: { data: QData }) {
   const [simple, setSimple] = useState<string[] | null>(null);
   const [sura, setSura] = useState<number>(() => lsGet('ts_sura', 1));
@@ -21,6 +25,7 @@ export function TasmeeSheikh({ data }: { data: QData }) {
   const [hints, setHints] = useState(0);
   const [pick, setPick] = useState<number | null>(null);
   const kind = useMemo(() => speechKind(), []);
+  const [weak, setWeak] = useState<Record<string, number>>(loadWeak);
 
   const active = useRef(false);
   const sess = useRef<SpeechSession | null>(null);
@@ -90,9 +95,31 @@ export function TasmeeSheikh({ data }: { data: QData }) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function finish() {
+    if (active.current) saveWeak();
     active.current = false;
     sess.current?.stop();
     setRun('done');
+  }
+
+  /** يحفظ الآيات التي أخطأتَ فيها أو فاتتك كلمات منها، لتظهر لك «آيات تحتاج مراجعة» (تُمحى الآية من القائمة إذا قرأتها صحيحة) */
+  function saveWeak() {
+    const r = lastR.current ?? base.current;
+    const us = unitsRef.current;
+    if (!r) return;
+    const bad = new Map<number, number>();
+    const seen = new Set<number>();
+    for (let i = 0; i < Math.min(r.p, us.length); i++) {
+      seen.add(us[i].ai);
+      if (r.st[i] === 2 || r.st[i] === 3) bad.set(us[i].ai, (bad.get(us[i].ai) ?? 0) + 1);
+    }
+    const w = loadWeak();
+    seen.forEach((ai) => {
+      const k = `${data.ayas[ai][0]}:${data.ayas[ai][1]}`;
+      if (bad.has(ai)) w[k] = (w[k] ?? 0) + bad.get(ai)!;
+      else delete w[k];
+    });
+    try { localStorage.setItem('ts.weak', JSON.stringify(w)); } catch {}
+    setWeak(w);
   }
 
   async function begin() {
@@ -196,6 +223,22 @@ export function TasmeeSheikh({ data }: { data: QData }) {
           <button type="button" className="ts-go" onClick={begin} disabled={!simple || !units.length}>
             🎙️ ابدأ التسميع
           </button>
+          {Object.keys(weak).length > 0 && (
+            <div className="ts-weak">
+              <b>آيات تحتاج مراجعة</b>
+              {Object.entries(weak)
+                .sort((x, y) => y[1] - x[1])
+                .slice(0, 6)
+                .map(([k, c]) => {
+                  const [s, a] = k.split(':').map(Number);
+                  return (
+                    <button key={k} type="button" onClick={() => { setSura(s); setFrom(a); }}>
+                      {data.suras[s - 1].name} • {toAr(a)} <em>{toAr(c)} كلمة</em>
+                    </button>
+                  );
+                })}
+            </div>
+          )}
           <p className="ts-n">
             ملاحظة: التعرّف على الكلام يحتاج اتصالًا بالإنترنت غالبًا، وقد يخطئ أحيانًا في سماع بعض الكلمات، فاعتبره معينًا ولا تعتمد عليه وحده.
           </p>
@@ -298,6 +341,9 @@ export function TasmeeSheikh({ data }: { data: QData }) {
         .ts-set label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #f1d77a; }
         .ts-set select, .ts-set input { padding: 11px; border-radius: 12px; border: 1px solid rgba(232,194,90,.35); background: #1a1409; color: #fff1c4; font-family: inherit; font-size: 15px; }
         .ts-go { padding: 14px; border-radius: 16px; border: 1px solid #f1d77a; background: linear-gradient(180deg, rgba(232,194,90,.4), rgba(232,194,90,.15)); color: #fff1c4; font-family: inherit; font-size: 17px; }
+        .ts-weak { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 14px; border: 1px solid rgba(255,138,138,.35); background: rgba(255,138,138,.06); font-size: 13px; color: #ffd9a0; }
+        .ts-weak button { display: flex; justify-content: space-between; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(232,194,90,.25); background: transparent; color: #fff1c4; font-family: inherit; }
+        .ts-weak em { font-style: normal; color: #ff9f9f; }
         .ts-go:disabled { opacity: .4; }
         .ts-n, .ts-msg { margin: 0; text-align: center; font-size: 12.5px; line-height: 1.8; color: rgba(255,241,196,.55); font-family: var(--font-ruqaa), serif; }
         .ts-msg { color: #ffd9a0; font-size: 14px; margin-top: 10px; }
