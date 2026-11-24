@@ -1858,4 +1858,8 @@ export const UI_EN: Record<string, string> = {
  "🎯 اختبر حفظك: أكمل البيت": "🎯 Test your memorization: complete the verse",
  "صوت فتح التطبيق": "App-open voice",
  "صلِّ على النبي ﷺ عند الفتح": "Send blessings on the Prophet ﷺ on open",
+ "الطير المسبّح ونطّ وسبّح": "Tasbih Bird & Jump",
+ "سبّح ليطير ويقفز": "Say tasbih to fly and jump",
+ "الطير المسبّح": "Tasbih Bird",
+ "نطّ وسبّح": "Jump & Tasbih",
 };

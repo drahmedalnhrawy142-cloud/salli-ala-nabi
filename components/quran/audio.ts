@@ -70,12 +70,41 @@ async function fetchBytes(url: string): Promise<ArrayBuffer> {
   return r.arrayBuffer();
 }
 
-/** مصدر التشغيل: الملف المحمَّل إن وُجد (بلا نت) وإلا الرابط المباشر */
+/** آيات تُجلب مسبقًا إلى الذاكرة أثناء تشغيل الآية الحالية، لتبدأ التالية فورًا بلا سكتة بين الآيات */
+const pre = new Map<string, string>();
+export async function prefetchAyah(url: string): Promise<void> {
+  if (pre.has(url)) return;
+  pre.set(url, '');
+  try {
+    const c = await cacheOpen();
+    if (c && (await c.match(url))) {
+      pre.delete(url); // محمَّلة على الجهاز وتبدأ فورًا
+      return;
+    }
+    const buf = await fetchBytes(url);
+    pre.set(url, URL.createObjectURL(new Blob([buf], { type: 'audio/mpeg' })));
+    while (pre.size > 4) {
+      const k = pre.keys().next().value as string;
+      const v = pre.get(k);
+      if (v) URL.revokeObjectURL(v);
+      pre.delete(k);
+    }
+  } catch {
+    pre.delete(url);
+  }
+}
+
+/** مصدر التشغيل: الملف المحمَّل إن وُجد (بلا نت)، ثم المجلوب مسبقًا، وإلا الرابط المباشر */
 export async function audioSrc(url: string): Promise<{ src: string; local: boolean }> {
   const c = await cacheOpen();
   if (c) {
     const m = await c.match(url);
     if (m) return { src: URL.createObjectURL(await m.blob()), local: true };
+  }
+  const p = pre.get(url);
+  if (p) {
+    pre.delete(url);
+    return { src: p, local: false };
   }
   return { src: url, local: false };
 }
