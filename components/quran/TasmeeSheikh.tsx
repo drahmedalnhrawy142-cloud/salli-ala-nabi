@@ -27,6 +27,7 @@ export function TasmeeSheikh({ data }: { data: QData }) {
   const base = useRef<Res | null>(null);
   const unitsRef = useRef<Unit[]>([]);
   const skipBas = useRef(false);
+  const lastR = useRef<Res | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -57,12 +58,14 @@ export function TasmeeSheikh({ data }: { data: QData }) {
 
   const listen = useCallback(async () => {
     if (!active.current) return;
+    lastR.current = base.current;
     try {
       sess.current = await startSpeech({
         onText: (text, final) => {
           const b = base.current;
           if (!b || !active.current) return;
-          const r = align(unitsRef.current, b, text.split(/\s+/).filter(Boolean), skipBas.current);
+          const r = align(unitsRef.current, b, text.split(/\s+/).filter(Boolean), skipBas.current, final);
+          lastR.current = r;
           setRes(r);
           setLive(text.split(/\s+/).slice(-4).join(' '));
           if (final) base.current = r;
@@ -70,12 +73,14 @@ export function TasmeeSheikh({ data }: { data: QData }) {
         },
         onEnd: (err) => {
           if (!active.current) return;
+          // ما فُهم من هذه الجلسة يُثبَّت ولو لم يصل «نهائي»، فلا تضيع كلمات قلتَها قبل أن ينقطع الاستماع
+          if (lastR.current) base.current = lastR.current;
           if (err === 'not-allowed' || err === 'permission' || err === 'service-not-allowed') {
             setMsg('لم يُسمح باستخدام الميكروفون. فعّله من إعدادات التطبيق ثم أعد المحاولة.');
             finish();
             return;
           }
-          setTimeout(listen, 250);
+          setTimeout(listen, 60);
         },
       });
     } catch {

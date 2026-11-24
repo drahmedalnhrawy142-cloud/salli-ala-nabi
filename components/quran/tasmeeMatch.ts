@@ -30,13 +30,21 @@ function lev(a: string, b: string): number {
   return prev[n];
 }
 
+/** حروف يخلط بينها التعرّف الآلي كثيرًا (ض/ظ، ذ/ز، ث/س، ص/س، ط/ت، ق/ك، غ/خ، ح/ه): نوحّدها عند المقارنة فقط لئلا نظلم القارئ بخطأ الجهاز */
+const SOFT: Record<string, string> = { ض: 'ظ', ذ: 'ز', ث: 'س', ص: 'س', ط: 'ت', ق: 'ك', غ: 'خ', ح: 'ه' };
+const soft = (w: string) => w.replace(/[ضذثصطقغح]/g, (c) => SOFT[c]);
+
 /** هل الكلمة المسموعة هي الكلمة المطلوبة (بتسامح محسوب)؟ */
 export function same(heard: string, want: string): boolean {
   if (!heard || !want) return false;
   if (heard === want) return true;
+  const sh = soft(heard);
+  const sw = soft(want);
+  if (sh === sw) return true;
   const len = Math.max(heard.length, want.length);
   if (len <= 3) return false;
-  return lev(heard, want) <= Math.floor(len / 4);
+  const tol = Math.floor((len - 1) / 4);
+  return lev(heard, want) <= tol || lev(sh, sw) <= tol;
 }
 
 /** وحدة مطلوبة: كلمة عثمانية واحدة وهدفها الإملائي */
@@ -67,8 +75,11 @@ export function unitsForAyah(ai: number, uth: string, simple: string): Unit[] {
 
 const BASM = ['بسم', 'الله', 'الرحمن', 'الرحيم'];
 
-/** يطبّق ما سمعه التعرّف (كل كلمات الجلسة الحالية) على حالة البداية ويعيد الحالة الجديدة */
-export function align(units: Unit[], base: Res, spoken: string[], skipBasmala: boolean): Res {
+/**
+ * يطبّق ما سمعه التعرّف (كل كلمات الجلسة الحالية) على حالة البداية ويعيد الحالة الجديدة.
+ * final=false: نتيجة مؤقتة قد تتغيّر، فلا نحكم بالخطأ على كلمة لم تطابق (ننتظر) بل نتوقف عندها.
+ */
+export function align(units: Unit[], base: Res, spoken: string[], skipBasmala: boolean, final = true): Res {
   const n = units.length;
   const r: Res = { p: base.p, st: base.st.slice(), heard: base.heard.slice(), bas: base.bas };
   let H = spoken.map(norm).filter(Boolean);
@@ -86,8 +97,11 @@ export function align(units: Unit[], base: Res, spoken: string[], skipBasmala: b
     const h = H[j];
     let hit = -1;
     let used = 1;
+    let span = 1;
     for (let k = 0; k < 4 && r.p + k < n; k++) {
       const t = units[r.p + k].t;
+      // لا نقفز إلى كلمة قصيرة شائعة (من، في، ما…) فقد تكون صدفة: القفز مسموح إلى كلمة مميّزة فقط
+      if (k > 0 && t.length < 4) continue;
       if (same(h, t)) {
         hit = k;
         break;
@@ -97,16 +111,27 @@ export function align(units: Unit[], base: Res, spoken: string[], skipBasmala: b
         used = 2;
         break;
       }
+      // كلمة واحدة مسموعة تغطي كلمتين متتاليتين (التعرّف يدمجهما أحيانًا)
+      if (k === 0 && r.p + 1 < n && h.length >= 6 && (h === t + units[r.p + 1].t || soft(h) === soft(t + units[r.p + 1].t))) {
+        hit = 0;
+        span = 2;
+        break;
+      }
     }
     if (hit >= 0) {
       for (let q = 0; q < hit; q++) r.st[r.p + q] = 3;
-      r.st[r.p + hit] = 1;
-      r.p += hit + 1;
+      for (let q = 0; q < span; q++) r.st[r.p + hit + q] = 1;
+      r.p += hit + span;
       j += used - 1;
       continue;
     }
     // كلمة زائدة (ضجيج أو تردد): إن كانت التي بعدها هي المطلوبة نتجاهلها
-    if (j + 1 < H.length && (same(H[j + 1], units[r.p].t) || (r.p + 1 < n && same(H[j + 1], units[r.p + 1].t)))) continue;
+    // (إن كانت التي بعدها تطابق الكلمة التالية فهذه إبدال لا ضجيج: تُعدّ خطأً)
+    if (j + 1 < H.length && same(H[j + 1], units[r.p].t)) continue;
+    // كلمة قصيرة جدًّا لا تطابق: غالبًا ضجيج، لا نحاسب عليها
+    if (h.length <= 2) continue;
+    // نتيجة مؤقتة: ننتظر التثبيت بدل الحكم بالخطأ
+    if (!final) break;
     r.st[r.p] = 2;
     r.heard[r.p] = raw[j];
     r.p += 1;
