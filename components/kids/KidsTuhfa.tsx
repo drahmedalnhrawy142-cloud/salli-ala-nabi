@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toAr } from '@/components/quran/data';
-import { bump, claim, useKids } from './store';
+import { addStars, bump, claim, useKids } from './store';
 
 type Sec = { t: string; v: [string, string][] };
 
@@ -13,6 +13,9 @@ export function KidsTuhfa() {
   const [mode, setMode] = useState<'read' | 'learn'>('read');
   const [shown, setShown] = useState<Record<string, boolean>>({});
   const [done, setDone] = useState('');
+  const [quiz, setQuiz] = useState<{ a: string; ans: string; opts: string[] } | null>(null);
+  const [qmsg, setQmsg] = useState('');
+  const [qok, setQok] = useState(false);
   const kids = useKids();
 
   useEffect(() => {
@@ -21,10 +24,38 @@ export function KidsTuhfa() {
 
   if (!secs) return <p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p>;
 
+  const nextQ = () => {
+    const all = secs.flatMap((x) => x.v).filter(([, b]) => b.length > 3);
+    const [a, ans] = all[Math.floor(Math.random() * all.length)];
+    const others = all.filter(([, b]) => b !== ans).sort(() => Math.random() - 0.5).slice(0, 2).map(([, b]) => b);
+    setQuiz({ a, ans, opts: [ans, ...others].sort(() => Math.random() - 0.5) });
+    setQmsg('');
+    setQok(false);
+  };
+
+  if (quiz)
+    return (
+      <div className="tf">
+        <button type="button" className="tf-back" onClick={() => setQuiz(null)}>← الأبواب</button>
+        <p className="tf-n">أكمل البيت: اختر الشطر الثاني الصحيح</p>
+        <div className="tf-v"><span>{quiz.a}</span><span className="tf-hid">…</span></div>
+        {quiz.opts.map((o) => (
+          <button key={o} type="button" className="tf-sec" disabled={qok} onClick={() => {
+            if (o === quiz.ans) { setQok(true); setQmsg('أحسنت! 🌟'); addStars(1); bump('plays'); }
+            else setQmsg('حاول مرة أخرى 💛');
+          }}>{o}</button>
+        ))}
+        {qmsg && <p className="tf-done">{qmsg}</p>}
+        {qok && <button type="button" className="tf-ok" onClick={nextQ}>التالي ›</button>}
+        <Style />
+      </div>
+    );
+
   if (open === null)
     return (
       <div className="tf">
         <p className="tf-n">منظومة قصيرة للصغار في أحكام التجويد، للشيخ سليمان الجمزوري. اختر بابًا، اقرأه ثم جرّب حفظه.</p>
+        <button type="button" className="tf-ok" onClick={nextQ}>🎯 اختبر حفظك: أكمل البيت</button>
         {secs.map((s, i) => (
           <button key={i} type="button" className="tf-sec" onClick={() => { setOpen(i); setShown({}); setDone(''); }}>
             <span>{s.t}</span>
