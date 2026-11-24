@@ -28,6 +28,9 @@ import { OfflineManager } from '@/components/OfflineManager';
 import { HijriCalendar } from '@/components/HijriCalendar';
 import { TalabIlm } from '@/components/talab/TalabIlm';
 import { KidsQuiz } from '@/components/kids/KidsQuiz';
+import { KidsRace } from '@/components/kids/KidsRace';
+import { KidsTuhfa } from '@/components/kids/KidsTuhfa';
+import { KidsGames2 } from '@/components/kids/KidsGames2';
 import { KidsHome, KidsTasbih } from '@/components/kids/KidsHome';
 import { UsageStats, pingUsage } from '@/components/UsageStats';
 import { WordDictionary } from '@/components/lugha/WordDictionary';
@@ -2114,6 +2117,9 @@ export function PrayerExperience() {
               groupOrder={['العب وتعلّم', 'رحلتك']}
               secs={[
                 { id: 'games', group: 'العب وتعلّم', label: 'ألعاب الحفظ', icon: '🧩', hint: 'رتّب وأكمل الآيات والأذكار', render: () => <KidsGames /> },
+                { id: 'krace', group: 'العب وتعلّم', label: 'سباق السيارة والقرآن', icon: '🚗', hint: 'تقود فيسمع القرآن', render: () => <KidsRace /> },
+                { id: 'kgames2', group: 'العب وتعلّم', label: 'ألعاب جديدة', icon: '🎲', hint: 'أي سورة؟ · ذاكرة · حروف · معاني', render: () => <KidsGames2 /> },
+                { id: 'ktuhfa', group: 'العب وتعلّم', label: 'تحفة الأطفال', icon: '📜', hint: 'منظومة التجويد للصغار', render: () => <KidsTuhfa /> },
                 { id: 'kquiz', group: 'العب وتعلّم', label: 'مسابقة المصحف', icon: '❓', hint: 'أسئلة عن السور والآيات', render: () => <KidsQuiz /> },
                 { id: 'kasma', group: 'العب وتعلّم', label: 'أسماء الله الحسنى', icon: '🌙', hint: 'العب واحفظ', render: () => <AsmaAllah /> },
                 { id: 'ktasbih', group: 'رحلتك', label: 'سبحة الصغار', icon: '📿', hint: 'سبّح واجمع النجوم', render: () => <KidsTasbih /> },

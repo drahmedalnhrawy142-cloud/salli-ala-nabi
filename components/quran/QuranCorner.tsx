@@ -126,7 +126,6 @@ export function QuranCorner() {
           },
         ]}
       />
-      <p className="qc-credit">نص المصحف وخطه: مجمع الملك فهد لطباعة المصحف الشريف (حفص، شعبة، ورش، قالون، الدوري، السوسي، البزي، قنبل — نص كل رواية وخطها من المجمع، عبر مرآة ibnhazm/KFGQPC). مواضع ألوان التجويد: مشروع cpfair/quran-tajweed (CC BY 4.0) على نص تنزيل. التفسير الميسّر: مجمع الملك فهد عبر مشروع spa5k/tafsir_api (MIT). المكي والمدني: Tanzil عبر risan/quran-json (CC BY-SA 4.0). أحاديث أسباب النزول: صحيحا البخاري ومسلم من موقع sunnah.com عبر مشروع hadith-json.</p>
     </div>
   );
 }

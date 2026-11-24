@@ -348,7 +348,7 @@ export function MushafReader({
             );
           });
         })()}
-        <span className="qa-n">{toAr(a[1])}</span>{' '}
+        <span className="qa-n" data-l={String(a[1]).length}>{toAr(a[1])}</span>{' '}
       </span>
     );
   }
@@ -541,7 +541,6 @@ export function MushafReader({
                   <p key={i} style={{ margin: '0 0 8px' }}>{t}</p>
                 ))}
               </div>
-              <div className="mr-q-n">من «تفسير غريب القرآن» لابن قتيبة الدينوري (ت ٢٧٦هـ)، كما ورد مرتبًا على الآيات. المكتبة الشاملة عبر OpenITI (CC BY-NC-SA 4.0).</div>
             </div>
           )}
           {isH && tafOpen && (
@@ -696,10 +695,11 @@ export function MushafReader({
         .qa-focus { background: rgba(120,200,160,.25); }
         .qa-mark .qa-n { background: #e8c25a; color: #1c1405; }
         .qa-n {
-          display: inline-grid; place-items: center; width: 1.35em; height: 1.35em; margin: 0 .15em;
+          display: inline-grid; place-items: center; box-sizing: border-box; min-width: 1.6em; height: 1.6em; padding: 0 .2em; margin: 0 .15em; white-space: nowrap;
           border: 1.5px solid #c9a24a; border-radius: 50%; font-family: var(--font-kufi), sans-serif;
-          font-size: .5em; line-height: 1; vertical-align: .35em; color: inherit;
+          font-size: .5em; line-height: 1; vertical-align: .3em; color: inherit;
         }
+        .qa-n[data-l="3"] { font-size: .42em; min-width: 1.9em; }
         .mr-sheet {
           position: fixed; left: 12px; right: 12px; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); z-index: 30;
           padding: 12px; border-radius: 20px; background: rgba(18,15,8,.97);

@@ -1,7 +1,7 @@
 /* خدمة عمل بسيطة للنسخة المثبّتة على الشاشة الرئيسية (PWA): تسرّع الفتح وتتيح ما فُتح سابقًا بلا نت. */
 const V = 'sn-v1';
 const STATIC = /^\/(_next\/static|fonts|images|icons)\//;
-const DATA = /^\/(quran|library|fiqh|hadith|sira|tafsir|ulum|adhkar|saadi|lugha|gharib|arkan)\/|^\/qudsi\.json$/;
+const DATA = /^\/(quran|library|fiqh|hadith|sira|tafsir|ulum|adhkar|saadi|lugha|gharib|arkan)\/|^\/(qudsi|tuhfa)\.json$/;
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(V).then((c) => c.add('/').catch(() => {})).then(() => self.skipWaiting()));

@@ -2,7 +2,16 @@
 
 import { SectionGrid } from '@/components/SectionGrid';
 import { ayaIndex, toAr, type QData } from './data';
-import { TAJWEED } from './tajweedData';
+import { useState } from 'react';
+import { TAJWEED3 } from './tajweed3Data';
+
+type Mode = 'f' | 'e' | 'g';
+const MODES: { id: Mode; label: string }[] = [
+  { id: 'f', label: 'فصحى' },
+  { id: 'e', label: 'بالمصري' },
+  { id: 'g', label: 'بالخليجي' },
+];
+const KEY = 'tj.mode';
 
 /** أحكام التجويد مع أمثلة حقيقية من المصحف (بخط المصحف). */
 export function TajweedRules({
@@ -12,20 +21,39 @@ export function TajweedRules({
   data: QData;
   onOpenAt: (page: number, ayaIdx: number | null) => void;
 }) {
+  const [mode, setModeS] = useState<Mode>(() => {
+    try {
+      const v = localStorage.getItem(KEY);
+      return v === 'e' || v === 'g' ? v : 'f';
+    } catch {
+      return 'f';
+    }
+  });
+  const setMode = (m: Mode) => {
+    setModeS(m);
+    try { localStorage.setItem(KEY, m); } catch {}
+  };
   return (
     <div className="tj">
+      <div className="tj-modes">
+        {MODES.map((m) => (
+          <button key={m.id} type="button" className={mode === m.id ? 'on' : ''} onClick={() => setMode(m.id)}>
+            {m.label}
+          </button>
+        ))}
+      </div>
       <SectionGrid
-        secs={TAJWEED.map((g) => ({
+        secs={TAJWEED3.map((g) => ({
           id: g.id,
           label: g.title,
           icon: g.icon,
           render: () => (
             <div className="tj-list">
-              {g.intro && <p className="tj-intro">{g.intro}</p>}
+              <p className="tj-intro">{g.intro[mode]}</p>
               {g.items.map((it) => (
                 <article key={it.name} className="tj-card">
                   <h4 className="tj-name">{it.name}</h4>
-                  <p className="tj-rule">{it.rule}</p>
+                  <p className="tj-rule">{it[mode]}</p>
                   {it.ex.map((e, k) => {
                     const i = ayaIndex(data, e.s, e.a);
                     if (i < 0) return null;
@@ -48,6 +76,9 @@ export function TajweedRules({
         }))}
       />
       <style>{`
+        .tj-modes { display: flex; gap: 8px; justify-content: center; margin: 0 0 12px; }
+        .tj-modes button { padding: 8px 18px; border-radius: 999px; border: 1px solid rgba(232,194,90,.3); background: transparent; color: #fff1c4; font-family: var(--font-kufi), sans-serif; font-size: 14px; }
+        .tj-modes .on { background: rgba(232,194,90,.22); border-color: #e8c25a; color: #f1d77a; }
         .tj-list { display: flex; flex-direction: column; gap: 12px; }
         .tj-intro { margin: 0; font-family: var(--font-ruqaa), serif; font-size: 17px; line-height: 1.9; color: rgba(255,241,196,.8); }
         .tj-card { padding: 14px; border-radius: 20px; border: 1px solid rgba(232,194,90,.3); background: rgba(18,15,8,.82); }
