@@ -1856,4 +1856,6 @@ export const UI_EN: Record<string, string> = {
  "اختبار التجويد": "Tajweed Quiz",
  "حدّد الحكم في موضع من المصحف": "Identify the rule in a Quran passage",
  "🎯 اختبر حفظك: أكمل البيت": "🎯 Test your memorization: complete the verse",
+ "صوت فتح التطبيق": "App-open voice",
+ "صلِّ على النبي ﷺ عند الفتح": "Send blessings on the Prophet ﷺ on open",
 };
