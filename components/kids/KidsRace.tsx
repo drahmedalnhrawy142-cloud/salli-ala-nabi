@@ -10,10 +10,32 @@ import { addStars, bump } from './store';
  * اضغط يمين/يسار الشاشة لتغيير المسار، واجمع النجوم وتجنّب العوائق.
  */
 const W = 300, H = 460, LANES = 3, LW = W / LANES;
-const KID_RECITERS = ['husary', 'minshawy', 'maher', 'fares', 'husary-muallim'];
-const SURAHS = [112, 113, 114, 108, 110, 103, 109, 105, 106, 107, 111, 97, 99, 93, 94, 87, 78].filter((x, i, a) => a.indexOf(x) === i);
+const KID_RECITERS = ['dussary', 'husary', 'minshawy', 'maher', 'fares', 'husary-muallim'];
+// آخر خمسة أجزاء من القرآن: من سورة الأحقاف (أول الجزء ٢٦) إلى سورة الناس
+const SURAHS = Array.from({ length: 69 }, (_, i) => 46 + i);
 
 type Obj = { lane: number; y: number; kind: 'rock' | 'cone' | 'star' };
+
+/** سيارة مرسومة من فوق (تتجه للأعلى): جسم أحمر ونافذتان وأربع عجلات */
+function car(ctx: CanvasRenderingContext2D, x: number, y: number, crashed: boolean) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = '#111';
+  for (const [wx, wy] of [[-20, -26], [20, -26], [-20, 24], [20, 24]]) {
+    ctx.beginPath(); ctx.roundRect(wx - 5, wy - 9, 10, 18, 3); ctx.fill();
+  }
+  ctx.fillStyle = crashed ? '#8a2b2b' : '#e23a3a';
+  ctx.beginPath(); ctx.roundRect(-17, -42, 34, 84, 12); ctx.fill();
+  ctx.fillStyle = '#9fd6ff';
+  ctx.beginPath(); ctx.roundRect(-12, -20, 24, 14, 4); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(-12, 14, 24, 10, 4); ctx.fill();
+  ctx.fillStyle = '#fff3b0';
+  ctx.fillRect(-14, -41, 8, 4); ctx.fillRect(6, -41, 8, 4);
+  ctx.fillStyle = '#c92a2a';
+  ctx.fillRect(-14, 38, 8, 3); ctx.fillRect(6, 38, 8, 3);
+  if (crashed) { ctx.font = '40px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('💥', 0, -6); }
+  ctx.restore();
+}
 
 export function KidsRace() {
   const { data } = useQuran();
@@ -105,7 +127,7 @@ export function KidsRace() {
       for (const o of s.objs) o.y += s.speed;
       const cy = H - 90;
       for (const o of s.objs) {
-        if (o.y > cy - 34 && o.y < cy + 34 && Math.abs(LW * (o.lane + 0.5) - s.x) < 34) {
+        if (o.y > cy - 34 && o.y < cy + 34 && Math.abs(LW * (o.lane + 0.5) - s.x) < 30) {
           if (o.kind === 'star') { s.score++; setScore(s.score); o.y = H + 100; }
           else { end(); draw(ctx); return; }
         }
@@ -127,8 +149,7 @@ export function KidsRace() {
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.font = '34px serif';
     for (const o of s.objs) ctx.fillText(o.kind === 'star' ? '⭐' : o.kind === 'rock' ? '🪨' : '🚧', LW * (o.lane + 0.5), o.y);
-    ctx.font = '48px serif';
-    ctx.save(); ctx.translate(s.x, H - 90); ctx.rotate(Math.PI / 2); ctx.fillText(s.over ? '💥' : '🚗', 0, 0); ctx.restore();
+    car(ctx, s.x, H - 90, s.over);
   }
 
   useEffect(() => {
@@ -179,7 +200,7 @@ export function KidsRace() {
           </button>
         )}
       </div>
-      <p className="kr-n">تعمل التلاوة وأنت تقود، وتتوقف إذا وقفتَ أو اصطدمت. تحتاج اتصالًا بالإنترنت للصوت.</p>
+      <p className="kr-n">السور من الأحقاف إلى الناس (آخر خمسة أجزاء). تعمل التلاوة وأنت تقود، وتتوقف إذا وقفتَ أو اصطدمت. تحتاج اتصالًا بالإنترنت للصوت.</p>
       <style>{`
         .kr { display:flex; flex-direction:column; gap:10px; font-family: var(--font-kufi), sans-serif; color:#fff1c4; align-items:center; }
         .kr-set { display:flex; gap:10px; width:100%; }
