@@ -1853,4 +1853,6 @@ export const UI_EN: Record<string, string> = {
  "سباق السيارة والقرآن": "Car race with Quran",
  "تقود فيسمع القرآن": "Drive and listen to Quran",
  "🚗 ابدأ السباق": "🚗 Start race",
+ "اختبار التجويد": "Tajweed Quiz",
+ "حدّد الحكم في موضع من المصحف": "Identify the rule in a Quran passage",
 };

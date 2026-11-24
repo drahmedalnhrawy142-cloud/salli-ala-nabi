@@ -11,6 +11,7 @@ import { QuranHifz } from './QuranHifz';
 import { AyahOnOpenSettings } from './AyahOnOpen';
 import { TasmeeSheikh } from './TasmeeSheikh';
 import { TajweedRules } from './TajweedRules';
+import { TajweedQuiz } from './TajweedQuiz';
 import { lsGet, lsSet, toAr, useQuran } from './data';
 
 export function QuranCorner() {
@@ -86,6 +87,7 @@ export function QuranCorner() {
           { id: 'sheikh', label: 'التسميع على الشيخ', icon: '🎙️', hint: 'بالصوت', render: () => need((d) => <TasmeeSheikh data={d} />) },
           { id: 'tasmee', label: 'التسميع الذاتي', icon: '📝', hint: 'اختبر حفظك', render: () => need((d) => <QuranTasmee data={d} currentPage={page} />) },
           { id: 'tajweed', label: 'أحكام التجويد', icon: '🎓', hint: 'بأمثلة من المصحف', render: () => need((d) => <TajweedRules data={d} onOpenAt={openAt} />) },
+          { id: 'tjquiz', label: 'اختبار التجويد', icon: '🎯', hint: 'حدّد الحكم في موضع من المصحف', render: () => need((d) => <TajweedQuiz data={d} />) },
           { id: 'index', label: 'الفهرس', icon: '🗂️', hint: 'السور والأجزاء', render: () => need((d) => <QuranIndex data={d} onGo={openAt} />) },
           { id: 'search', label: 'بحث', icon: '🔎', hint: 'في كل الآيات', render: () => need((d) => <QuranSearch data={d} onGo={openAt} />) },
           {
