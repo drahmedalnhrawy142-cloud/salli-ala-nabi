@@ -1,6 +1,7 @@
 
 'use client';
 
+import { OpenVoiceSetting, playOpenVoice } from '@/components/openVoice';
 import { Fragment, Suspense, lazy, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ProphetLineage } from '@/components/ProphetLineage';
@@ -516,6 +517,7 @@ export function PrayerExperience() {
   useEffect(() => {
     initI18n();
     pingUsage();
+    playOpenVoice();
   }, []);
 
   const volRef = useRef<() => void>(() => {});
@@ -2329,6 +2331,7 @@ export function PrayerExperience() {
                   ]}
                 />
                 ) },
+                { id: 'openvoice', group: 'التنبيهات والتحكم', label: 'صوت فتح التطبيق', icon: '🔊', hint: 'صلِّ على النبي ﷺ عند الفتح', render: () => <OpenVoiceSetting /> },
                 { id: 'usage', group: 'التطبيق', label: 'إحصائية الاستخدام', icon: '📈', hint: 'كم جهازًا يستعمل التطبيق', render: () => <UsageStats /> },
                 { id: 'offline', group: 'التطبيق', label: 'التحميل بدون إنترنت', icon: '⬇️', hint: 'حمّل الكتب والتفاسير مرة واحدة', render: () => <OfflineManager /> },
                 { id: 'backup', group: 'التطبيق', label: 'نسخة احتياطية', icon: '💾', render: () => <Backup /> },
