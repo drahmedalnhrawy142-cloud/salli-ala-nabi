@@ -10,7 +10,6 @@ import { SurahInfo } from '@/components/quran/SurahInfo';
 import { WordDictionary } from '@/components/lugha/WordDictionary';
 import { QuranSciencesHub } from '@/components/QuranSciencesHub';
 import { AsmaAllah } from '@/components/AsmaAllah';
-import { DailyHadith } from '@/components/DailyHadith';
 
 /**
  * المكتبة العلمية لطالب العلم: كتب متفق عليها عند أهل السنة (عقيدة، حديث ومصطلح، أصول فقه، علم وآداب، لغة).
@@ -19,7 +18,6 @@ import { DailyHadith } from '@/components/DailyHadith';
  */
 type B = { id: string; cat: string; title: string; author: string; sub: string; via: string; dir?: string; fiqh?: boolean };
 const TOOLS: { id: string; icon: string; t: string; h: string; r: () => React.ReactNode }[] = [
-  { id: 'dhadith', icon: '🌅', t: 'حديث اليوم', h: 'حديث جديد كل يوم', r: () => <DailyHadith /> },
   { id: 'tour', icon: '🎥', t: 'جولة داخل بيت النبي ﷺ', h: 'مقاطع مرئية كأنك هناك', r: () => <Tour /> },
   { id: 'qudsi', icon: '📜', t: 'الأحاديث القدسية', h: 'من الصحيحين', r: () => <HadithQudsi /> },
   { id: 'sinfo', icon: '📑', t: 'بطاقة السورة', h: 'مكية/مدنية وفضلها وأسباب نزولها', r: () => <SurahInfo /> },

@@ -37,6 +37,7 @@ import { WeeklyStats } from '@/components/WeeklyStats';
 import { FridayBanner } from '@/components/FridayBanner';
 import { GlobalKhatma } from '@/components/GlobalKhatma';
 import { AsmaAllah } from '@/components/AsmaAllah';
+import { DailyHadith } from '@/components/DailyHadith';
 import { ProphetMoments } from '@/components/ProphetMoments';
 import { Backup } from '@/components/Backup';
 import { FontSize } from '@/components/FontSize';
@@ -2043,11 +2044,6 @@ export function PrayerExperience() {
               { id: 'fkhatma', group: 'مع الأحباب', label: 'ختمة مع الأصحاب', icon: '👥', hint: 'وزّع الأجزاء الثلاثين', render: () => <FriendsKhatma /> },
               { id: 'wird', group: 'أذكارك وورد يومك', label: 'وردك', icon: '📜', render: () => <DailyWird onPray={addPrayer} /> },
               { id: 'fadl', group: 'أذكارك وورد يومك', label: 'فضل الصلاة', icon: '📖', render: () => <HadithFadl /> },
-              { id: 'dq', group: 'أذكارك وورد يومك', label: 'سؤال اليوم', icon: '💡', render: () => (
-                <Suspense fallback={null}>
-                  <DailyQuestion />
-                </Suspense>
-              ) },
               { id: 'stats', group: 'متابعة وإنجاز', label: 'إحصائياتك', icon: '📊', render: () => (
                 <>
                   <WeeklyStats />
@@ -2110,7 +2106,12 @@ export function PrayerExperience() {
             <SectionGrid
               groupOrder={['التنبيهات والتحكم', 'التخصيص', 'التطبيق']}
               secs={[
-                { id: 'float', group: 'التنبيهات والتحكم', label: 'الأيقونة العايمة', icon: '🫧', hidden: !floatSupported, render: () => (
+                { id: 'rhub', group: 'التنبيهات والتحكم', label: 'مركز التذكيرات', icon: '⏰', hint: 'الصلاة على النبي ﷺ والأذكار والحديث وكل تنبيهاتك', render: () => (
+                  <SectionGrid
+                    groupOrder={['الصلاة على النبي ﷺ', 'تنبيهات الصلاة والأذكار', 'من العلم']}
+                    secs={[
+                { id: 'openvoice', group: 'الصلاة على النبي ﷺ', label: 'صوت فتح التطبيق', icon: '🔊', hint: 'صلِّ على النبي ﷺ عند الفتح', render: () => <OpenVoiceSetting /> },
+                { id: 'float', group: 'الصلاة على النبي ﷺ', label: 'الأيقونة العايمة', icon: '🫧', hidden: !floatSupported, render: () => (
           <section className="content-card" id="s-float">
             <h2 className="section-title">الأيقونة العايمة</h2>
             <p className="float-note">
@@ -2137,7 +2138,7 @@ export function PrayerExperience() {
             <FloatTarget />
           </section>
                 ) },
-                { id: 'remind', group: 'التنبيهات والتحكم', label: 'التذكيرات', icon: '🔔', hint: 'الصلاة والأذكار', hidden: !remSupported, render: () => (
+                { id: 'remind', group: 'تنبيهات الصلاة والأذكار', label: 'التذكيرات', icon: '🔔', hint: 'الصلاة والأذكار', hidden: !remSupported, render: () => (
                 <SectionGrid
                   secs={[
                 { id: 'adhkar-rem', label: 'تذكير الأذكار', icon: '🔔', hidden: !remSupported, render: () => (
@@ -2290,6 +2291,15 @@ export function PrayerExperience() {
                   ]}
                 />
                 ) },
+                { id: 'dhadith', group: 'من العلم', label: 'حديث اليوم', icon: '🌅', hint: 'حديث جديد كل يوم', render: () => <DailyHadith /> },
+                { id: 'dq', group: 'من العلم', label: 'سؤال اليوم', icon: '💡', render: () => (
+                <Suspense fallback={null}>
+                  <DailyQuestion />
+                </Suspense>
+              ) }
+                    ]}
+                  />
+                ) },
                 { id: 'volume', group: 'التنبيهات والتحكم', label: 'أزرار الصوت', icon: '🔊', render: () => <VolumeKeys /> },
                 { id: 'look', group: 'التخصيص', label: 'المظهر', icon: '🎨', hint: 'اللغة وحجم الخط ونوعه', render: () => (
                 <SectionGrid
@@ -2300,7 +2310,6 @@ export function PrayerExperience() {
                   ]}
                 />
                 ) },
-                { id: 'openvoice', group: 'التنبيهات والتحكم', label: 'صوت فتح التطبيق', icon: '🔊', hint: 'صلِّ على النبي ﷺ عند الفتح', render: () => <OpenVoiceSetting /> },
                 { id: 'offline', group: 'التطبيق', label: 'التحميل بدون إنترنت', icon: '⬇️', hint: 'حمّل الكتب والتفاسير مرة واحدة', render: () => <OfflineManager /> },
                 { id: 'backup', group: 'التطبيق', label: 'نسخة احتياطية', icon: '💾', render: () => <Backup /> },
                 { id: 'credits', group: 'التطبيق', label: 'المصادر والتراخيص', icon: '📜', hint: 'من أين أخذنا كل نص', render: () => <CreditsPage /> },
