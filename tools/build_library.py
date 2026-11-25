@@ -98,6 +98,12 @@ BOOKS = [
        sub='خواطر وتأملات في الدين والنفس والحياة', src='RELEASE/data/0597IbnJawzi/0597IbnJawzi.SaydKhatir/*Shamela0012028-ara1', via='المكتبة الشاملة'),
   dict(id='shudhur', cat='اللغة العربية', title='متن شذور الذهب', author='ابن هشام الأنصاري (ت ٧٦١هـ)',
        sub='متن في النحو للمتوسطين', src='RELEASE/data/0761JamalDinIbnHisham/0761JamalDinIbnHisham.MatnShudhurDhahab/*Shamela0096770-ara1', via='المكتبة الشاملة'),
+  dict(id='cumdatfiqh', cat='الفقه والعبادات', title='عمدة الفقه', author='ابن قدامة المقدسي (ت ٦٢٠هـ)',
+       sub='متن مختصر في الفقه على مذهب الإمام أحمد', src='RELEASE/data/0620IbnQudamaMaqdisi/0620IbnQudamaMaqdisi.CumdatFiqh/*Shamela0011315-ara1', via='المكتبة الشاملة'),
+  dict(id='siyasa', cat='الفقه والعبادات', title='السياسة الشرعية في إصلاح الراعي والرعية', author='ابن تيمية (ت ٧٢٨هـ)',
+       sub='الأمانة والعدل وولاية الأمور في الشرع', src='RELEASE/data/0728IbnTaymiyya/0728IbnTaymiyya.SiyasaSharciyya/*Shamela0031237-ara1', via='المكتبة الشاملة'),
+  dict(id='aqsam', cat='علوم القرآن', title='التبيان في أقسام القرآن', author='ابن القيم (ت ٧٥١هـ)',
+       sub='أقسام الله في القرآن ودلالاتها', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.TibyanFiAqsamQuran/*Shamela0007572-ara1', via='المكتبة الشاملة'),
 ]
 def clean(t):
     t = re.sub(r'PageV\d+P\d+', '', t); t = re.sub(r'\s*ms\d+\b', '', t)
