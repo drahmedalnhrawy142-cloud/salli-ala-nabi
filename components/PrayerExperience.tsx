@@ -2080,8 +2080,9 @@ export function PrayerExperience() {
               secs={[
                 { id: 'kplay', group: 'العب', label: 'الألعاب', icon: '🎮', hint: 'كل الألعاب والبستان في مكان واحد', render: () => (
                   <SectionGrid
-                    groupOrder={['ذكر وصلاة على النبي ﷺ', 'القرآن', 'معلومات ومسابقات']}
+                    groupOrder={['معلومات ومسابقات', 'ذكر وصلاة على النبي ﷺ', 'القرآن']}
                     secs={[
+                      { id: 'kasma', group: 'معلومات ومسابقات', label: 'أسماء الله الحسنى', icon: '🌙', hint: 'معانيها وأدلتها واحفظها', render: () => <AsmaAllah /> },
                       { id: 'ksal', group: 'ذكر وصلاة على النبي ﷺ', label: 'نجوم الصلاة ودائرة النور', icon: '🌟', hint: 'المس النجوم وصلِّ عليه ﷺ', render: () => <KidsSalawat /> },
                       { id: 'kfly', group: 'ذكر وصلاة على النبي ﷺ', label: 'الطير المسبّح ونطّ وسبّح', icon: '🐦', hint: 'سبّح ليطير ويقفز', render: () => <KidsFly /> },
                       { id: 'garden', group: 'ذكر وصلاة على النبي ﷺ', label: 'بستانك', icon: '🌴', hint: 'يكبر مع كل ذكر', render: () => (
@@ -2093,7 +2094,6 @@ export function PrayerExperience() {
                       { id: 'games', group: 'القرآن', label: 'ألعاب الحفظ', icon: '🧩', hint: 'رتّب وأكمل الآيات والأذكار', render: () => <KidsGames /> },
                       { id: 'kgames2', group: 'القرآن', label: 'ألعاب جديدة', icon: '🎲', hint: 'أي سورة؟ · ذاكرة · حروف · معاني', render: () => <KidsGames2 /> },
                       { id: 'kquiz', group: 'معلومات ومسابقات', label: 'مسابقة المصحف', icon: '❓', hint: 'أسئلة عن السور والآيات', render: () => <KidsQuiz /> },
-                      { id: 'kasma', group: 'معلومات ومسابقات', label: 'أسماء الله الحسنى', icon: '🌙', hint: 'العب واحفظ', render: () => <AsmaAllah /> },
                     ]}
                   />
                 ) },

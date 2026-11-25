@@ -18,13 +18,13 @@ import { AsmaAllah } from '@/components/AsmaAllah';
  */
 type B = { id: string; cat: string; title: string; author: string; sub: string; via: string; dir?: string; fiqh?: boolean };
 const TOOLS: { id: string; icon: string; t: string; h: string; r: () => React.ReactNode }[] = [
+  { id: 'asma', icon: '🌙', t: 'أسماء الله الحسنى', h: 'معانيها وأدلتها', r: () => <AsmaAllah /> },
   { id: 'tour', icon: '🎥', t: 'جولة داخل بيت النبي ﷺ', h: 'مقاطع مرئية كأنك هناك', r: () => <Tour /> },
   { id: 'qudsi', icon: '📜', t: 'الأحاديث القدسية', h: 'من الصحيحين', r: () => <HadithQudsi /> },
   { id: 'sinfo', icon: '📑', t: 'بطاقة السورة', h: 'مكية/مدنية وفضلها وأسباب نزولها', r: () => <SurahInfo /> },
   { id: 'wdict', icon: '📖', t: 'معجم غريب القرآن', h: 'ابحث عن معنى كلمة', r: () => <WordDictionary /> },
   { id: 'uloom', icon: '🔬', t: 'علوم القرآن', h: 'مكي ومدني وأسباب النزول', r: () => <QuranSciencesHub /> },
   { id: 'gmap', icon: '🗺️', t: 'الغزوات على الخريطة', h: 'بسنواتها من سير الذهبي', r: () => <GhazawatMap /> },
-  { id: 'asma', icon: '🌙', t: 'أسماء الله الحسنى', h: 'معانيها وأدلتها', r: () => <AsmaAllah /> },
 ];
 const yt = (q: string) => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
 function Tour() {

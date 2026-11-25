@@ -1826,7 +1826,7 @@ export const UI_EN: Record<string, string> = {
  "مراجعة متباعدة وتقدّمك": "Spaced review and your progress",
  "السيرة النبوية": "The Prophet's Biography",
  "النسب والصفات والمواقف والاختبار": "Lineage, description, moments and quiz",
- "العب واحفظ": "Play and memorize",
+ "معانيها وأدلتها واحفظها": "Meanings, evidences and memorize them",
  "التقويم الهجري ورمضان": "Hijri Calendar & Ramadan",
  "المناسبات وإمساكية رمضان": "Occasions and the Ramadan timetable",
  "التحميل بدون إنترنت": "Download for Offline Use",
