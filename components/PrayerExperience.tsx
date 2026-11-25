@@ -23,6 +23,7 @@ import { HijriCalendar } from '@/components/HijriCalendar';
 import { TalabIlm } from '@/components/talab/TalabIlm';
 import { KidsQuiz } from '@/components/kids/KidsQuiz';
 import { KidsFly } from '@/components/kids/KidsFly';
+import { KidsSalawat } from '@/components/kids/KidsSalawat';
 import { KidsRace } from '@/components/kids/KidsRace';
 import { KidsTuhfa } from '@/components/kids/KidsTuhfa';
 import { KidsGames2 } from '@/components/kids/KidsGames2';
@@ -2081,6 +2082,7 @@ export function PrayerExperience() {
                   <SectionGrid
                     groupOrder={['ذكر وصلاة على النبي ﷺ', 'القرآن', 'معلومات ومسابقات']}
                     secs={[
+                      { id: 'ksal', group: 'ذكر وصلاة على النبي ﷺ', label: 'نجوم الصلاة ودائرة النور', icon: '🌟', hint: 'المس النجوم وصلِّ عليه ﷺ', render: () => <KidsSalawat /> },
                       { id: 'kfly', group: 'ذكر وصلاة على النبي ﷺ', label: 'الطير المسبّح ونطّ وسبّح', icon: '🐦', hint: 'سبّح ليطير ويقفز', render: () => <KidsFly /> },
                       { id: 'garden', group: 'ذكر وصلاة على النبي ﷺ', label: 'بستانك', icon: '🌴', hint: 'يكبر مع كل ذكر', render: () => (
                         <Suspense fallback={null}>
