@@ -17,13 +17,6 @@ import { SituationAdhkar } from '@/components/SituationAdhkar';
 import { Tasbeeh } from '@/components/Tasbeeh';
 import { SectionGrid } from '@/components/SectionGrid';
 import { FloatTarget } from '@/components/FloatTarget';
-import { HadithQudsi } from '@/components/HadithQudsi';
-import { HadithLibrary } from '@/components/HadithLibrary';
-import { DailyHadith } from '@/components/DailyHadith';
-import { GhazawatMap } from '@/components/GhazawatMap';
-import { ArkanIslam } from '@/components/arkan/ArkanIslam';
-import { SurahInfo } from '@/components/quran/SurahInfo';
-import { HajjGuide } from '@/components/arkan/HajjGuide';
 import { KidsGames } from '@/components/kids/KidsGames';
 import { OfflineManager } from '@/components/OfflineManager';
 import { HijriCalendar } from '@/components/HijriCalendar';
@@ -34,16 +27,11 @@ import { KidsRace } from '@/components/kids/KidsRace';
 import { KidsTuhfa } from '@/components/kids/KidsTuhfa';
 import { KidsGames2 } from '@/components/kids/KidsGames2';
 import { KidsHome, KidsTasbih } from '@/components/kids/KidsHome';
-import { UsageStats, pingUsage } from '@/components/UsageStats';
-import { WordDictionary } from '@/components/lugha/WordDictionary';
 import { WorshipTracker } from '@/components/WorshipTracker';
 import { FriendsKhatma } from '@/components/FriendsKhatma';
-import { QuranSciencesHub } from '@/components/QuranSciencesHub';
-import { IlmTools } from '@/components/ilm/IlmTools';
 import { POEMS } from '@/components/poemsData';
 import { CreditsPage } from '@/components/CreditsPage';
 import { IslamicLibrary } from '@/components/IslamicLibrary';
-import { FiqhMadhahib } from '@/components/FiqhMadhahib';
 import { ProphetStats, bumpHistory } from '@/components/ProphetStats';
 import { WeeklyStats } from '@/components/WeeklyStats';
 import { FridayBanner } from '@/components/FridayBanner';
@@ -62,7 +50,6 @@ import { initI18n, useLang } from '@/components/i18n';
 const ProphetQuiz = lazy(() => import('@/components/ProphetQuiz').then((m) => ({ default: m.ProphetQuiz })));
 const AyahOnOpen = lazy(() => import('@/components/quran/AyahOnOpen').then((m) => ({ default: m.AyahOnOpen })));
 const GardenCorner = lazy(() => import('@/components/garden/GardenCorner').then((m) => ({ default: m.GardenCorner })));
-const SiraCorner = lazy(() => import('@/components/sira/SiraCorner').then((m) => ({ default: m.SiraCorner })));
 const QuranCorner = lazy(() => import('@/components/quran/QuranCorner').then((m) => ({ default: m.QuranCorner })));
 const DailyQuestion = lazy(() => import('@/components/DailyQuestion').then((m) => ({ default: m.DailyQuestion })));
 
@@ -517,7 +504,6 @@ export function PrayerExperience() {
   const lang = useLang();
   useEffect(() => {
     initI18n();
-    pingUsage();
     playOpenVoice();
   }, []);
 
@@ -2077,33 +2063,14 @@ export function PrayerExperience() {
         <div className="tab-pane" hidden={tab !== 'names'}>
           <header className="tab-head">
             <h1>طلب العلم</h1>
-            <p>كل علوم الدين في مكان واحد: العقيدة والقرآن والحديث والفقه والسيرة</p>
+            <p>مكتبة الكتب وحلقات العلم</p>
           </header>
           {seen.names && (
             <SectionGrid
-              groupOrder={['مسارك في الطلب', 'يومك مع العلم', 'القرآن وعلومه', 'الحديث الشريف', 'العقيدة والفقه والعبادة', 'السيرة والتاريخ', 'المكتبة العامة']}
+              groupOrder={['طلب العلم']}
               secs={[
-                { id: 'levels', group: 'مسارك في الطلب', label: 'مستويات طلب العلم', icon: '🪜', hint: 'مسار متدرّج بكتب وشروح مرئية', render: () => <TalabIlm /> },
-                { id: 'dhadith', group: 'يومك مع العلم', label: 'حديث اليوم', icon: '🌅', hint: 'حديث جديد كل يوم', render: () => <DailyHadith /> },
-                { id: 'last', group: 'يومك مع العلم', label: 'أكمل القراءة', icon: '🔖', hint: 'من حيث توقفت', render: () => <IlmTools mode="last" /> },
-                { id: 'isearch', group: 'يومك مع العلم', label: 'بحث شامل', icon: '🔎', hint: 'في الفقه والمكتبة والحديث', render: () => <IlmTools mode="search" /> },
-                { id: 'ifav', group: 'يومك مع العلم', label: 'المفضلة', icon: '⭐', hint: 'فقراتك المحفوظة', render: () => <IlmTools mode="fav" /> },
-                { id: 'arkan', group: 'العقيدة والفقه والعبادة', label: 'أركان الإسلام الخمسة', icon: '🕌', hint: 'لكل ركن: أحاديث وكتب وفهرس وبحث', render: () => <ArkanIslam /> },
-                { id: 'lib', group: 'المكتبة العامة', label: 'المكتبة العامة', icon: '🏛️', hint: 'كل الكتب مرتّبة بالأقسام، بما فيها الكتب خارج المستويات', render: () => <IslamicLibrary /> },
-                { id: 'uloom', group: 'القرآن وعلومه', label: 'علوم القرآن', icon: '🔬', hint: 'موسوعة ومكي ومدني وأسباب النزول', render: () => <QuranSciencesHub /> },
-                { id: 'books', group: 'الحديث الشريف', label: 'كتب الحديث', icon: '📚', hint: 'البخاري ومسلم والأربعون', render: () => <HadithLibrary /> },
-                { id: 'qudsi', group: 'الحديث الشريف', label: 'الأحاديث القدسية', icon: '📜', hint: 'من الصحيحين', render: () => <HadithQudsi /> },
-                { id: 'hajj', group: 'العقيدة والفقه والعبادة', label: 'دليل الحاج والمعتمر', icon: '🕋', hint: 'مناسك النووي مرتّبة مع متابعة قراءتك', render: () => <HajjGuide /> },
-                { id: 'fiqh', group: 'العقيدة والفقه والعبادة', label: 'المذاهب الأربعة', icon: '⚖️', hint: 'الفقه المقارن: إجماع الأئمة وخلافهم', render: () => <FiqhMadhahib /> },
-                { id: 'sira', group: 'السيرة والتاريخ', label: 'السيرة الكاملة', icon: '📚', hint: 'ابن هشام • بفهرس', render: () => (
-                  <Suspense fallback={null}>
-                    <SiraCorner />
-                  </Suspense>
-                ) },
-                { id: 'gmap', group: 'السيرة والتاريخ', label: 'الغزوات على الخريطة', icon: '🗺️', hint: 'بسنواتها من سير الذهبي', render: () => <GhazawatMap /> },
-                { id: 'sinfo', group: 'القرآن وعلومه', label: 'بطاقة السورة', icon: '📑', hint: 'مكية/مدنية وفضلها وأسباب نزولها', render: () => <SurahInfo /> },
-                { id: 'wdict', group: 'القرآن وعلومه', label: 'معجم غريب القرآن', icon: '📖', hint: 'ابحث عن معنى كلمة — نزهة القلوب', render: () => <WordDictionary /> },
-                { id: 'asma', group: 'العقيدة والفقه والعبادة', label: 'أسماء الله الحسنى', icon: '🌙', render: () => <AsmaAllah /> },
+                { id: 'lib', group: 'طلب العلم', label: 'المكتبة', icon: '🏛️', hint: 'كل الكتب على رفوفها، والبحث الشامل والمفضلة والمراجع', render: () => <IslamicLibrary /> },
+                { id: 'levels', group: 'طلب العلم', label: 'حلقات العلم', icon: '🪜', hint: 'مسار متدرّج بكتب وشروح مرئية', render: () => <TalabIlm /> },
               ]}
             />
           )}
@@ -2334,7 +2301,6 @@ export function PrayerExperience() {
                 />
                 ) },
                 { id: 'openvoice', group: 'التنبيهات والتحكم', label: 'صوت فتح التطبيق', icon: '🔊', hint: 'صلِّ على النبي ﷺ عند الفتح', render: () => <OpenVoiceSetting /> },
-                { id: 'usage', group: 'التطبيق', label: 'إحصائية الاستخدام', icon: '📈', hint: 'كم جهازًا يستعمل التطبيق', render: () => <UsageStats /> },
                 { id: 'offline', group: 'التطبيق', label: 'التحميل بدون إنترنت', icon: '⬇️', hint: 'حمّل الكتب والتفاسير مرة واحدة', render: () => <OfflineManager /> },
                 { id: 'backup', group: 'التطبيق', label: 'نسخة احتياطية', icon: '💾', render: () => <Backup /> },
                 { id: 'credits', group: 'التطبيق', label: 'المصادر والتراخيص', icon: '📜', hint: 'من أين أخذنا كل نص', render: () => <CreditsPage /> },

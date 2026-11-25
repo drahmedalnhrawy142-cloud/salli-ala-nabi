@@ -1,15 +1,60 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { FiqhBook } from '@/components/FiqhMadhahib';
+import { BookReader } from '@/components/BookReader';
+import { IlmTools } from '@/components/ilm/IlmTools';
+import { EXTRA_SHELF } from '@/components/ilm/books';
+import { HadithQudsi } from '@/components/HadithQudsi';
+import { GhazawatMap } from '@/components/GhazawatMap';
+import { SurahInfo } from '@/components/quran/SurahInfo';
+import { WordDictionary } from '@/components/lugha/WordDictionary';
+import { QuranSciencesHub } from '@/components/QuranSciencesHub';
+import { AsmaAllah } from '@/components/AsmaAllah';
+import { DailyHadith } from '@/components/DailyHadith';
 
 /**
  * المكتبة العلمية لطالب العلم: كتب متفق عليها عند أهل السنة (عقيدة، حديث ومصطلح، أصول فقه، علم وآداب، لغة).
  * النصوص من المكتبة الشاملة عبر مشروع OpenITI (CC BY-NC-SA 4.0)، مقسّمة بـ tools/build_library.py دون تعديل ألفاظ المؤلفين.
  * لإضافة كتاب: أضفه إلى BOOKS في tools/build_library.py وأعد التوليد. تعمل بلا نت داخل التطبيق.
  */
-type B = { id: string; cat: string; title: string; author: string; sub: string; via: string };
-const CATS = ['العقيدة', 'علوم القرآن', 'الحديث وعلومه', 'أصول الفقه', 'العلم وآدابه', 'اللغة العربية'];
+type B = { id: string; cat: string; title: string; author: string; sub: string; via: string; dir?: string; fiqh?: boolean };
+const TOOLS: { id: string; icon: string; t: string; h: string; r: () => React.ReactNode }[] = [
+  { id: 'dhadith', icon: '🌅', t: 'حديث اليوم', h: 'حديث جديد كل يوم', r: () => <DailyHadith /> },
+  { id: 'tour', icon: '🎥', t: 'جولة داخل بيت النبي ﷺ', h: 'مقاطع مرئية كأنك هناك', r: () => <Tour /> },
+  { id: 'qudsi', icon: '📜', t: 'الأحاديث القدسية', h: 'من الصحيحين', r: () => <HadithQudsi /> },
+  { id: 'sinfo', icon: '📑', t: 'بطاقة السورة', h: 'مكية/مدنية وفضلها وأسباب نزولها', r: () => <SurahInfo /> },
+  { id: 'wdict', icon: '📖', t: 'معجم غريب القرآن', h: 'ابحث عن معنى كلمة', r: () => <WordDictionary /> },
+  { id: 'uloom', icon: '🔬', t: 'علوم القرآن', h: 'مكي ومدني وأسباب النزول', r: () => <QuranSciencesHub /> },
+  { id: 'gmap', icon: '🗺️', t: 'الغزوات على الخريطة', h: 'بسنواتها من سير الذهبي', r: () => <GhazawatMap /> },
+  { id: 'asma', icon: '🌙', t: 'أسماء الله الحسنى', h: 'معانيها وأدلتها', r: () => <AsmaAllah /> },
+];
+const yt = (q: string) => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+function Tour() {
+  const L: [string, string, string][] = [
+    ['🏠', 'داخل بيت النبي ﷺ في المدينة', 'محاكاة ثلاثية الأبعاد لحجرات بيت النبي صلى الله عليه وسلم'],
+    ['🕌', 'المسجد النبوي في عهد النبي ﷺ', 'مجسّم المسجد النبوي الأول وما كان فيه'],
+    ['🏛️', 'متحف «السلام عليك أيها النبي»', 'جولة في المتحف: مدينة النبي ﷺ ومكة والمدينة في زمنه'],
+    ['🗺️', 'رحلة الهجرة من مكة إلى المدينة', 'مسار الهجرة النبوية وتجسيده للزوار'],
+  ];
+  const Q = ['بيت النبي صلى الله عليه وسلم محاكاة ثلاثية الأبعاد المدينة', 'المسجد النبوي القديم في عهد النبي مجسم محاكاة', 'متحف السلام عليك أيها النبي جولة', 'مشروع في خطى النبي الهجرة من مكة إلى المدينة'];
+  return (
+    <div>
+      <p style={{ fontSize: 12.5, lineHeight: 1.9, opacity: 0.8, margin: '0 0 10px' }}>مقاطع مرئية لمشاريع سعودية تعيد تصوير بيت النبي ﷺ ومسجده كما كانا. تفتح في المتصفح أو تطبيق يوتيوب، وتحتاج اتصالًا بالإنترنت.</p>
+      {L.map(([i, t, h], k) => (
+        <a key={t} href={yt(Q[k])} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', gap: 12, alignItems: 'center', padding: 14, marginBottom: 10, borderRadius: 16, border: '1px solid rgba(232,194,90,.35)', background: 'rgba(18,15,8,.82)', color: '#fff1c4', textDecoration: 'none', fontFamily: 'inherit' }}>
+          <span style={{ fontSize: 30 }}>{i}</span>
+          <span>
+            <b style={{ display: 'block', fontSize: 15, fontWeight: 500 }}>{t}</b>
+            <small style={{ color: '#7fe0c0', fontSize: 12 }}>{h}</small>
+          </span>
+          <span style={{ marginInlineStart: 'auto', color: '#e8c25a' }}>▶</span>
+        </a>
+      ))}
+    </div>
+  );
+}
+const TABS: [string, string][] = [['shelves', '🏛️ الرفوف'], ['search', '🔎 بحث شامل'], ['last', '🔖 أكمل القراءة'], ['fav', '⭐ المفضلة'], ['tools', '🧰 مراجع']];
+const CATS = ['العقيدة', 'علوم القرآن', 'الحديث وعلومه', 'السيرة والتراجم', 'الفقه والعبادات', 'الفقه المقارن', 'أصول الفقه', 'القواعد الفقهية', 'العلم وآدابه', 'اللغة العربية'];
 
 export function IslamicLibrary() {
   const [list, setList] = useState<B[] | null>(null);
@@ -17,26 +62,29 @@ export function IslamicLibrary() {
   const [bk, setBk] = useState<B | null>(null);
   const [op, setOp] = useState<{ b: B; c: string } | null>(null);
   const [q, setQ] = useState('');
+  const [tab, setTab] = useState('shelves');
+  const [tool, setTool] = useState<string | null>(null);
   const tm = useRef<number[]>([]);
   useEffect(() => () => tm.current.forEach(clearTimeout), []);
   useEffect(() => {
     fetch('/library/index.json')
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then(setList)
+      .then((l: B[]) => setList([...EXTRA_SHELF, ...l.map((x) => ({ ...x, dir: `/library/${x.id}/` }))]))
       .catch(() => setErr(true));
   }, []);
   if (err) return <p style={{ textAlign: 'center', color: '#ffd9a0' }}>تعذّر تحميل المكتبة.</p>;
   if (!list) return <p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p>;
   if (bk)
     return (
-      <FiqhBook
+      <BookReader
         key={bk.id}
-        dir={`/library/${bk.id}/`}
+        dir={bk.dir || `/library/${bk.id}/`}
         title={bk.title}
-        fiqh={false}
+        author={bk.author}
+        sub={bk.sub}
+        fiqh={bk.fiqh}
         backLabel="← المكتبة"
         onBack={() => setBk(null)}
-        credit={`الكتاب: «${bk.title}» — ${bk.author}. النص من ${bk.via} عبر مشروع OpenITI بترخيص CC BY-NC-SA 4.0، دون تعديل في ألفاظ المؤلف (وقد تظهر فيه هوامش المحقق وأرقام الأحاديث كما في النسخة الرقمية). للدراسة والاطّلاع؛ والأفضل قراءة الكتب على شيخ أو معلّم.`}
       />
     );
   const cats = [...CATS, ...Array.from(new Set(list.map((b) => b.cat))).filter((c) => !CATS.includes(c))];
@@ -59,6 +107,32 @@ export function IslamicLibrary() {
   };
   return (
     <div className="lib">
+      <div className="lib-tabs">
+        {TABS.map(([k, l]) => (
+          <button key={k} type="button" className={tab === k ? 'on' : ''} onClick={() => (setTab(k), setTool(null))}>{l}</button>
+        ))}
+      </div>
+      {tab === 'search' && <IlmTools mode="search" />}
+      {tab === 'last' && <IlmTools mode="last" />}
+      {tab === 'fav' && <IlmTools mode="fav" />}
+      {tab === 'tools' &&
+        (tool ? (
+          <div>
+            <button type="button" className="lib-bkb" onClick={() => setTool(null)}>← المراجع</button>
+            {TOOLS.find((t) => t.id === tool)?.r()}
+          </div>
+        ) : (
+          <div className="lib-tl">
+            {TOOLS.map((t) => (
+              <button key={t.id} type="button" onClick={() => setTool(t.id)}>
+                <i>{t.icon}</i>
+                <b>{t.t}</b>
+                <small>{t.h}</small>
+              </button>
+            ))}
+          </div>
+        ))}
+      {tab === 'shelves' && (<>
       <div className="lib-hall">
         <div className="lib-arch"><span className="lib-chand">🕯️</span></div>
         <b>المكتبة العامة</b>
@@ -115,7 +189,8 @@ export function IslamicLibrary() {
         <div className="lib-floor"><span className="lib-ladder">🪜</span><span className="lib-rug" /></div>
       </div>
       <p className="lib-note">اضغط على أي كتاب ليُفتح لك وتتصفّح أبوابه وفصوله. تُضاف كتب أخرى تباعًا.</p>
-      {op && (
+      </>)}
+      {tab === 'shelves' && op && (
         <div className="lib-ov" aria-hidden="true">
           <div className="lib-3d">
             <div className="lib-pages" />
@@ -131,6 +206,13 @@ export function IslamicLibrary() {
         </div>
       )}
       <style>{`
+        .lib-tabs { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 10px; padding-bottom: 4px; scrollbar-width: none; }
+        .lib-tabs button { flex: none; padding: 8px 13px; border-radius: 999px; border: 1px solid rgba(232,194,90,.35); background: rgba(18,15,8,.85); color: #f1d77a; font-family: inherit; font-size: 13px; white-space: nowrap; }
+        .lib-tabs button.on { background: rgba(232,194,90,.25); border-color: #e8c25a; }
+        .lib-tl { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .lib-tl button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 8px; border-radius: 16px; border: 1px solid rgba(232,194,90,.3); background: rgba(18,15,8,.82); color: #fff1c4; font-family: inherit; }
+        .lib-tl i { font-style: normal; font-size: 28px; } .lib-tl b { font-size: 14px; font-weight: 500; } .lib-tl small { color: #7fe0c0; font-size: 11px; text-align: center; }
+        .lib-bkb { background: none; border: 0; color: #f1d77a; font-family: inherit; font-size: 14px; padding: 6px 0 10px; }
         .lib { font-family: var(--font-kufi), sans-serif; color: #fff1c4; }
         .lib-hall { position: relative; text-align: center; padding: 56px 0 10px; margin: 0 0 8px; border-radius: 16px 16px 0 0; background: linear-gradient(180deg,#0a0603,#1c1209); border: 1px solid rgba(232,194,90,.25); overflow: hidden; }
         .lib-arch { position: absolute; top: 14px; left: 50%; width: 150px; height: 70px; transform: translateX(-50%); border: 5px solid #6a4620; border-bottom: 0; border-radius: 75px 75px 0 0; background: radial-gradient(ellipse at 50% 100%, rgba(255,214,110,.55), rgba(255,170,60,.12) 60%, transparent 75%); }
