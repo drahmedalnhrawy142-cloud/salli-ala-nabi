@@ -104,6 +104,20 @@ BOOKS = [
        sub='الأمانة والعدل وولاية الأمور في الشرع', src='RELEASE/data/0728IbnTaymiyya/0728IbnTaymiyya.SiyasaSharciyya/*Shamela0031237-ara1', via='المكتبة الشاملة'),
   dict(id='aqsam', cat='علوم القرآن', title='التبيان في أقسام القرآن', author='ابن القيم (ت ٧٥١هـ)',
        sub='أقسام الله في القرآن ودلالاتها', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.TibyanFiAqsamQuran/*Shamela0007572-ara1', via='المكتبة الشاملة'),
+  dict(id='tadmuriyya', cat='العقيدة', title='الرسالة التدمرية', author='ابن تيمية (ت ٧٢٨هـ)',
+       sub='تحقيق الإثبات للأسماء والصفات وحقيقة التوحيد والقدر', src='RELEASE/data/0728IbnTaymiyya/0728IbnTaymiyya.RisalaTadmuriyya/*Shamela0022666-ara1', via='المكتبة الشاملة'),
+  dict(id='hisba', cat='الفقه والعبادات', title='الحسبة في الإسلام', author='ابن تيمية (ت ٧٢٨هـ)',
+       sub='الأمر بالمعروف والنهي عن المنكر وولاية الحسبة', src='RELEASE/data/0728IbnTaymiyya/0728IbnTaymiyya.Hisba/*Shamela0007263-ara1', via='المكتبة الشاملة'),
+  dict(id='rafcmalam', cat='الفقه المقارن', title='رفع الملام عن الأئمة الأعلام', author='ابن تيمية (ت ٧٢٨هـ)',
+       sub='أسباب اختلاف الأئمة وعذرهم فيما خالفوا فيه', src='RELEASE/data/0728IbnTaymiyya/0728IbnTaymiyya.RafcMalam/*Shamela0004118-ara1', via='المكتبة الشاملة'),
+  dict(id='amrad', cat='العلم وآدابه', title='أمراض القلوب وشفاؤها', author='ابن تيمية (ت ٧٢٨هـ)',
+       sub='الحسد والرياء والكبر ودواؤها', src='RELEASE/data/0728IbnTaymiyya/0728IbnTaymiyya.AmradQulub/*Shamela0001512-ara1', via='المكتبة الشاملة'),
+  dict(id='hasana', cat='العقيدة', title='الحسنة والسيئة', author='ابن تيمية (ت ٧٢٨هـ)',
+       sub='أسباب الحسنات والسيئات وما يصيب العبد', src='RELEASE/data/0728IbnTaymiyya/0728IbnTaymiyya.HasanaWaSayyia/*Shamela0007609-ara1', via='المكتبة الشاملة'),
+  dict(id='ahkamsult', cat='الفقه والعبادات', title='الأحكام السلطانية', author='الماوردي (ت ٤٥٠هـ)',
+       sub='الإمامة والولايات والقضاء والحسبة', src='RELEASE/data/0450AbuHasanMawardi/0450AbuHasanMawardi.AhkamSultaniyya/*Shamela0022881-ara1.mARkdown', via='المكتبة الشاملة'),
+  dict(id='rawdat', cat='أصول الفقه', title='روضة الناظر وجنة المناظر', author='ابن قدامة المقدسي (ت ٦٢٠هـ)',
+       sub='في أصول الفقه على مذهب الإمام أحمد', src='RELEASE/data/0620IbnQudamaMaqdisi/0620IbnQudamaMaqdisi.RawdatNazir/*Shamela0012010-ara1', via='المكتبة الشاملة'),
 ]
 def clean(t):
     t = re.sub(r'PageV\d+P\d+', '', t); t = re.sub(r'\s*ms\d+\b', '', t)
