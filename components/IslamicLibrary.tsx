@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { FiqhBook } from '@/components/FiqhMadhahib';
+import { BookReader } from '@/components/BookReader';
 
 /**
  * المكتبة العلمية لطالب العلم: كتب متفق عليها عند أهل السنة (عقيدة، حديث ومصطلح، أصول فقه، علم وآداب، لغة).
@@ -29,14 +29,14 @@ export function IslamicLibrary() {
   if (!list) return <p style={{ textAlign: 'center', opacity: 0.7 }}>جارٍ التحميل…</p>;
   if (bk)
     return (
-      <FiqhBook
+      <BookReader
         key={bk.id}
         dir={`/library/${bk.id}/`}
         title={bk.title}
-        fiqh={false}
+        author={bk.author}
+        sub={bk.sub}
         backLabel="← المكتبة"
         onBack={() => setBk(null)}
-        credit={`الكتاب: «${bk.title}» — ${bk.author}. النص من ${bk.via} عبر مشروع OpenITI بترخيص CC BY-NC-SA 4.0، دون تعديل في ألفاظ المؤلف (وقد تظهر فيه هوامش المحقق وأرقام الأحاديث كما في النسخة الرقمية). للدراسة والاطّلاع؛ والأفضل قراءة الكتب على شيخ أو معلّم.`}
       />
     );
   const cats = [...CATS, ...Array.from(new Set(list.map((b) => b.cat))).filter((c) => !CATS.includes(c))];

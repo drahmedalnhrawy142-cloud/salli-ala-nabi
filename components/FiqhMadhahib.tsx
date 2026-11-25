@@ -10,12 +10,12 @@ import { FIQH_BOOKS } from '@/components/ilm/books';
  * النص من المكتبة الشاملة (تحقيق السيد يوسف أحمد، دار الكتب العلمية) عبر مشروع OpenITI (CC BY-NC-SA 4.0)،
  * مقسّم بـ tools/build_fiqh.py إلى كتب وأبواب وفقرات دون تعديل ألفاظ المؤلف. يعمل بلا نت داخل التطبيق.
  */
-type K = { t: string; b: number; n: number };
-type Bab = { t: string; e: string[] };
-type Kit = { t: string; b: Bab[] };
+export type K = { t: string; b: number; n: number };
+export type Bab = { t: string; e: string[] };
+export type Kit = { t: string; b: Bab[] };
 
 const cache = new Map<string, Promise<Kit>>();
-function loadK(dir: string, n: number): Promise<Kit> {
+export function loadK(dir: string, n: number): Promise<Kit> {
   const key = `${dir}/${n}`;
   let p = cache.get(key);
   if (!p) {
