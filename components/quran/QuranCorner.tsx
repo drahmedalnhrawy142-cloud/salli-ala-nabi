@@ -8,7 +8,6 @@ import { QuranSearch } from './QuranSearch';
 import { QuranWird } from './QuranWird';
 import { QuranTasmee } from './QuranTasmee';
 import { QuranHifz } from './QuranHifz';
-import { AyahOnOpenSettings } from './AyahOnOpen';
 import { TasmeeSheikh } from './TasmeeSheikh';
 import { TajweedRules } from './TajweedRules';
 import { TajweedQuiz } from './TajweedQuiz';
@@ -82,12 +81,23 @@ export function QuranCorner() {
               )),
           },
           { id: 'wird', label: 'ورد القرآن', icon: '🗓️', hint: 'خطة الختمة', render: () => need((d) => <QuranWird data={d} currentPage={page} onOpenAt={openAt} />) },
-          { id: 'aoo', label: 'آية عند الفتح', icon: '🌟', hint: 'كل مرة تفتح التطبيق', render: () => <AyahOnOpenSettings /> },
-          { id: 'hifz', label: 'خطة الحفظ والمراجعة', icon: '🧠', hint: 'مراجعة متباعدة وتقدّمك', render: () => need((d) => <QuranHifz data={d} onGo={openAt} />) },
-          { id: 'sheikh', label: 'التسميع على الشيخ', icon: '🎙️', hint: 'بالصوت', render: () => need((d) => <TasmeeSheikh data={d} />) },
-          { id: 'tasmee', label: 'التسميع الذاتي', icon: '📝', hint: 'اختبر حفظك', render: () => need((d) => <QuranTasmee data={d} currentPage={page} />) },
-          { id: 'tajweed', label: 'أحكام التجويد', icon: '🎓', hint: 'بأمثلة من المصحف', render: () => need((d) => <TajweedRules data={d} onOpenAt={openAt} />) },
-          { id: 'tjquiz', label: 'اختبار التجويد', icon: '🎯', hint: 'حدّد الحكم في موضع من المصحف', render: () => need((d) => <TajweedQuiz data={d} />) },
+          { id: 'hifzhub', label: 'الحفظ والتسميع', icon: '🧠', hint: 'خطة الحفظ · التسميع على الشيخ · التسميع الذاتي', render: () => (
+            <SectionGrid
+              secs={[
+                { id: 'hifz', label: 'خطة الحفظ والمراجعة', icon: '🧠', hint: 'مراجعة متباعدة وتقدّمك', render: () => need((d) => <QuranHifz data={d} onGo={openAt} />) },
+                { id: 'sheikh', label: 'التسميع على الشيخ', icon: '🎙️', hint: 'بالصوت', render: () => need((d) => <TasmeeSheikh data={d} />) },
+                { id: 'tasmee', label: 'التسميع الذاتي', icon: '📝', hint: 'اختبر حفظك', render: () => need((d) => <QuranTasmee data={d} currentPage={page} />) },
+              ]}
+            />
+          ) },
+          { id: 'tjhub', label: 'التجويد', icon: '🎓', hint: 'الأحكام بأمثلة · واختبار التجويد', render: () => (
+            <SectionGrid
+              secs={[
+                { id: 'tajweed', label: 'أحكام التجويد', icon: '🎓', hint: 'بأمثلة من المصحف', render: () => need((d) => <TajweedRules data={d} onOpenAt={openAt} />) },
+                { id: 'tjquiz', label: 'اختبار التجويد', icon: '🎯', hint: 'حدّد الحكم في موضع من المصحف', render: () => need((d) => <TajweedQuiz data={d} />) },
+              ]}
+            />
+          ) },
           { id: 'index', label: 'الفهرس', icon: '🗂️', hint: 'السور والأجزاء', render: () => need((d) => <QuranIndex data={d} onGo={openAt} />) },
           { id: 'search', label: 'بحث', icon: '🔎', hint: 'في كل الآيات', render: () => need((d) => <QuranSearch data={d} onGo={openAt} />) },
           {

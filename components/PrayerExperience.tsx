@@ -1,6 +1,7 @@
 
 'use client';
 
+import { AyahOnOpenSettings } from '@/components/quran/AyahOnOpen';
 import { OpenVoiceSetting, playOpenVoice } from '@/components/openVoice';
 import { Fragment, Suspense, lazy, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -2117,10 +2118,11 @@ export function PrayerExperience() {
               secs={[
                 { id: 'rhub', group: 'التنبيهات والتحكم', label: 'مركز التذكيرات', icon: '⏰', hint: 'الصلاة على النبي ﷺ والأذكار والحديث وكل تنبيهاتك', render: () => (
                   <SectionGrid
-                    groupOrder={['الصلاة على النبي ﷺ', 'تنبيهات الصلاة والأذكار', 'من العلم']}
+                    groupOrder={['يظهر على شاشتك', 'تنبيهات الصلاة والأذكار']}
                     secs={[
-                { id: 'openvoice', group: 'الصلاة على النبي ﷺ', label: 'صوت فتح التطبيق', icon: '🔊', hint: 'صلِّ على النبي ﷺ عند الفتح', render: () => <OpenVoiceSetting /> },
-                { id: 'float', group: 'الصلاة على النبي ﷺ', label: 'الأيقونة العايمة', icon: '🫧', hidden: !floatSupported, render: () => (
+                { id: 'aoo', group: 'يظهر على شاشتك', label: 'آية عند الفتح', icon: '🌟', hint: 'آية جديدة كل مرة تفتح التطبيق', render: () => <AyahOnOpenSettings /> },
+                { id: 'openvoice', group: 'يظهر على شاشتك', label: 'صوت فتح التطبيق', icon: '🔊', hint: 'صلِّ على النبي ﷺ عند الفتح', render: () => <OpenVoiceSetting /> },
+                { id: 'float', group: 'يظهر على شاشتك', label: 'الأيقونة العايمة', icon: '🫧', hidden: !floatSupported, render: () => (
           <section className="content-card" id="s-float">
             <h2 className="section-title">الأيقونة العايمة</h2>
             <p className="float-note">
@@ -2300,8 +2302,8 @@ export function PrayerExperience() {
                   ]}
                 />
                 ) },
-                { id: 'dhadith', group: 'من العلم', label: 'حديث اليوم', icon: '🌅', hint: 'حديث جديد كل يوم', render: () => <DailyHadith /> },
-                { id: 'dq', group: 'من العلم', label: 'سؤال اليوم', icon: '💡', render: () => (
+                { id: 'dhadith', group: 'يظهر على شاشتك', label: 'حديث اليوم', icon: '🌅', hint: 'حديث جديد كل يوم', render: () => <DailyHadith /> },
+                { id: 'dq', group: 'يظهر على شاشتك', label: 'سؤال اليوم', icon: '💡', render: () => (
                 <Suspense fallback={null}>
                   <DailyQuestion />
                 </Suspense>
