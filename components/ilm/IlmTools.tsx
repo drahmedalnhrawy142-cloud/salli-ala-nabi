@@ -11,33 +11,9 @@ import { getLast, removeFav, useFavs } from '@/components/ilm/ilmStore';
  * متابعة القراءة، المفضلة، والبحث الشامل في كل الكتب. تعمل بلا نت داخل التطبيق.
  */
 type Open = { b: BookMeta; ki: number; bi: number };
-type Kit = { t: string; b: { t: string; e: string[] }[] };
 type Mode = 'search' | 'fav' | 'last';
 
-const kc = new Map<string, Promise<Kit>>();
-function loadK(dir: string, n: number): Promise<Kit> {
-  const k = `${dir}${n}`;
-  let p = kc.get(k);
-  if (!p) {
-    p = fetch(`${dir}k${n}.json`).then((r) => {
-      if (!r.ok) throw new Error('k');
-      return r.json() as Promise<Kit>;
-    });
-    p.catch(() => kc.delete(k));
-    kc.set(k, p);
-  }
-  return p;
-}
-const ic = new Map<string, Promise<{ t: string }[]>>();
-function loadIdx(dir: string) {
-  let p = ic.get(dir);
-  if (!p) {
-    p = fetch(`${dir}index.json`).then((r) => (r.ok ? r.json() : Promise.reject()));
-    p.catch(() => ic.delete(dir));
-    ic.set(dir, p);
-  }
-  return p;
-}
+import { loadIndex as loadIdx, loadKit as loadK } from '@/components/ilm/sources';
 
 const css = `
   .it { font-family: var(--font-kufi), sans-serif; color: #fff1c4; }
@@ -79,28 +55,6 @@ function Card({ src, t, q, onOpen, extra }: { src: string; t: string; q?: string
   );
 }
 
-type HBook = { id: string; title: string; chapters: { id: number; t: string }[] };
-let hIdx: Promise<HBook[]> | null = null;
-function loadHIdx() {
-  if (!hIdx) {
-    hIdx = fetch('/hadith/index.json').then((r) => (r.ok ? r.json() : Promise.reject()));
-    hIdx.catch(() => (hIdx = null));
-  }
-  return hIdx;
-}
-const hc = new Map<string, Promise<[string, string][]>>();
-function loadH(book: string, id: number) {
-  const k = `${book}/${id}`;
-  let p = hc.get(k);
-  if (!p) {
-    p = fetch(`/hadith/${k}.json`).then((r) => (r.ok ? r.json() : Promise.reject()));
-    p.catch(() => hc.delete(k));
-    hc.set(k, p);
-  }
-  return p;
-}
-const HSEL: [string, string][] = [['h:bukhari', 'صحيح البخاري'], ['h:muslim', 'صحيح مسلم'], ['h:nawawi', 'الأربعون النووية']];
-
 function SearchAll({ books, onOpen }: { books: BookMeta[]; onOpen: (o: Open) => void }) {
   const [q, setQ] = useState('');
   const [sel, setSel] = useState('all');
@@ -138,26 +92,6 @@ function SearchAll({ books, onOpen }: { books: BookMeta[]; onOpen: (o: Open) => 
         setRes([...out]);
       }
     }
-    // الحديث: البخاري ومسلم والأربعون النووية (نصوص sunnah.com)
-    if (sel === 'all' || sel.startsWith('h:')) {
-      try {
-        const hb = (await loadHIdx()).filter((b) => sel === 'all' || sel === `h:${b.id}`);
-        const hj: { b: HBook; c: { id: number; t: string } }[] = [];
-        hb.forEach((b) => b.chapters.forEach((c) => hj.push({ b, c })));
-        for (let j = 0; j < hj.length && out.length < 80; j += 6) {
-          const part = hj.slice(j, j + 6);
-          const data = await Promise.all(part.map((x) => loadH(x.b.id, x.c.id).catch(() => [] as [string, string][])));
-          if (stop.current !== my) return;
-          data.forEach((arr, k) => {
-            for (const [n, t] of arr)
-              if (out.length < 80 && w.every((x) => norm(t).includes(x)))
-                out.push({ ki: 0, bi: 0, src: `${part[k].b.title} ‹ ${part[k].c.t} ‹ حديث ${n}`, p: t });
-          });
-          setProg(Math.round(((j + part.length) / hj.length) * 100));
-          setRes([...out]);
-        }
-      } catch {}
-    }
     setProg(null);
     setRes([...out]);
   }
@@ -167,9 +101,6 @@ function SearchAll({ books, onOpen }: { books: BookMeta[]; onOpen: (o: Open) => 
         <option value="all">كل الكتب والأحاديث</option>
         {books.map((b) => (
           <option key={b.id} value={b.id}>{b.title}</option>
-        ))}
-        {HSEL.map(([v, l]) => (
-          <option key={v} value={v}>{l} (حديث)</option>
         ))}
       </select>
       <div className="it-s">

@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { loadK, type K, type Kit } from '@/components/FiqhMadhahib';
+import { loadIndex, loadKit, type K, type Kit } from '@/components/ilm/sources';
+import { allBooks } from '@/components/ilm/books';
 import { setLast, toggleFav, useFavs } from '@/components/ilm/ilmStore';
 import { addMark, getPos, removeMark, setPos, useMarks } from '@/components/ilm/bookStore';
 import { toAr } from '@/components/quran/data';
@@ -40,12 +41,18 @@ type Info = { pages: number; starts: number[] };
 type Anim = { dir: 'next' | 'prev'; base: F; leaves: F[]; to: Pos | null };
 
 const esc = (s: string) => s.replace(/[&<>]/g, (c) => (c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'));
-function secHtml(sec: { t: string; e: string[] }, hl: Set<number>) {
+const MZ = /(أبو حنيفة|أبي حنيفة|الحنفية|مالك|المالكية|الشافعي|الشافعية|أحمد|الحنابلة)/g;
+const MC = (w: string) => (/حنيف|الحنفية/.test(w) ? 'h' : /مالك/.test(w) ? 'm' : /شافع/.test(w) ? 's' : 'b');
+function secHtml(sec: { t: string; e: string[] }, hl: Set<number>, fiqh = false) {
   let h = `<h2 class="bk-h"><i>❖</i>${esc(sec.t)}<i>❖</i></h2>`;
-  sec.e.forEach((t, i) => {
-    const m = t.match(/^\((\d+)\)\s*([\s\S]*)$/);
-    const body = m ? `<b class="bk-n">${toAr(Number(m[1]))}</b> ${esc(m[2])}` : esc(t);
-    h += `<p data-oi="${i}"${hl.has(i) ? ' class="hl"' : ''}>${body}</p>`;
+  sec.e.forEach((t0, i) => {
+    const kind = t0.charCodeAt(0) === 1 ? 'sub' : t0.charCodeAt(0) === 2 ? 'po' : '';
+    const t = kind ? t0.slice(1) : t0;
+    const m = kind ? null : t.match(/^\((\d+)\)\s*([\s\S]*)$/);
+    const color = (x: string) => (fiqh ? esc(x).replace(MZ, (w) => `<b class="mz ${MC(w)}">${w}</b>`) : esc(x));
+    const body = m ? `<b class="bk-n">${toAr(Number(m[1]))}</b> ${color(m[2])}` : color(t);
+    const cls = [kind, hl.has(i) ? 'hl' : ''].filter(Boolean).join(' ');
+    h += `<p data-oi="${i}"${cls ? ` class="${cls}"` : ''}>${body}</p>`;
   });
   return h;
 }
@@ -67,9 +74,10 @@ const STAG = 85;
 export function BookReader({
   dir,
   title,
-  author = '',
-  sub = '',
+  author: authorP,
+  sub: subP,
   year,
+  fiqh = false,
   onBack,
   backLabel = '← المكتبة',
   start,
@@ -79,11 +87,22 @@ export function BookReader({
   author?: string;
   sub?: string;
   year?: number | null;
+  fiqh?: boolean;
   onBack: () => void;
   backLabel?: string;
   start?: { ki: number; bi: number | null };
 }) {
-  const th = themeOf(year !== undefined ? year : eraYear(author));
+  const [meta, setMeta] = useState<{ author: string; sub: string } | null>(null);
+  useEffect(() => {
+    if (authorP != null) return;
+    allBooks().then((l) => {
+      const m = l.find((x) => x.dir === dir);
+      if (m) setMeta({ author: m.author || '', sub: m.sub || '' });
+    }).catch(() => {});
+  }, [dir, authorP]);
+  const author = authorP ?? meta?.author ?? '';
+  const sub = subP ?? meta?.sub ?? '';
+  const th = themeOf(year !== undefined ? year : author ? eraYear(author) : null);
   const [night, setNight] = useState(() => lsg('bk.night', '0') === '1');
   const [fs, setFs] = useState(() => Number(lsg('bk.fs', '19')));
   const root = useRef<HTMLDivElement>(null);
@@ -122,10 +141,7 @@ export function BookReader({
     return () => window.removeEventListener('resize', up);
   }, []);
   useEffect(() => {
-    fetch(`${dir}index.json`)
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d: K[]) => setIdx(d))
-      .catch(() => setErr(true));
+    loadIndex(dir).then(setIdx).catch(() => setErr(true));
   }, [dir]);
 
   // تغيّر الخط/المقاس يُبطل حساب الصفحات
@@ -149,7 +165,7 @@ export function BookReader({
     async (ki: number) => {
       let k = kits.current.get(ki);
       if (!k) {
-        k = await loadK(dir, ki);
+        k = await loadKit(dir, ki);
         kits.current.set(ki, k);
       }
       return k;
@@ -166,7 +182,7 @@ export function BookReader({
       const kit = await getKit(ki);
       const sec = kit.b[bi];
       const h = host.current!;
-      h.innerHTML = secHtml(sec, new Set());
+      h.innerHTML = secHtml(sec, new Set(), fiqh);
       const right = h.getBoundingClientRect().right;
       const starts: number[] = [];
       let pages = 1;
@@ -306,7 +322,8 @@ export function BookReader({
         if (t.ki >= 0) await measure(t.ki, t.bi);
         busy.current = false;
         run(dir2 === 'next' ? { dir: 'next', base: toF(t), leaves: [toF(pos)], to: t } : { dir: 'prev', base: toF(pos), leaves: [toF(t)], to: t }, 1);
-      } catch {
+      } catch (e) {
+        console.error('book', e);
         busy.current = false;
         setErr(true);
       }
@@ -333,7 +350,8 @@ export function BookReader({
           fwd ? { dir: 'next', base: toF(t), leaves: [toF(pos), ...blanks], to: t } : { dir: 'prev', base: toF(pos), leaves: [...blanks, toF(t)], to: t },
           n
         );
-      } catch {
+      } catch (e) {
+        console.error('book', e);
         busy.current = false;
         setErr(true);
       }
@@ -471,7 +489,7 @@ export function BookReader({
           <span>{kit!.t === title ? '' : kit!.t.length > 26 ? kit!.t.slice(0, 25) + '…' : kit!.t}</span>
         </div>
         <div className="bk-vw">
-          <div className="bk-cols" style={{ transform: `translateX(${f.pg * Wi}px)` }} dangerouslySetInnerHTML={{ __html: secHtml(sec, hlOf(f.ki, f.bi)) }} />
+          <div className="bk-cols" style={{ transform: `translateX(${f.pg * Wi}px)` }} dangerouslySetInnerHTML={{ __html: secHtml(sec, hlOf(f.ki, f.bi), fiqh) }} />
         </div>
         <div className="bk-ft">
           <i>❖</i> {toAr(f.pg + 1)}
@@ -633,7 +651,10 @@ export function BookReader({
         .bk-clip { position: absolute; top: 0; right: 0; width: 0; height: 0; overflow: hidden; pointer-events: none; }
         .bk-meas { position: absolute; top: 0; right: 0; visibility: hidden; font-family: var(--f); color: var(--ink); }
         .bk-cols p, .bk-meas p { margin: 0 0 .35em; text-indent: 1.3em; orphans: 2; widows: 2; font-family: var(--f); }
+        .bk-cols p.sub, .bk-meas p.sub { text-indent: 0; text-align: center; font-weight: 700; color: var(--rub); margin: .5em 0 .3em; break-after: avoid; }
+        .bk-cols p.po, .bk-meas p.po { text-indent: 0; text-align: center; margin: .2em 0 .5em; font-size: .96em; }
         .bk-cols p.hl { background: color-mix(in srgb, #f3c640 42%, transparent); border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+        .bk-cols .mz { font-weight: 700; } .mz.h { color: #0b6b50; } .mz.m { color: #a65a10; } .mz.s { color: #1a4f9c; } .mz.b { color: #7a2a9e; }
         .bk-cols .bk-n, .bk-meas .bk-n { color: var(--rub); font-weight: 700; }
         .bk-cols .bk-h, .bk-meas .bk-h { margin: 0 0 .5em; text-align: center; font-size: 1.12em; line-height: 1.7; font-weight: 700; color: var(--rub); break-after: avoid; }
         .bk-h i { font-style: normal; font-size: .6em; opacity: .75; margin: 0 .5em; }

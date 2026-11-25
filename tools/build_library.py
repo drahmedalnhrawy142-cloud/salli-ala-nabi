@@ -66,8 +66,6 @@ BOOKS = [
   dict(id='waqf', cat='علوم القرآن', title='المكتفى في الوقف والابتدا', author='أبو عمرو الداني (ت ٤٤٤هـ)',
        sub='مواضع الوقف التام والكافي في كل سورة', src='0450AH/data/0444AbuCamrDani/0444AbuCamrDani.MuktafiFiWaqf/*Shamela0026461-ara1', via='المكتبة الشاملة',
        kre=r'سورة', nonum=True),
-  dict(id='arbacun', cat='الحديث وعلومه', title='الأربعون النووية', author='الإمام النووي (ت ٦٧٦هـ)',
-       sub='اثنان وأربعون حديثًا من جوامع الكلم', src='RELEASE/data/0676Nawawi/0676Nawawi.ArbacunaNawawiyya/*Shamela0012836-ara1.mARkdown', via='المكتبة الشاملة'),
   dict(id='wasitiyya', cat='العقيدة', title='العقيدة الواسطية', author='ابن تيمية (ت ٧٢٨هـ)',
        sub='أصول الإيمان بالله وصفاته وبالقدر واليوم الآخر ومنهج أهل السنة', src='RELEASE/data/0728IbnTaymiyya/0728IbnTaymiyya.CaqidaWasitiyya/*Shamela0022665-ara1', via='المكتبة الشاملة'),
   dict(id='usulsunna', cat='العقيدة', title='أصول السنة', author='الإمام أحمد بن حنبل (ت ٢٤١هـ)',
