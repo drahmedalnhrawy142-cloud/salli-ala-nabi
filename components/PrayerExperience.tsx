@@ -26,6 +26,7 @@ import { KidsQuiz } from '@/components/kids/KidsQuiz';
 import { KidsFly } from '@/components/kids/KidsFly';
 import { KidsSalawat } from '@/components/kids/KidsSalawat';
 import { KidsNoor } from '@/components/kids/KidsNoor';
+import { KidsNoor2 } from '@/components/kids/KidsNoor2';
 import { KidsRace } from '@/components/kids/KidsRace';
 import { KidsTuhfa } from '@/components/kids/KidsTuhfa';
 import { KidsGames2 } from '@/components/kids/KidsGames2';
@@ -2087,6 +2088,7 @@ export function PrayerExperience() {
                       { id: 'kasma', group: 'معلومات ومسابقات', label: 'أسماء الله الحسنى', icon: '🌙', hint: 'معانيها وأدلتها واحفظها', render: () => <AsmaAllah /> },
                       { id: 'ksal', group: 'ذكر وصلاة على النبي ﷺ', label: 'نجوم الصلاة ودائرة النور', icon: '🌟', hint: 'المس النجوم وصلِّ عليه ﷺ', render: () => <KidsSalawat /> },
                       { id: 'knoor', group: 'ذكر وصلاة على النبي ﷺ', label: 'فوانيس وبالونات وبطاقات الذكر', icon: '🏮', hint: 'ذاكرة وتركيز ومطابقة بالأذكار', render: () => <KidsNoor /> },
+                      { id: 'knoor2', group: 'ذكر وصلاة على النبي ﷺ', label: 'بيانو وقافلة ونجوم الرسم', icon: '🎹', hint: 'إيقاع وحركة ورسم بالنجوم', render: () => <KidsNoor2 /> },
                       { id: 'kfly', group: 'ذكر وصلاة على النبي ﷺ', label: 'الطير المسبّح ونطّ وسبّح', icon: '🐦', hint: 'سبّح ليطير ويقفز', render: () => <KidsFly /> },
                       { id: 'garden', group: 'ذكر وصلاة على النبي ﷺ', label: 'بستانك', icon: '🌴', hint: 'يكبر مع كل ذكر', render: () => (
                         <Suspense fallback={null}>
