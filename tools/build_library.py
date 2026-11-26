@@ -134,6 +134,22 @@ BOOKS = [
        sub='أحكام المولود وتربية الأولاد', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.TuhfatMawdud/*Shamela0006266-ara1', via='المكتبة الشاملة'),
   dict(id='madarij', cat='العلم وآدابه', title='مدارج السالكين', author='ابن القيم (ت ٧٥١هـ)',
        sub='منازل إياك نعبد وإياك نستعين', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.MadarijSalikin/*Shamela0008370-ara1', via='المكتبة الشاملة'),
+  dict(id='zad', cat='السيرة والتراجم', title='زاد المعاد في هدي خير العباد', author='ابن القيم (ت ٧٥١هـ)',
+       sub='هديه ﷺ في العبادات والمعاملات والطب · تراثي: فيه روايات ضعيفة، للاطلاع', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.ZadMacad/*Shamela0021713-ara1', via='المكتبة الشاملة'),
+  dict(id='ruh', cat='العقيدة', title='الروح', author='ابن القيم (ت ٧٥١هـ)',
+       sub='مسائل الروح والبرزخ · تراثي: فيه روايات ضعيفة، للاطلاع', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.RuhFiKalam/*Shamela0006462-ara1', via='المكتبة الشاملة'),
+  dict(id='dawa', cat='العلم وآدابه', title='الجواب الكافي (الداء والدواء)', author='ابن القيم (ت ٧٥١هـ)',
+       sub='الذنوب وأثرها وعلاجها · تراثي: فيه روايات ضعيفة، للاطلاع', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.DaWaDawa/*Shamela0000158-ara1', via='المكتبة الشاملة'),
+  dict(id='wabil', cat='العلم وآدابه', title='الوابل الصيب من الكلم الطيب', author='ابن القيم (ت ٧٥١هـ)',
+       sub='فضل الذكر وفوائده · تراثي: فيه روايات ضعيفة، للاطلاع', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.WabilSayyib/*Shamela0000216-ara1', via='المكتبة الشاملة'),
+  dict(id='akhlaqquran', cat='علوم القرآن', title='أخلاق أهل القرآن', author='الآجري (ت ٣٦٠هـ)',
+       sub='آداب حامل القرآن وأخلاقه · تراثي: فيه روايات ضعيفة، للاطلاع', src='RELEASE/data/0360AbuBakrAjurri/0360AbuBakrAjurri.AkhlaqAhlQuran/*Shamela0010531-ara1', via='المكتبة الشاملة'),
+  dict(id='akhlaqculama', cat='العلم وآدابه', title='أخلاق العلماء', author='الآجري (ت ٣٦٠هـ)',
+       sub='آداب العالم وأخلاقه · تراثي: فيه روايات ضعيفة، للاطلاع', src='RELEASE/data/0360AbuBakrAjurri/0360AbuBakrAjurri.AkhlaqCulama/*Shamela0001311-ara1', via='المكتبة الشاملة'),
+  dict(id='iqtida', cat='العلم وآدابه', title='اقتضاء العلم العمل', author='الخطيب البغدادي (ت ٤٦٣هـ)',
+       sub='العمل بالعلم وذم من لا يعمل · تراثي: فيه روايات ضعيفة، للاطلاع', src='RELEASE/data/0463KhatibBaghdadi/0463KhatibBaghdadi.IqtidaCilmCamal/*Shamela0012985-ara1', via='المكتبة الشاملة'),
+  dict(id='talbis', cat='العلم وآدابه', title='تلبيس إبليس', author='ابن الجوزي (ت ٥٩٧هـ)',
+       sub='مداخل الشيطان على الناس · تراثي: فيه روايات ضعيفة، للاطلاع', src='RELEASE/data/0597IbnJawzi/0597IbnJawzi.TalbisIblis/*Shamela0011438-ara1.mARkdown', via='المكتبة الشاملة'),
 ]
 def clean(t):
     t = re.sub(r'PageV\d+P\d+', '', t); t = re.sub(r'\s*ms\d+\b', '', t)
