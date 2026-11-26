@@ -118,6 +118,22 @@ BOOKS = [
        sub='الإمامة والولايات والقضاء والحسبة', src='RELEASE/data/0450AbuHasanMawardi/0450AbuHasanMawardi.AhkamSultaniyya/*Shamela0022881-ara1.mARkdown', via='المكتبة الشاملة'),
   dict(id='rawdat', cat='أصول الفقه', title='روضة الناظر وجنة المناظر', author='ابن قدامة المقدسي (ت ٦٢٠هـ)',
        sub='في أصول الفقه على مذهب الإمام أحمد', src='RELEASE/data/0620IbnQudamaMaqdisi/0620IbnQudamaMaqdisi.RawdatNazir/*Shamela0012010-ara1', via='المكتبة الشاملة'),
+  dict(id='qamthal', cat='علوم القرآن', title='الأمثال في القرآن', author='ابن القيم (ت ٧٥١هـ)',
+       sub='ما ضربه الله من الأمثال وما فيها من العبر', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.AmthalFiQuran/*Shamela0000928-ara1', via='المكتبة الشاملة'),
+  dict(id='aclam', cat='أصول الفقه', title='إعلام الموقعين عن رب العالمين', author='ابن القيم (ت ٧٥١هـ)',
+       sub='الفتوى وأصول الاستدلال ومقاصد الشريعة', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.AclamMuwaqqicin/*Shamela0011496-ara1', via='المكتبة الشاملة'),
+  dict(id='turuq', cat='الفقه والعبادات', title='الطرق الحكمية في السياسة الشرعية', author='ابن القيم (ت ٧٥١هـ)',
+       sub='القضاء والبيّنات وطرق الحكم بالعدل', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.TuruqHukmiyya/*Shamela0011495-ara1', via='المكتبة الشاملة'),
+  dict(id='hijratayn', cat='العقيدة', title='طريق الهجرتين وباب السعادتين', author='ابن القيم (ت ٧٥١هـ)',
+       sub='الهجرة إلى الله ورسوله وطبقات المكلفين', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.TariqHijratayn/*Shamela0012029-ara1', via='المكتبة الشاملة'),
+  dict(id='cuddat', cat='العلم وآدابه', title='عدة الصابرين وذخيرة الشاكرين', author='ابن القيم (ت ٧٥١هـ)',
+       sub='الصبر والشكر وحقيقتهما ومنازلهما', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.CuddatSabirin/*Shamela0011274-ara1', via='المكتبة الشاملة'),
+  dict(id='qsalat', cat='الفقه والعبادات', title='الصلاة وحكم تاركها', author='ابن القيم (ت ٧٥١هـ)',
+       sub='حكم الصلاة وتاركها ومنزلتها في الدين', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.Salat/*Shamela0007661-ara1', via='المكتبة الشاملة'),
+  dict(id='tuhfat', cat='الفقه والعبادات', title='تحفة المودود بأحكام المولود', author='ابن القيم (ت ٧٥١هـ)',
+       sub='أحكام المولود وتربية الأولاد', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.TuhfatMawdud/*Shamela0006266-ara1', via='المكتبة الشاملة'),
+  dict(id='madarij', cat='العلم وآدابه', title='مدارج السالكين', author='ابن القيم (ت ٧٥١هـ)',
+       sub='منازل إياك نعبد وإياك نستعين', src='RELEASE/data/0751IbnQayyimJawziyya/0751IbnQayyimJawziyya.MadarijSalikin/*Shamela0008370-ara1', via='المكتبة الشاملة'),
 ]
 def clean(t):
     t = re.sub(r'PageV\d+P\d+', '', t); t = re.sub(r'\s*ms\d+\b', '', t)

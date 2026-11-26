@@ -1717,6 +1717,8 @@ export const UI_EN: Record<string, string> = {
  "آية جديدة كل مرة تفتح التطبيق": "A new ayah each time you open the app",
  "فوانيس وبالونات وبطاقات الذكر": "Dhikr lanterns, balloons and cards",
  "ذاكرة وتركيز ومطابقة بالأذكار": "Memory, focus and matching with dhikr",
+ "بيانو وقافلة ونجوم الرسم": "Piano, caravan and star drawing",
+ "إيقاع وحركة ورسم بالنجوم": "Rhythm, movement and drawing with stars",
  "العقيدة والفقه والعبادة": "Creed, Fiqh & Worship",
  "السيرة والتاريخ": "Seerah & History",
  "المكتبة العلمية": "Scholarly Library",
