@@ -4,6 +4,7 @@ import { memo as __memo } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { gardenAdd } from '@/components/garden/store';
 import { SectionChips } from '@/components/SectionChips';
+import { BeadTasbih, BEAD_STYLES, type BeadStyle } from '@/components/TasbeehBeads';
 
 type Item = { label: string; text: string; source?: string };
 type Group = { id: string; title: string; note?: string; items: Item[] };
@@ -82,6 +83,9 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [rounds, setRounds] = useState<Record<string, number>>({});
   const [auto, setAuto] = useState(true);
+  const [view, setView] = useState<'beads' | 'ring'>('beads');
+  const [bstyle, setBstyle] = useState<BeadStyle>('amber');
+  const [taps, setTaps] = useState(0);
 
   useEffect(() => {
     try {
@@ -90,6 +94,9 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
       const t = localStorage.getItem('tasbeeh_target' + sfx);
       if (t !== null) setTarget(Number(t));
       if (localStorage.getItem('tasbeeh_auto') === '0') setAuto(false);
+      if (localStorage.getItem('tasbeeh_view') === 'ring') setView('ring');
+      const bs = localStorage.getItem('tasbeeh_beads');
+      if (BEAD_STYLES.some((x) => x.id === bs)) setBstyle(bs as BeadStyle);
       if (multi) {
         const saved = localStorage.getItem('tasbeeh_msel');
         const all = GROUPS.flatMap((g) => g.items);
@@ -121,6 +128,7 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
 
   function tap() {
     gardenAdd(1);
+    setTaps((t) => t + 1);
     let next = c + 1;
     let nr = r;
     let done = false;
@@ -145,6 +153,15 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
         } catch {}
       }
     }
+  }
+
+  function pickView(v: 'beads' | 'ring') {
+    setView(v);
+    try { localStorage.setItem('tasbeeh_view', v); } catch {}
+  }
+  function pickBead(v: BeadStyle) {
+    setBstyle(v);
+    try { localStorage.setItem('tasbeeh_beads', v); } catch {}
   }
 
   function toggleAuto(v: boolean) {
@@ -229,6 +246,33 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
           </div>
         )}
 
+        <div className="tb-chips" style={{ marginBottom: 6 }}>
+          <button type="button" className={view === 'beads' ? 'tb-chip tb-on' : 'tb-chip'} onClick={() => pickView('beads')}>📿 مسبحة</button>
+          <button type="button" className={view === 'ring' ? 'tb-chip tb-on' : 'tb-chip'} onClick={() => pickView('ring')}>⭕ عدّاد</button>
+        </div>
+
+        {view === 'beads' && (
+          <>
+            <BeadTasbih
+              N={target > 0 && target <= 33 ? target : 33}
+              c={c}
+              taps={taps}
+              style={bstyle}
+              name={name}
+              num={n(c)}
+              of={target > 0 ? `من ${n(target)}` : 'بلا حد ∞'}
+              onTap={tap}
+            />
+            <div className="tb-chips" style={{ marginTop: 4 }}>
+              {BEAD_STYLES.map((b) => (
+                <button key={b.id} type="button" className={b.id === bstyle ? 'tb-chip tb-on' : 'tb-chip'} onClick={() => pickBead(b.id)}>{b.label}</button>
+              ))}
+            </div>
+            <p className="tb-source" style={{ opacity: 0.7, fontSize: '.8rem' }}>المس الحبّات أو اسحب بإبهامك لأعلى وأسفل لتمرير حبّة</p>
+          </>
+        )}
+
+        {view === 'ring' && (
         <button type="button" className="tb-btn" onClick={tap} aria-label={`${name}: ${c}`}>
           <svg viewBox="0 0 260 260" className="tb-ring" aria-hidden="true">
             <circle cx="130" cy="130" r={R} fill="none" stroke="rgba(232,194,90,.15)" strokeWidth="8" />
@@ -243,6 +287,7 @@ function Tasbeeh({ mode = 'plain' }: { mode?: 'plain' | 'multi' }) {
           <span className="tb-num">{n(c)}</span>
           <span className="tb-of">{target > 0 ? `من ${n(target)}` : 'بلا حد ∞'}</span>
         </button>
+        )}
 
         {multi && sel?.source && <p className="tb-source">{sel.source}</p>}
 
