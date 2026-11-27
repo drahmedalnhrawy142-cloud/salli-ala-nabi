@@ -28,6 +28,7 @@ import { KidsSalawat } from '@/components/kids/KidsSalawat';
 import { KidsNoor } from '@/components/kids/KidsNoor';
 import { KidsNoor2 } from '@/components/kids/KidsNoor2';
 import { KidsLearn } from '@/components/kids/KidsLearn';
+import { LearnFard } from '@/components/learn/LearnFard';
 import { KidsRace } from '@/components/kids/KidsRace';
 import { KidsTuhfa } from '@/components/kids/KidsTuhfa';
 import { KidsGames2 } from '@/components/kids/KidsGames2';
@@ -2065,6 +2066,7 @@ export function PrayerExperience() {
             <SectionGrid
               groupOrder={['طلب العلم']}
               secs={[
+                { id: 'fard', group: 'طلب العلم', label: 'تعلّم الفروض', icon: '🕌', hint: 'الصلاة والوضوء وغيرها مصوّرة خطوة خطوة بأدلتها', render: () => <LearnFard /> },
                 { id: 'lib', group: 'طلب العلم', label: 'المكتبة', icon: '🏛️', hint: 'كل الكتب على رفوفها، والبحث الشامل والمفضلة والمراجع', render: () => <IslamicLibrary /> },
                 { id: 'levels', group: 'طلب العلم', label: 'حلقات العلم', icon: '🪜', hint: 'مسار متدرّج بكتب وشروح مرئية', render: () => <TalabIlm /> },
               ]}
