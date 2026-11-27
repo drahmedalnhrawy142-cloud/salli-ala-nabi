@@ -1726,6 +1726,8 @@ export const UI_EN: Record<string, string> = {
  "لؤلؤ": "Pearl",
  "فيروز": "Turquoise",
  "المس الحبّات أو اسحب بإبهامك لأعلى وأسفل لتمرير حبّة": "Tap the beads or swipe your thumb up and down to pass a bead",
+ "رتّب وتعلّم ولوّن": "Order, learn and colour",
+ "الأركان والوضوء والأشهر · وتلوين": "Pillars, wudu, months · and colouring",
  "العقيدة والفقه والعبادة": "Creed, Fiqh & Worship",
  "السيرة والتاريخ": "Seerah & History",
  "المكتبة العلمية": "Scholarly Library",
