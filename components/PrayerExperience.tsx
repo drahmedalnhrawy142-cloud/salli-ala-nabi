@@ -27,6 +27,7 @@ import { KidsFly } from '@/components/kids/KidsFly';
 import { KidsSalawat } from '@/components/kids/KidsSalawat';
 import { KidsNoor } from '@/components/kids/KidsNoor';
 import { KidsNoor2 } from '@/components/kids/KidsNoor2';
+import { KidsLearn } from '@/components/kids/KidsLearn';
 import { KidsRace } from '@/components/kids/KidsRace';
 import { KidsTuhfa } from '@/components/kids/KidsTuhfa';
 import { KidsGames2 } from '@/components/kids/KidsGames2';
@@ -2102,6 +2103,7 @@ export function PrayerExperience() {
                     ]}
                   />
                 ) },
+                { id: 'klearn', group: 'تعلّم', label: 'رتّب وتعلّم ولوّن', icon: '🧩', hint: 'الأركان والوضوء والأشهر · وتلوين', render: () => <KidsLearn /> },
                 { id: 'ktuhfa', group: 'تعلّم', label: 'تحفة الأطفال', icon: '📜', hint: 'منظومة التجويد للصغار', render: () => <KidsTuhfa /> },
                 { id: 'ktasbih', group: 'رحلتك', label: 'سبحة الصغار', icon: '📿', hint: 'سبّح واجمع النجوم', render: () => <KidsTasbih /> },
                 { id: 'kjourney', group: 'رحلتك', label: 'رحلتي', icon: '🏆', hint: 'مهام اليوم وأوسمتك', render: () => <KidsHome /> },
