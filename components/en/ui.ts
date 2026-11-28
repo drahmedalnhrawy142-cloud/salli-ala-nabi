@@ -1893,4 +1893,8 @@ export const UI_EN: Record<string, string> = {
  "سبّح ليطير ويقفز": "Say tasbih to fly and jump",
  "الطير المسبّح": "Tasbih Bird",
  "نطّ وسبّح": "Jump & Tasbih",
+ "متابعتك": "Your Progress",
+ "مناسبات وفضائل": "Occasions & Virtues",
+ "أوراد وأذكار": "Wird & Dhikr",
+ "وردك اليومي والسبحة والأذكار": "Your daily wird, tasbih and adhkar",
 };

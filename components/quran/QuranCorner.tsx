@@ -11,6 +11,7 @@ import { QuranHifz } from './QuranHifz';
 import { TasmeeSheikh } from './TasmeeSheikh';
 import { TajweedRules } from './TajweedRules';
 import { TajweedQuiz } from './TajweedQuiz';
+import { FriendsKhatma } from '@/components/FriendsKhatma';
 import { lsGet, lsSet, toAr, useQuran } from './data';
 
 export function QuranCorner() {
@@ -81,6 +82,7 @@ export function QuranCorner() {
               )),
           },
           { id: 'wird', label: 'ورد القرآن', icon: '🗓️', hint: 'خطة الختمة', render: () => need((d) => <QuranWird data={d} currentPage={page} onOpenAt={openAt} />) },
+          { id: 'fkhatma', label: 'ختمة مع الأصحاب', icon: '👥', hint: 'وزّع الأجزاء الثلاثين', render: () => <FriendsKhatma /> },
           { id: 'hifzhub', label: 'الحفظ والتسميع', icon: '🧠', hint: 'خطة الحفظ · التسميع على الشيخ · التسميع الذاتي', render: () => (
             <SectionGrid
               secs={[
