@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { BookReader } from '@/components/BookReader';
 import { IlmTools } from '@/components/ilm/IlmTools';
 import { EXTRA_SHELF } from '@/components/ilm/books';
+import { getLast } from '@/components/ilm/ilmStore';
+import { lsGet, lsSet } from '@/components/quran/data';
 import { HadithQudsi } from '@/components/HadithQudsi';
 import { GhazawatMap } from '@/components/GhazawatMap';
 import { SurahInfo } from '@/components/quran/SurahInfo';
@@ -62,6 +64,9 @@ export function IslamicLibrary() {
   const [q, setQ] = useState('');
   const [tab, setTab] = useState('shelves');
   const [tool, setTool] = useState<string | null>(null);
+  const [cf, setCf] = useState('');
+  const [view, setView] = useState<string>(() => lsGet<string>('lib.view', 'shelves'));
+  const [sheet, setSheet] = useState<B | null>(null);
   const tm = useRef<number[]>([]);
   useEffect(() => () => tm.current.forEach(clearTimeout), []);
   useEffect(() => {
@@ -86,13 +91,22 @@ export function IslamicLibrary() {
       />
     );
   const cats = [...CATS, ...Array.from(new Set(list.map((b) => b.cat))).filter((c) => !CATS.includes(c))];
-  const qq = q.trim();
-  const shown = qq ? list.filter((b) => (b.title + b.author + b.sub).includes(qq)) : list;
   const PAL = [
     ['#5a1620', '#8a2433'], ['#0f4a3a', '#17705a'], ['#13294b', '#1f4478'], ['#4a2c12', '#744520'],
     ['#2b1a42', '#472a6b'], ['#1c1c1c', '#383838'], ['#5b4210', '#8a6618'], ['#0f3d47', '#1a6475'],
   ];
   const hash = (t: string) => [...t].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
+  const qq = q.trim();
+  const shown = list.filter((b) => (!cf || b.cat === cf) && (!qq || (b.title + b.author + b.sub).includes(qq)));
+  const bdir = (b: B) => b.dir || `/library/${b.id}/`;
+  const lastRec = getLast();
+  const lastBook = lastRec ? list.find((b) => bdir(b) === lastRec.dir) : undefined;
+  const dayN = Math.floor(Date.now() / 86400000);
+  const pick = list[(dayN * 7919) % list.length];
+  const nAuth = new Set(list.map((b) => b.author)).size;
+  const catCount = (c: string) => list.filter((b) => b.cat === c).length;
+  const grad = (b: B) => { const [c1, c2] = PAL[hash(b.id) % PAL.length]; return `linear-gradient(135deg,${c1},${c2})`; };
+  const setV = (v: string) => { setView(v); lsSet('lib.view', v); };
   function open(b: B) {
     const [c1, c2] = PAL[hash(b.id) % PAL.length];
     setOp({ b, c: `linear-gradient(135deg,${c1},${c2})` });
@@ -134,10 +148,47 @@ export function IslamicLibrary() {
       <div className="lib-hall">
         <div className="lib-arch"><span className="lib-chand">🕯️</span></div>
         <b>المكتبة العامة</b>
-        <small>{list.length} كتابًا على الرفوف</small>
+        <small>{list.length} كتابًا · {nAuth} مؤلفًا · {cats.filter((c) => catCount(c)).length} فنًّا</small>
       </div>
       <input className="lib-q" value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث عن كتاب أو مؤلف…" aria-label="بحث في المكتبة" />
-      <div className="lib-room">
+      {!qq && !cf && (
+        <div className="lib-feat">
+          {lastBook && (
+            <button type="button" className="lib-fc" onClick={() => open(lastBook)}>
+              <span className="lib-mini" style={{ background: grad(lastBook) }}>🔖</span>
+              <span><small>تابع القراءة</small><b>{lastBook.title}</b><em>{lastRec?.label}</em></span>
+            </button>
+          )}
+          {pick && (
+            <button type="button" className="lib-fc" onClick={() => setSheet(pick)}>
+              <span className="lib-mini" style={{ background: grad(pick) }}>✨</span>
+              <span><small>كتاب اليوم</small><b>{pick.title}</b><em>{pick.author}</em></span>
+            </button>
+          )}
+        </div>
+      )}
+      <div className="lib-chips">
+        <button type="button" className={!cf ? 'on' : ''} onClick={() => setCf('')}>الكل <i>{list.length}</i></button>
+        {cats.filter((c) => catCount(c)).map((c) => (
+          <button key={c} type="button" className={cf === c ? 'on' : ''} onClick={() => setCf(c)}>{c} <i>{catCount(c)}</i></button>
+        ))}
+      </div>
+      <div className="lib-vt">
+        <button type="button" className={view === 'shelves' ? 'on' : ''} onClick={() => setV('shelves')}>🏛️ رفوف</button>
+        <button type="button" className={view === 'cards' ? 'on' : ''} onClick={() => setV('cards')}>🗂️ بطاقات</button>
+      </div>
+      {view === 'cards' && (
+        <div className="lib-cards">
+          {shown.map((b) => (
+            <button key={b.id} type="button" className="lib-card" onClick={() => setSheet(b)}>
+              <span className="lib-mini" style={{ background: grad(b) }}>{b.title.slice(0, 1)}</span>
+              <span className="lib-ct"><b>{b.title}</b><em>{b.author}</em><small>{b.sub}</small><i>{b.cat}</i></span>
+            </button>
+          ))}
+          {!shown.length && <p style={{ textAlign: 'center', opacity: 0.7, padding: 20, gridColumn: '1/-1' }}>لا يوجد كتاب بهذا الاسم.</p>}
+        </div>
+      )}
+      {view !== 'cards' && <div className="lib-room">
         {cats.map((c, ci) => {
           const bs = shown.filter((b) => b.cat === c);
           if (!bs.length) return null;
@@ -162,7 +213,7 @@ export function IslamicLibrary() {
                             type="button"
                             className={`lib-bk${op?.b.id === b.id ? ' out' : ''}${lean ? ' lean' : ''}`}
                             style={{ height: ht, width: w, background: `linear-gradient(90deg,${c1},${c2} 40%,${c1} 85%,rgba(0,0,0,.5))` }}
-                            onClick={() => open(b)}
+                            onClick={() => setSheet(b)}
                             aria-label={`${b.title} — ${b.author}`}
                           >
                             <span className="lib-band" style={{ top: 7 }} />
@@ -185,9 +236,24 @@ export function IslamicLibrary() {
         })}
         {!shown.length && <p style={{ textAlign: 'center', opacity: 0.7, padding: 20 }}>لا يوجد كتاب بهذا الاسم.</p>}
         <div className="lib-floor"><span className="lib-ladder">🪜</span><span className="lib-rug" /></div>
-      </div>
+      </div>}
       <p className="lib-note">اضغط على أي كتاب ليُفتح لك وتتصفّح أبوابه وفصوله. تُضاف كتب أخرى تباعًا.</p>
       </>)}
+      {tab === 'shelves' && sheet && !op && (
+        <div className="lib-sh" onClick={() => setSheet(null)}>
+          <div className="lib-sc" onClick={(e) => e.stopPropagation()}>
+            <span className="lib-mini big" style={{ background: grad(sheet) }}>{sheet.title.slice(0, 1)}</span>
+            <h3>{sheet.title}</h3>
+            <em>{sheet.author}</em>
+            <p>{sheet.sub}</p>
+            <i className="lib-cat">{sheet.cat}</i>
+            <div className="lib-sb">
+              <button type="button" className="go" onClick={() => { const b = sheet; setSheet(null); open(b); }}>📖 افتح الكتاب</button>
+              <button type="button" onClick={() => setSheet(null)}>إغلاق</button>
+            </div>
+          </div>
+        </div>
+      )}
       {tab === 'shelves' && op && (
         <div className="lib-ov" aria-hidden="true">
           <div className="lib-3d">
@@ -250,6 +316,23 @@ export function IslamicLibrary() {
         .lib-frame b { font-size: 19px; line-height: 1.5; } .lib-frame em { font-style: normal; font-size: 12px; color: #ffe9a8; }
         @keyframes lib-zoom { 0% { transform: scale(.35) rotateY(0) } 45% { transform: scale(1) rotateY(-12deg) } 100% { transform: scale(1.35) rotateY(-12deg) } }
         @keyframes lib-open { 0%, 45% { transform: rotateY(0) } 100% { transform: rotateY(160deg) } }
+        .lib-feat { display: grid; gap: 8px; margin-bottom: 10px; }
+        .lib-fc, .lib-card { display: flex; gap: 12px; align-items: center; text-align: start; padding: 10px 12px; border-radius: 16px; border: 1px solid rgba(232,194,90,.3); background: linear-gradient(135deg, rgba(40,28,10,.9), rgba(18,15,8,.9)); color: #fff1c4; font-family: inherit; }
+        .lib-fc small { display: block; color: #7fe0c0; font-size: 11px; } .lib-fc b { display: block; font-size: 15px; color: #f1d77a; font-weight: 600; } .lib-fc em { font-style: normal; font-size: 12px; opacity: .75; }
+        .lib-mini { flex: none; width: 46px; height: 62px; border-radius: 4px 8px 8px 4px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #f7e7a6; border: 1px solid rgba(241,215,122,.55); box-shadow: inset -3px 0 5px rgba(0,0,0,.45), 2px 3px 8px rgba(0,0,0,.6); }
+        .lib-mini.big { width: 84px; height: 116px; font-size: 40px; margin: 0 auto 10px; }
+        .lib-chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; }
+        .lib-chips button { flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(232,194,90,.3); background: transparent; color: #e8c25a; font-family: inherit; font-size: 12.5px; white-space: nowrap; }
+        .lib-chips button.on { background: rgba(232,194,90,.25); border-color: #e8c25a; color: #fff1c4; } .lib-chips i { font-style: normal; opacity: .6; font-size: 11px; margin-inline-start: 3px; }
+        .lib-vt { display: flex; gap: 6px; margin-bottom: 10px; }
+        .lib-vt button { flex: 1; padding: 7px; border-radius: 12px; border: 1px solid rgba(232,194,90,.3); background: rgba(18,15,8,.8); color: #f1d77a; font-family: inherit; font-size: 13px; } .lib-vt button.on { background: rgba(232,194,90,.22); border-color: #e8c25a; }
+        .lib-cards { display: grid; gap: 8px; }
+        .lib-ct { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .lib-ct b { font-size: 14.5px; color: #f1d77a; font-weight: 600; } .lib-ct em { font-style: normal; font-size: 12px; opacity: .8; } .lib-ct small { font-size: 11.5px; opacity: .6; line-height: 1.6; }
+        .lib-ct i, .lib-cat { font-style: normal; align-self: flex-start; font-size: 11px; padding: 2px 9px; border-radius: 999px; background: rgba(127,224,192,.14); color: #7fe0c0; }
+        .lib-sh { position: fixed; inset: 0; z-index: 55; background: rgba(0,0,0,.7); display: flex; align-items: flex-end; justify-content: center; animation: lib-fd .2s both; }
+        .lib-sc { width: 100%; max-width: 480px; box-sizing: border-box; padding: 20px 18px 24px; border-radius: 22px 22px 0 0; background: linear-gradient(180deg,#1c1409,#0d0905); border: 1px solid rgba(232,194,90,.4); border-bottom: 0; text-align: center; }
+        .lib-sc h3 { margin: 0 0 4px; font-size: 19px; color: #f1d77a; } .lib-sc em { font-style: normal; font-size: 13px; color: #ffe9a8; } .lib-sc p { font-size: 13px; line-height: 1.8; opacity: .8; margin: 8px 0; }
+        .lib-sb { display: flex; gap: 8px; margin-top: 14px; } .lib-sb button { flex: 1; padding: 11px; border-radius: 14px; border: 1px solid rgba(232,194,90,.4); background: transparent; color: #f1d77a; font-family: inherit; font-size: 14px; } .lib-sb .go { flex: 2; background: rgba(232,194,90,.25); border-color: #e8c25a; color: #fff1c4; }
       `}</style>
     </div>
   );

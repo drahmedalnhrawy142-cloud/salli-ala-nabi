@@ -1901,4 +1901,9 @@ export const UI_EN: Record<string, string> = {
  "الصلاة على النبي ﷺ": "Salawat on the Prophet ﷺ",
  "مواقيت الصلاة": "Prayer Times",
  "الفروض والمكتبة والسيرة والمناسبات": "Obligations, library, seerah and occasions",
+ "تابع القراءة": "Continue reading",
+ "كتاب اليوم": "Book of the day",
+ "🏛️ رفوف": "🏛️ Shelves",
+ "🗂️ بطاقات": "🗂️ Cards",
+ "📖 افتح الكتاب": "📖 Open the book",
 };
