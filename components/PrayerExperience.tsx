@@ -34,7 +34,6 @@ import { KidsTuhfa } from '@/components/kids/KidsTuhfa';
 import { KidsGames2 } from '@/components/kids/KidsGames2';
 import { KidsHome, KidsTasbih } from '@/components/kids/KidsHome';
 import { WorshipTracker } from '@/components/WorshipTracker';
-import { FriendsKhatma } from '@/components/FriendsKhatma';
 import { POEMS } from '@/components/poemsData';
 import { CreditsPage } from '@/components/CreditsPage';
 import { IslamicLibrary } from '@/components/IslamicLibrary';
@@ -2022,14 +2021,14 @@ export function PrayerExperience() {
         <div className="tab-pane" hidden={tab !== 'wird'}>
           <header className="tab-head">
             <h1>وردي</h1>
-            <p>السبحة والأذكار وورد اليوم وإنجازاتك</p>
+            <p>وردك اليومي والسبحة والأذكار</p>
           </header>
           <SectionGrid
-            groupOrder={['أذكارك وورد يومك', 'متابعة وإنجاز', 'مع الأحباب']}
+            groupOrder={['أوراد وأذكار']}
             onOpenChange={setWirdSec}
             secs={[
-              { id: 'virtue', group: 'أذكارك وورد يومك', label: 'أيام الفضل', icon: '🌙', hint: 'عرفة وعاشوراء والبيض…', render: () => <VirtueDays /> },
-              { id: 'corner', group: 'أذكارك وورد يومك', label: 'السبحة والأذكار', icon: '📿', render: () => (
+              { id: 'wird', group: 'أوراد وأذكار', label: 'وردك', icon: '📜', render: () => <DailyWird onPray={addPrayer} /> },
+              { id: 'corner', group: 'أوراد وأذكار', label: 'السبحة والأذكار', icon: '📿', render: () => (
                 <SectionGrid
                   onOpenChange={setCornerSec}
                   secs={[
@@ -2040,18 +2039,6 @@ export function PrayerExperience() {
                   ]}
                 />
               ) },
-              { id: 'hijri', group: 'أذكارك وورد يومك', label: 'التقويم الهجري ورمضان', icon: '🗓️', hint: 'المناسبات وإمساكية رمضان', render: () => <HijriCalendar /> },
-              { id: 'tracker', group: 'متابعة وإنجاز', label: 'جدول عباداتك', icon: '✅', hint: 'صلواتك وأذكارك وصيامك + تذكير', render: () => <WorshipTracker /> },
-              { id: 'fkhatma', group: 'مع الأحباب', label: 'ختمة مع الأصحاب', icon: '👥', hint: 'وزّع الأجزاء الثلاثين', render: () => <FriendsKhatma /> },
-              { id: 'wird', group: 'أذكارك وورد يومك', label: 'وردك', icon: '📜', render: () => <DailyWird onPray={addPrayer} /> },
-              { id: 'fadl', group: 'أذكارك وورد يومك', label: 'فضل الصلاة', icon: '📖', render: () => <HadithFadl /> },
-              { id: 'stats', group: 'متابعة وإنجاز', label: 'إحصائياتك', icon: '📊', render: () => (
-                <>
-                  <WeeklyStats />
-                  <ProphetStats count={count} todayCount={todayCount} streak={streak} />
-                </>
-              ) },
-              { id: 'share', group: 'متابعة وإنجاز', label: 'بطاقتك', icon: '🎴', render: () => <ShareCard count={count} /> },
             ]}
           />
         </div>
@@ -2064,11 +2051,14 @@ export function PrayerExperience() {
           </header>
           {seen.names && (
             <SectionGrid
-              groupOrder={['طلب العلم']}
+              groupOrder={['طلب العلم', 'مناسبات وفضائل']}
               secs={[
                 { id: 'fard', group: 'طلب العلم', label: 'تعلّم الفروض', icon: '🕌', hint: 'الصلاة والوضوء وغيرها مصوّرة خطوة خطوة بأدلتها', render: () => <LearnFard /> },
                 { id: 'lib', group: 'طلب العلم', label: 'المكتبة', icon: '🏛️', hint: 'كل الكتب على رفوفها، والبحث الشامل والمفضلة والمراجع', render: () => <IslamicLibrary /> },
                 { id: 'levels', group: 'طلب العلم', label: 'حلقات العلم', icon: '🪜', hint: 'مسار متدرّج بكتب وشروح مرئية', render: () => <TalabIlm /> },
+              { id: 'virtue', group: 'مناسبات وفضائل', label: 'أيام الفضل', icon: '🌙', hint: 'عرفة وعاشوراء والبيض…', render: () => <VirtueDays /> },
+              { id: 'hijri', group: 'مناسبات وفضائل', label: 'التقويم الهجري ورمضان', icon: '🗓️', hint: 'المناسبات وإمساكية رمضان', render: () => <HijriCalendar /> },
+              { id: 'fadl', group: 'مناسبات وفضائل', label: 'فضل الصلاة', icon: '📖', render: () => <HadithFadl /> },
               ]}
             />
           )}
@@ -2122,8 +2112,16 @@ export function PrayerExperience() {
           </header>
           {seen.more && (
             <SectionGrid
-              groupOrder={['التنبيهات والتحكم', 'التخصيص', 'التطبيق']}
+              groupOrder={['متابعتك', 'التنبيهات والتحكم', 'التخصيص', 'التطبيق']}
               secs={[
+              { id: 'tracker', group: 'متابعتك', label: 'جدول عباداتك', icon: '✅', hint: 'صلواتك وأذكارك وصيامك + تذكير', render: () => <WorshipTracker /> },
+              { id: 'stats', group: 'متابعتك', label: 'إحصائياتك', icon: '📊', render: () => (
+                <>
+                  <WeeklyStats />
+                  <ProphetStats count={count} todayCount={todayCount} streak={streak} />
+                </>
+              ) },
+              { id: 'share', group: 'متابعتك', label: 'بطاقتك', icon: '🎴', render: () => <ShareCard count={count} /> },
                 { id: 'rhub', group: 'التنبيهات والتحكم', label: 'مركز التذكيرات', icon: '⏰', hint: 'الصلاة على النبي ﷺ والأذكار والحديث وكل تنبيهاتك', render: () => (
                   <SectionGrid
                     groupOrder={['يظهر على شاشتك', 'تنبيهات الصلاة والأذكار']}
