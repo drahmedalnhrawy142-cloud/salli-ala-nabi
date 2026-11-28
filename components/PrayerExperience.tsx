@@ -1813,8 +1813,9 @@ export function PrayerExperience() {
         </Suspense>
         <FridayBanner onGo={() => goTab('wird')} />
         <SectionGrid
+          groupOrder={['الصلاة على النبي ﷺ', 'مواقيت الصلاة']}
           secs={[
-            { id: 'counts', label: 'العدادات', icon: '🔢', render: () => (
+            { id: 'counts', group: 'الصلاة على النبي ﷺ', label: 'العدادات', icon: '🔢', render: () => (
         <section className="content-card" id="s-counts">
           <h2 className="section-title">عدادات الصلوات</h2>
 
@@ -1846,9 +1847,9 @@ export function PrayerExperience() {
           </div>
         </section>
             ) },
-            { id: 'times', label: 'المواقيت', icon: '🕋', keepMounted: true, render: () => <PrayerTimes /> },
-            { id: 'khatma', label: 'الختمة', icon: '🌍', render: () => <GlobalKhatma total={globalCount} loading={globalLoading} /> },
-            { id: 'goal', label: 'هدفك', icon: '🎯', render: () => (
+            { id: 'times', group: 'مواقيت الصلاة', label: 'المواقيت', icon: '🕋', keepMounted: true, render: () => <PrayerTimes /> },
+            { id: 'khatma', group: 'الصلاة على النبي ﷺ', label: 'الختمة', icon: '🌍', render: () => <GlobalKhatma total={globalCount} loading={globalLoading} /> },
+            { id: 'goal', group: 'الصلاة على النبي ﷺ', label: 'هدفك', icon: '🎯', render: () => (
         <section className="content-card" id="s-goal">
           <h2 className="section-title">هدفك اليومي</h2>
 
@@ -1921,7 +1922,7 @@ export function PrayerExperience() {
           </button>
         </section>
             ) },
-            { id: 'hadith', label: 'حديث', icon: '📖', render: () => (
+            { id: 'hadith', group: 'الصلاة على النبي ﷺ', label: 'حديث', icon: '📖', render: () => (
               <>
         <section className="content-card">
           <p className="salawat-text">{salawat}</p>
@@ -1940,65 +1941,6 @@ export function PrayerExperience() {
           <p className="hadith-src">رواه أبو داود بإسناد صحيح</p>
         </section>
               </>
-            ) },
-            { id: 'seera', label: 'السيرة النبوية', icon: '🌙', hint: 'النسب والصفات والمواقف والاختبار', render: () => (
-              <SectionGrid
-                secs={[
-                  { id: 'lineage', label: 'النسب', icon: '🌿', render: () => <ProphetLineage /> },
-                  { id: 'desc', label: 'الصفات', icon: '✨', render: () => <ProphetDescription /> },
-                  { id: 'timeline', label: 'السيرة', icon: '⏳', render: () => <ProphetTimeline /> },
-                  { id: 'moments', label: 'مواقف', icon: '🕌', render: () => <ProphetMoments /> },
-                  { id: 'names', label: 'الأسماء', icon: '🏷️', render: () => <ProphetNames /> },
-                  { id: 'quiz', label: 'اختبر نفسك', icon: '❓', render: () => (
-                  <Suspense fallback={null}>
-                    <ProphetQuiz />
-                  </Suspense>
-                ) },
-                ]}
-              />
-            ) },
-            { id: 'poems', label: 'أبيات', icon: '✨', render: () => (
-        <section className="content-card" id="s-poems">
-          <h2 className="section-title">من مدح رسول الله ﷺ</h2>
-
-          {poems[poemIndex].v.map((verse, index) => (
-            <div className="poem-verse" key={index}>
-              {verse.length === 2 ? (
-                <>
-                  <span className="poem-line poem-sadr">{verse[0]}</span>
-                  <span className="poem-line poem-ajz">{verse[1]}</span>
-                </>
-              ) : (
-                verse.map((line, j) => (
-                  <span className="poem-line poem-one" key={j}>
-                    {line}
-                  </span>
-                ))
-              )}
-            </div>
-          ))}
-          <p style={{ textAlign: 'center', fontSize: 12.5, opacity: 0.75, margin: '8px 0' }}>
-            {poems[poemIndex].poet} — {poems[poemIndex].src}
-          </p>
-
-          <div className="poem-actions">
-            <button
-              type="button"
-              className="poem-copy"
-              onClick={copyPoem}
-            >
-              {copied ? '✓ تم النسخ' : '⧉ نسخ الأبيات'}
-            </button>
-
-            <button
-              type="button"
-              className="poem-change"
-              onClick={changePoem}
-            >
-              تغيير الأبيات
-            </button>
-          </div>
-        </section>
             ) },
           ]}
         />
@@ -2047,15 +1989,74 @@ export function PrayerExperience() {
         <div className="tab-pane" hidden={tab !== 'names'}>
           <header className="tab-head">
             <h1>طلب العلم</h1>
-            <p>مكتبة الكتب وحلقات العلم</p>
+            <p>الفروض والمكتبة والسيرة والمناسبات</p>
           </header>
           {seen.names && (
             <SectionGrid
-              groupOrder={['طلب العلم', 'مناسبات وفضائل']}
+              groupOrder={['طلب العلم', 'عن النبي ﷺ', 'مناسبات وفضائل']}
               secs={[
                 { id: 'fard', group: 'طلب العلم', label: 'تعلّم الفروض', icon: '🕌', hint: 'الصلاة والوضوء وغيرها مصوّرة خطوة خطوة بأدلتها', render: () => <LearnFard /> },
                 { id: 'lib', group: 'طلب العلم', label: 'المكتبة', icon: '🏛️', hint: 'كل الكتب على رفوفها، والبحث الشامل والمفضلة والمراجع', render: () => <IslamicLibrary /> },
                 { id: 'levels', group: 'طلب العلم', label: 'حلقات العلم', icon: '🪜', hint: 'مسار متدرّج بكتب وشروح مرئية', render: () => <TalabIlm /> },
+            { id: 'seera', group: 'عن النبي ﷺ', label: 'السيرة النبوية', icon: '🌙', hint: 'النسب والصفات والمواقف والاختبار', render: () => (
+              <SectionGrid
+                secs={[
+                  { id: 'lineage', label: 'النسب', icon: '🌿', render: () => <ProphetLineage /> },
+                  { id: 'desc', label: 'الصفات', icon: '✨', render: () => <ProphetDescription /> },
+                  { id: 'timeline', label: 'السيرة', icon: '⏳', render: () => <ProphetTimeline /> },
+                  { id: 'moments', label: 'مواقف', icon: '🕌', render: () => <ProphetMoments /> },
+                  { id: 'names', label: 'الأسماء', icon: '🏷️', render: () => <ProphetNames /> },
+                  { id: 'quiz', label: 'اختبر نفسك', icon: '❓', render: () => (
+                  <Suspense fallback={null}>
+                    <ProphetQuiz />
+                  </Suspense>
+                ) },
+                ]}
+              />
+            ) },
+            { id: 'poems', group: 'عن النبي ﷺ', label: 'أبيات', icon: '✨', render: () => (
+        <section className="content-card" id="s-poems">
+          <h2 className="section-title">من مدح رسول الله ﷺ</h2>
+
+          {poems[poemIndex].v.map((verse, index) => (
+            <div className="poem-verse" key={index}>
+              {verse.length === 2 ? (
+                <>
+                  <span className="poem-line poem-sadr">{verse[0]}</span>
+                  <span className="poem-line poem-ajz">{verse[1]}</span>
+                </>
+              ) : (
+                verse.map((line, j) => (
+                  <span className="poem-line poem-one" key={j}>
+                    {line}
+                  </span>
+                ))
+              )}
+            </div>
+          ))}
+          <p style={{ textAlign: 'center', fontSize: 12.5, opacity: 0.75, margin: '8px 0' }}>
+            {poems[poemIndex].poet} — {poems[poemIndex].src}
+          </p>
+
+          <div className="poem-actions">
+            <button
+              type="button"
+              className="poem-copy"
+              onClick={copyPoem}
+            >
+              {copied ? '✓ تم النسخ' : '⧉ نسخ الأبيات'}
+            </button>
+
+            <button
+              type="button"
+              className="poem-change"
+              onClick={changePoem}
+            >
+              تغيير الأبيات
+            </button>
+          </div>
+        </section>
+            ) },
               { id: 'virtue', group: 'مناسبات وفضائل', label: 'أيام الفضل', icon: '🌙', hint: 'عرفة وعاشوراء والبيض…', render: () => <VirtueDays /> },
               { id: 'hijri', group: 'مناسبات وفضائل', label: 'التقويم الهجري ورمضان', icon: '🗓️', hint: 'المناسبات وإمساكية رمضان', render: () => <HijriCalendar /> },
               { id: 'fadl', group: 'مناسبات وفضائل', label: 'فضل الصلاة', icon: '📖', render: () => <HadithFadl /> },

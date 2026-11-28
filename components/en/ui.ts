@@ -1897,4 +1897,8 @@ export const UI_EN: Record<string, string> = {
  "مناسبات وفضائل": "Occasions & Virtues",
  "أوراد وأذكار": "Wird & Dhikr",
  "وردك اليومي والسبحة والأذكار": "Your daily wird, tasbih and adhkar",
+ "عن النبي ﷺ": "About the Prophet ﷺ",
+ "الصلاة على النبي ﷺ": "Salawat on the Prophet ﷺ",
+ "مواقيت الصلاة": "Prayer Times",
+ "الفروض والمكتبة والسيرة والمناسبات": "Obligations, library, seerah and occasions",
 };
