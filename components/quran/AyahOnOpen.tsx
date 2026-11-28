@@ -71,8 +71,8 @@ export function AyahCard({ d, i, onClose, onNext }: { d: QData; i: number; onClo
         .ao-top button { background: none; border: 0; color: #f1d77a; font-size: 18px; padding: 4px 8px; }
         .ao-t { margin: 14px 0; font-family: var(--f-amiriq), 'Amiri Quran', 'KFGQPC Hafs', serif; font-size: 30px; line-height: 2.3; text-align: center; color: #fff1c4; }
         .ao-n { color: #e8c25a; font-size: 22px; white-space: nowrap; }
-        .ao-taf { padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(232,194,90,.35); background: rgba(232,194,90,.06); font-size: 14.5px; line-height: 1.9; margin-bottom: 10px; }
-        .ao-taf small { display: block; margin-top: 4px; font-size: 11px; opacity: .6; }
+        .ao-taf { font-family: var(--f-amiri), 'Amiri', 'Noto Naskh Arabic', serif; padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(232,194,90,.35); background: rgba(232,194,90,.06); font-size: 14.5px; line-height: 1.9; margin-bottom: 10px; }
+        .ao-taf small { font-family: var(--f-amiri), 'Amiri', serif; display: block; margin-top: 4px; font-size: 11px; opacity: .6; }
         .ao-btns { display: flex; gap: 8px; }
         .ao-btns button { flex: 1; padding: 11px 6px; border-radius: 12px; border: 1px solid rgba(232,194,90,.4); background: #1a1409; color: #f7ebc1; font-family: inherit; font-size: 13.5px; }
         .ao-btns .ao-ok { background: rgba(232,194,90,.25); color: #f1d77a; }

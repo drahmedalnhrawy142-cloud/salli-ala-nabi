@@ -68,6 +68,13 @@ const lss = (k: string, v: string) => {
     localStorage.setItem(k, v);
   } catch {}
 };
+const FONTS: Record<string, { n: string; v: string }> = {
+  amiri: { n: 'أميري', v: "var(--f-amiri), 'Amiri', 'Noto Naskh Arabic', serif" },
+  naskh: { n: 'نسخ', v: "var(--f-naskh), 'Noto Naskh Arabic', 'Amiri', serif" },
+  schehe: { n: 'شهرزاد', v: "var(--f-schehe), 'Scheherazade New', 'Amiri', serif" },
+  ruqaa: { n: 'رقعة', v: "var(--font-ruqaa), 'Amiri', serif" },
+};
+const FONT_KEYS = Object.keys(FONTS);
 const FLIP = 640;
 const STAG = 85;
 
@@ -105,6 +112,8 @@ export function BookReader({
   const th = themeOf(year !== undefined ? year : author ? eraYear(author) : null);
   const [night, setNight] = useState(() => lsg('bk.night', '0') === '1');
   const [fs, setFs] = useState(() => Number(lsg('bk.fs', '19')));
+  const [ft, setFt] = useState(() => lsg('bk.font', 'amiri'));
+  const [jf, setJf] = useState(() => lsg('bk.just', '1'));
   const [lh, setLh] = useState(() => Number(lsg('bk.lh', '2.02')));
   const root = useRef<HTMLDivElement>(null);
   const host = useRef<HTMLDivElement>(null);
@@ -130,7 +139,7 @@ export function BookReader({
   const PADX = 22;
   const Wi = W - PADX * 2;
   const Hi = H - 76;
-  const dimKey = `${Wi}x${Hi}x${fs}x${lh}`;
+  const dimKey = `${Wi}x${Hi}x${fs}x${lh}x${ft}x${jf}`;
 
   useEffect(() => {
     const up = () => {
@@ -451,6 +460,8 @@ export function BookReader({
     '--vig': night ? 0.5 : th.vig,
     '--cover': th.cover,
     '--lh': lh,
+    '--f': FONTS[ft]?.v || FONTS.amiri.v,
+    '--ta': jf === '1' ? 'justify' : 'right',
     '--fs': `${fs}px`,
     '--W': `${W}px`,
     '--H': `${H}px`,
@@ -531,6 +542,8 @@ export function BookReader({
           <button type="button" onClick={() => setSheet('marks')} aria-label="العلامات">🔖 {myMarks.length + myHl.length || ''}</button>
           <button type="button" onClick={() => (setFs((v) => (lss('bk.fs', String(Math.max(15, v - 1))), Math.max(15, v - 1))))} aria-label="تصغير الخط">أ−</button>
           <button type="button" onClick={() => (setFs((v) => (lss('bk.fs', String(Math.min(30, v + 1))), Math.min(30, v + 1))))} aria-label="تكبير الخط">أ+</button>
+          <button type="button" onClick={() => setFt((v) => { const n = FONT_KEYS[(FONT_KEYS.indexOf(v) + 1) % FONT_KEYS.length]; lss('bk.font', n); return n; })} aria-label="نوع الخط">خط: {FONTS[ft]?.n}</button>
+          <button type="button" onClick={() => setJf((v) => { const n = v === '1' ? '0' : '1'; lss('bk.just', n); return n; })} aria-label="ضبط الأسطر">{jf === '1' ? '☰ ضبط' : '☰ يمين'}</button>
           <button type="button" onClick={() => setLh((v) => { const n = v < 1.8 ? 2.02 : v < 2.2 ? 2.4 : 1.65; lss('bk.lh', String(n)); return n; })} aria-label="تباعد الأسطر">☰↕</button>
           <button type="button" onClick={() => (setNight((n) => (lss('bk.night', n ? '0' : '1'), !n)))} aria-label="وضع الليل">{night ? '☀' : '☾'}</button>
         </div>
@@ -638,9 +651,9 @@ export function BookReader({
 
       <style>{`
         .bk { --f: var(--f-amiri), var(--font-ruqaa), 'Amiri', 'Noto Naskh Arabic', serif; font-family: var(--font-kufi), sans-serif; color: #fff1c4; position: relative; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; padding-bottom: 96px; }
-        .bk-bar { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 8px; }
+        .bk-bar { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 8px; }
         .bk-bk { background: none; border: 0; color: #f1d77a; font-family: inherit; font-size: 14px; padding: 6px 0; }
-        .bk-tools { display: flex; gap: 5px; }
+        .bk-tools { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
         .bk-tools button { padding: 6px 9px; border-radius: 10px; border: 1px solid rgba(232,194,90,.4); background: rgba(232,194,90,.1); color: #f1d77a; font-family: inherit; font-size: 12.5px; }
         .bk-desk { padding: 18px 0 22px; border-radius: 14px; background: radial-gradient(ellipse at 50% 30%, #2a1a0c, #0b0704 85%); box-shadow: inset 0 0 40px rgba(0,0,0,.8); display: flex; justify-content: center; }
         .bk-stage { position: relative; width: var(--W); height: var(--H); perspective: 1900px; touch-action: pan-y; overflow: hidden; border-radius: 3px 8px 8px 3px;
@@ -651,7 +664,7 @@ export function BookReader({
         .bk-pg::after { content: ''; position: absolute; inset: 9px 12px 9px 16px; border: 1px solid color-mix(in srgb, var(--ink) 45%, transparent); outline: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); outline-offset: 3px; pointer-events: none; opacity: .65; }
         .bk-rh { position: absolute; top: 14px; left: 26px; right: 66px; display: flex; justify-content: space-between; font-size: 12px; color: color-mix(in srgb, var(--ink) 70%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); padding-bottom: 3px; }
         .bk-vw { position: absolute; top: 40px; right: 24px; width: var(--Wi); height: var(--Hi); overflow: hidden; }
-        .bk-cols, .bk-meas { direction: rtl; column-width: var(--Wi); column-gap: 0; column-fill: auto; width: var(--Wi); height: var(--Hi); font-size: var(--fs); line-height: var(--lh); text-align: justify; hyphens: none; }
+        .bk-cols, .bk-meas { direction: rtl; column-width: var(--Wi); column-gap: 0; column-fill: auto; width: var(--Wi); height: var(--Hi); font-size: var(--fs); line-height: var(--lh); text-align: var(--ta); word-spacing: .04em; hyphens: none; }
         .bk-clip { position: absolute; top: 0; right: 0; width: 0; height: 0; overflow: hidden; pointer-events: none; }
         .bk-meas { position: absolute; top: 0; right: 0; visibility: hidden; font-family: var(--f); color: var(--ink); }
         .bk-cols p, .bk-meas p { margin: 0 0 .35em; text-indent: 1.3em; orphans: 2; widows: 2; font-family: var(--f); }
