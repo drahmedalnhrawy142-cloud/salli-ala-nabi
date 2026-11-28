@@ -1732,6 +1732,8 @@ export const UI_EN: Record<string, string> = {
  "الصلاة والوضوء وغيرها مصوّرة خطوة خطوة بأدلتها": "Prayer, wudu and more, illustrated step by step with evidence",
  "الصلاة كما صلّى النبي ﷺ": "The prayer as the Prophet ﷺ prayed",
  "رسوم متحركة خطوة خطوة بالأدلة": "Animated step by step with evidence",
+ "احسب زكاتك": "Calculate your zakat",
+ "اكتب ما تملكه فيظهر ما عليك": "Enter what you own and see what is due",
  "العقيدة والفقه والعبادة": "Creed, Fiqh & Worship",
  "السيرة والتاريخ": "Seerah & History",
  "المكتبة العلمية": "Scholarly Library",
