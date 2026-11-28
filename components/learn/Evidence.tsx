@@ -42,6 +42,12 @@ function load(coll: string, file: number) {
   return cache[k];
 }
 
+const EV_CSS = `
+        .ev { margin: 8px 0 0; padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(232,194,90,.28); border-right: 3px solid #e8c25a; background: rgba(232,194,90,.07); }
+        .ev-t { font-family: var(--f-amiri), var(--font-ruqaa), serif; font-size: 1.12rem; line-height: 2; color: #fff1c4; }
+        .ev cite { display: block; margin-top: 4px; font-family: var(--font-kufi), sans-serif; font-style: normal; font-size: .78rem; color: #c9a24a; }
+`;
+
 export type Ev = { coll: 'bukhari' | 'muslim'; file: number; num: string; phrase: string; len?: number };
 
 export function Evidence({ ev }: { ev: Ev }) {
@@ -63,11 +69,41 @@ export function Evidence({ ev }: { ev: Ev }) {
     <blockquote className="ev">
       <div className="ev-t">{t ?? '…'}</div>
       <cite>{ev.coll === 'bukhari' ? 'صحيح البخاري' : 'صحيح مسلم'} — حديث رقم {ev.num}</cite>
-      <style>{`
-        .ev { margin: 8px 0 0; padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(232,194,90,.28); border-right: 3px solid #e8c25a; background: rgba(232,194,90,.07); }
-        .ev-t { font-family: var(--f-amiri), var(--font-ruqaa), serif; font-size: 1.12rem; line-height: 2; color: #fff1c4; }
-        .ev cite { display: block; margin-top: 4px; font-family: var(--font-kufi), sans-serif; font-style: normal; font-size: .78rem; color: #c9a24a; }
-      `}</style>
+      <style>{EV_CSS}</style>
+    </blockquote>
+  );
+}
+
+/* ———— آية من المصحف الموجود في التطبيق (رسم حفص) ———— */
+let qCache: Promise<Map<string, string>> | null = null;
+function loadQ() {
+  if (!qCache) {
+    qCache = fetch('/quran/hafs.json').then((r) => r.json()).then((h) => {
+      const m = new Map<string, string>();
+      for (const a of h.ayas) m.set(a[0] + ':' + a[1], a[4]);
+      return m;
+    });
+  }
+  return qCache;
+}
+
+export function QEvidence({ sura, from, to, name }: { sura: number; from: number; to?: number; name: string }) {
+  const [t, setT] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    loadQ().then((m) => {
+      const out: string[] = [];
+      for (let i = from; i <= (to || from); i++) { const v = m.get(sura + ':' + i); if (v) out.push(v); }
+      if (live && out.length) setT(out.join(' ﴾ ﴿ '));
+    }).catch(() => {});
+    return () => { live = false; };
+  }, [sura, from, to]);
+  if (!t) return null;
+  return (
+    <blockquote className="ev">
+      <div className="ev-t">﴿ {t} ﴾</div>
+      <style>{EV_CSS}</style>
+      <cite>سورة {name} — الآية {to && to !== from ? `${from}–${to}` : from}</cite>
     </blockquote>
   );
 }
